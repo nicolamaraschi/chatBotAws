@@ -30,16 +30,16 @@ const ConfigComponent = ({ onConfigSet, isEditingConfig, setEditingConfig }) => 
   const [config, setConfig] = useState({
     // Cognito authentication configuration
     cognito: {
-      userPoolId: '',
-      userPoolClientId: '',
-      region: '',
-      identityPoolId: ''
+      userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || '',
+      userPoolClientId: import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID || '',
+      region: import.meta.env.VITE_COGNITO_REGION || '',
+      identityPoolId: import.meta.env.VITE_COGNITO_IDENTITY_POOL_ID || ''
     },
     bedrock: {
-      agentName: '',
-      agentId: '',
-      agentAliasId: '',
-      region: ''
+      agentName: import.meta.env.VITE_BEDROCK_AGENT_NAME || '',
+      agentId: import.meta.env.VITE_BEDROCK_AGENT_ID || '',
+      agentAliasId: import.meta.env.VITE_BEDROCK_AGENT_ALIAS_ID || '',
+      region: import.meta.env.VITE_BEDROCK_REGION || ''
     },
     strands: {
       enabled: false,
