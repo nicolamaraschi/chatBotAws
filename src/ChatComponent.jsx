@@ -59,6 +59,17 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
   const [isStrandsAgent, setIsStrandsAgent] = useState(false);
   // Flag to determine if using AgentCore Agent
   const [isAgentCoreAgent, setIsAgentCoreAgent] = useState(false);
+  // Ruolo dell'utente (admin o cliente)
+  const [userRole, setUserRole] = useState('cliente');
+
+  /**
+   * Helper function to get user-specific localStorage key
+   * @param {string} key - Base key name
+   * @returns {string} User-specific key
+   */
+  const getUserKey = useCallback((key) => {
+    return `user_${user.username}_${key}`;
+  }, [user.username]);
 
   /**
   * Scrolls the chat window to the most recent message
@@ -90,14 +101,21 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
 
   /**
    * Handles the confirmation action for clearing conversation data
-   */
-  /**
-   * Handles the confirmation action for clearing conversation data
-   * Clears all local storage and reloads the application
+   * Clears only the current user's data from localStorage
    */
   const confirmClearData = () => {
-    // Clear all stored data from localStorage
-    localStorage.clear();
+    // Get all keys for current user
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(`user_${user.username}_`)) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    // Remove all user-specific keys
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
     // Reload the application to reset state
     window.location.reload();
   };
@@ -114,11 +132,11 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     setSessionId(newSessionId);
     // Clear existing messages
     setMessages([]);
-    // Store session information in localStorage
-    localStorage.setItem('lastSessionId', newSessionId);
-    localStorage.setItem(`messages_${newSessionId}`, JSON.stringify([]));
-    console.log('New session created:', newSessionId);
-  }, []);
+    // Store session information in localStorage with user-specific key
+    localStorage.setItem(getUserKey('lastSessionId'), newSessionId);
+    localStorage.setItem(getUserKey(`messages_${newSessionId}`), JSON.stringify([]));
+    console.log('New session created for user:', user.username, 'Session:', newSessionId);
+  }, [getUserKey, user.username]);
 
   /**
    * Retrieves messages for a specific chat session from localStorage
@@ -126,9 +144,9 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
    * @returns {Array} Array of messages for the session, or empty array if none found
    */
   const fetchMessagesForSession = useCallback((sessionId) => {
-    const storedMessages = localStorage.getItem(`messages_${sessionId}`);
+    const storedMessages = localStorage.getItem(getUserKey(`messages_${sessionId}`));
     return storedMessages ? JSON.parse(storedMessages) : [];
-  }, []);
+  }, [getUserKey]);
 
   /**
    * Persists messages to localStorage for a specific session
@@ -141,9 +159,9 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     const currentMessages = fetchMessagesForSession(sessionId);
     // Merge existing and new messages
     const updatedMessages = [...currentMessages, ...newMessages];
-    // Save updated message list to localStorage
-    localStorage.setItem(`messages_${sessionId}`, JSON.stringify(updatedMessages));
-  }, [fetchMessagesForSession]);
+    // Save updated message list to localStorage with user-specific key
+    localStorage.setItem(getUserKey(`messages_${sessionId}`), JSON.stringify(updatedMessages));
+  }, [fetchMessagesForSession, getUserKey]);
 
   /**
    * Attempts to load the last active chat session
@@ -151,18 +169,19 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
    * Restores messages from localStorage for existing sessions
    */
   const loadExistingSession = useCallback(() => {
-    // Try to get the ID of the last active session
-    const lastSessionId = localStorage.getItem('lastSessionId');
+    // Try to get the ID of the last active session for this user
+    const lastSessionId = localStorage.getItem(getUserKey('lastSessionId'));
     if (lastSessionId) {
       // If found, restore the session and its messages
       setSessionId(lastSessionId);
       const loadedMessages = fetchMessagesForSession(lastSessionId);
       setMessages(loadedMessages);
+      console.log('Loaded existing session for user:', user.username, 'Session:', lastSessionId);
     } else {
       // If no existing session, create a new one
       createNewSession();
     }
-  }, [createNewSession, fetchMessagesForSession]);
+  }, [createNewSession, fetchMessagesForSession, getUserKey, user.username]);
 
   /**
    * Effect hook to initialize AWS Bedrock client and fetch credentials
@@ -189,6 +208,12 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
         
         // Fetch AWS authentication session
         const session = await AWSAuth.fetchAuthSession();
+        
+        // Ottieni e salva il ruolo dell'utente
+        const userAttributes = await AWSAuth.fetchUserAttributes();
+        const ruolo = userAttributes['custom:ruolo'] || 'cliente';
+        setUserRole(ruolo);
+        console.log('Ruolo utente caricato:', ruolo);
         
         // Initialize Bedrock client if needed
         if (!strandsConfig?.enabled && !agentCoreConfig?.enabled) {
@@ -270,8 +295,23 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
         // Handle Bedrock Agent
         if (!isStrandsAgent && bedrockClient) {
           const bedrockConfig = appConfig.bedrock;
+          
+          // Ottieni ruolo e nome cliente da Cognito
+          const userAttributes = await AWSAuth.fetchUserAttributes();
+          const ruolo = userAttributes['custom:ruolo'] || 'cliente';
+          const nomeCliente = userAttributes['custom:nomeCliente'] || null;
+          
+          // Verifica che nomeCliente esista SOLO se non è admin
+          if (ruolo !== 'admin' && !nomeCliente) {
+            throw new Error('Attributo nomeCliente non trovato per questo utente. Contatta l\'amministratore.');
+          }
+          
+          console.log('Ruolo utente:', ruolo);
+          console.log('Nome cliente:', nomeCliente);
+          
           const sessionAttributes = {
-            aws_session: await AWSAuth.fetchAuthSession()
+            ruolo: ruolo,
+            nomeCliente: nomeCliente || ''
           };
 
           const command = new InvokeAgentCommand({
@@ -281,7 +321,9 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
             endSession: false,
             enableTrace: true,
             inputText: newMessage,
-            promptSessionAttributes: sessionAttributes
+            sessionState: {
+              sessionAttributes: sessionAttributes
+            }
           });
 
           let completion = "";
@@ -422,16 +464,13 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
   };
 
   return (
-    // <ContentLayout
-    //   defaultPadding
-    //   header={
     <div className="chat-component">
       <Container stretch>
         <div className="chat-container">
           <TopNavigation
             identity={{
               href: "#",
-              title: `Chat with ${agentName.value}`,
+              title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}`,
             }}
             utilities={
               [
@@ -466,7 +505,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
                       id: "clear-settings",
                       type: "button",
                       iconName: "remove",
-                      text: "Clear settings and local storage",
+                      text: "Clear settings and chat history",
                     },
                     {
                       id: "edit-settings",
@@ -503,10 +542,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               ]
             }
           />
-          {/* <div className="chat-header">
-                <div className="header-buttons">
-                </div>
-              </div> */}
           <div className="messages-container scrollable">
             {messages.map((message, index) => (
               <div key={index}>
@@ -610,16 +645,12 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               </Box>
             }
           >
-            <strong>This action cannot be undone.</strong> Configuration for this application will be deleted along with the chat history with {agentName.value}. Do you want to continue?
+            <strong>This action cannot be undone.</strong> Your chat history with {agentName.value} will be permanently deleted. Do you want to continue?
           </Modal>
         </div>
       </Container>
 
     </div>
-    //   }
-    // >
-
-    // </ContentLayout>  
   );
 };
 
