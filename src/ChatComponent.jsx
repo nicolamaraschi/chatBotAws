@@ -15,7 +15,10 @@ import {
   Button,
   Modal,
   SpaceBetween,
-  TopNavigation
+  TopNavigation,
+  Input,
+  SideNavigation,
+  Badge
 } from "@cloudscape-design/components";
 import PropTypes from 'prop-types';
 import * as AWSAuth from '@aws-amplify/auth';
@@ -24,73 +27,43 @@ import { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } from "@aws-sdk/clie
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import './ChatComponent.css';
 
-/**
- * Main chat interface component that handles message interaction with Bedrock agent
- * @param {Object} props - Component properties
- * @param {Object} props.user - Current authenticated user information
- * @param {Function} props.onLogout - Callback handler for logout action
- * @param {Function} props.onConfigEditorClick - Callback for configuration editor
- * @returns {JSX.Element} The chat interface
- */
 const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
-  // AWS Bedrock client instance for agent communication
   const [bedrockClient, setBedrockClient] = useState(null);
-  // AWS Lambda client for Strands agent communication
   const [lambdaClient, setLambdaClient] = useState(null);
-  // AgentCore client for AgentCore agent communication
   const [agentCoreClient, setAgentCoreClient] = useState(null);
-  // Array of chat messages in the conversation
   const [messages, setMessages] = useState([]);
-  // Current message being composed by the user
   const [newMessage, setNewMessage] = useState('');
-  // Unique identifier for the current chat session
   const [sessionId, setSessionId] = useState(null);
-  // Reference to automatically scroll to latest messages
   const messagesEndRef = useRef(null);
-  // Tracks when the AI agent is processing a response
   const [isAgentResponding, setIsAgentResponding] = useState(false);
-  // Controls visibility of the clear conversation modal
   const [showClearDataModal, setShowClearDataModal] = useState(false);
-  // Name of the AI agent for display purposes
   const [agentName, setAgentName] = useState({ value: 'Agent' });
-  // Tracks completed tasks and their explanation
   const [tasksCompleted, setTasksCompleted] = useState({ count: 0, latestRationale: '' });
-  // Flag to determine if using Strands Agent
   const [isStrandsAgent, setIsStrandsAgent] = useState(false);
-  // Flag to determine if using AgentCore Agent
   const [isAgentCoreAgent, setIsAgentCoreAgent] = useState(false);
-  // Ruolo dell'utente (admin o cliente)
   const [userRole, setUserRole] = useState('cliente');
 
-  /**
-   * Helper function to get user-specific localStorage key
-   * @param {string} key - Base key name
-   * @returns {string} User-specific key
-   */
+  // NUOVI STATE per gestione chat salvate
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [chatName, setChatName] = useState('');
+  const [savedChats, setSavedChats] = useState([]);
+  const [showSavedChatsPanel, setShowSavedChatsPanel] = useState(false);
+  const [currentChatName, setCurrentChatName] = useState(null);
+
   const getUserKey = useCallback((key) => {
     return `user_${user.username}_${key}`;
   }, [user.username]);
 
-  /**
-  * Scrolls the chat window to the most recent message
-  * Uses smooth scrolling behavior for better user experience
-  */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  /**
- * Shows the modal for confirming conversation clearing
- */
   const handleClearData = () => {
     setShowClearDataModal(true);
   };
 
-  /**
-  Lines added for Speech to Text functionality
-   */
   const { transcript, isListening, startListening, stopListening, speechRecognitionSupported } = useSpeechToText();
-  console.log('Speech Recognition Supported', speechRecognitionSupported);
+  
   useEffect(() => {
     if (transcript) {
       setNewMessage(transcript.trim());
@@ -98,13 +71,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     }
   }, [transcript]);
 
-
-  /**
-   * Handles the confirmation action for clearing conversation data
-   * Clears only the current user's data from localStorage
-   */
   const confirmClearData = () => {
-    // Get all keys for current user
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -112,110 +79,122 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
         keysToRemove.push(key);
       }
     }
-    
-    // Remove all user-specific keys
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    
-    // Reload the application to reset state
     window.location.reload();
   };
 
-  /**
-   * Creates a new chat session with a unique identifier
-   * Clears existing messages and initializes storage for the new session
-   * Uses timestamp as session identifier
-   */
+  // NUOVA FUNZIONE: Carica la lista delle chat salvate
+  const loadSavedChatsList = useCallback(() => {
+    const savedChatsData = localStorage.getItem(getUserKey('savedChats'));
+    if (savedChatsData) {
+      setSavedChats(JSON.parse(savedChatsData));
+    }
+  }, [getUserKey]);
+
+  // NUOVA FUNZIONE: Salva la chat corrente con un nome
+  const saveCurrentChat = () => {
+    if (!chatName.trim()) {
+      alert('Inserisci un nome per la chat');
+      return;
+    }
+
+    const chatData = {
+      id: sessionId,
+      name: chatName.trim(),
+      messages: messages,
+      savedAt: new Date().toISOString(),
+      messageCount: messages.length
+    };
+
+    // Aggiorna la lista delle chat salvate
+    const updatedSavedChats = [...savedChats, chatData];
+    setSavedChats(updatedSavedChats);
+    
+    // Salva nel localStorage
+    localStorage.setItem(getUserKey('savedChats'), JSON.stringify(updatedSavedChats));
+    localStorage.setItem(getUserKey(`chat_${sessionId}`), JSON.stringify(chatData));
+
+    setCurrentChatName(chatName.trim());
+    setShowSaveModal(false);
+    setChatName('');
+    
+    console.log('Chat salvata:', chatData.name);
+  };
+
+  // NUOVA FUNZIONE: Carica una chat salvata
+  const loadSavedChat = (chatData) => {
+    setSessionId(chatData.id);
+    setMessages(chatData.messages);
+    setCurrentChatName(chatData.name);
+    setShowSavedChatsPanel(false);
+    
+    localStorage.setItem(getUserKey('lastSessionId'), chatData.id);
+    console.log('Chat caricata:', chatData.name);
+  };
+
+  // NUOVA FUNZIONE: Elimina una chat salvata
+  const deleteSavedChat = (chatId) => {
+    const updatedSavedChats = savedChats.filter(chat => chat.id !== chatId);
+    setSavedChats(updatedSavedChats);
+    
+    localStorage.setItem(getUserKey('savedChats'), JSON.stringify(updatedSavedChats));
+    localStorage.removeItem(getUserKey(`chat_${chatId}`));
+    
+    console.log('Chat eliminata:', chatId);
+  };
+
   const createNewSession = useCallback(() => {
-    // Generate new session ID using current timestamp
     const newSessionId = `agentcore-session-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
-    // Update session state
     setSessionId(newSessionId);
-    // Clear existing messages
     setMessages([]);
-    // Store session information in localStorage with user-specific key
+    setCurrentChatName(null);
     localStorage.setItem(getUserKey('lastSessionId'), newSessionId);
     localStorage.setItem(getUserKey(`messages_${newSessionId}`), JSON.stringify([]));
     console.log('New session created for user:', user.username, 'Session:', newSessionId);
   }, [getUserKey, user.username]);
 
-  /**
-   * Retrieves messages for a specific chat session from localStorage
-   * @param {string} sessionId - The identifier of the session to fetch messages for
-   * @returns {Array} Array of messages for the session, or empty array if none found
-   */
   const fetchMessagesForSession = useCallback((sessionId) => {
     const storedMessages = localStorage.getItem(getUserKey(`messages_${sessionId}`));
     return storedMessages ? JSON.parse(storedMessages) : [];
   }, [getUserKey]);
 
-  /**
-   * Persists messages to localStorage for a specific session
-   * Merges new messages with existing ones before storing
-   * @param {string} sessionId - The identifier of the session to store messages for
-   * @param {Array} newMessages - New messages to add to storage
-   */
   const storeMessages = useCallback((sessionId, newMessages) => {
-    // Retrieve existing messages for the session
     const currentMessages = fetchMessagesForSession(sessionId);
-    // Merge existing and new messages
     const updatedMessages = [...currentMessages, ...newMessages];
-    // Save updated message list to localStorage with user-specific key
     localStorage.setItem(getUserKey(`messages_${sessionId}`), JSON.stringify(updatedMessages));
   }, [fetchMessagesForSession, getUserKey]);
 
-  /**
-   * Attempts to load the last active chat session
-   * Creates a new session if no existing session is found
-   * Restores messages from localStorage for existing sessions
-   */
   const loadExistingSession = useCallback(() => {
-    // Try to get the ID of the last active session for this user
     const lastSessionId = localStorage.getItem(getUserKey('lastSessionId'));
     if (lastSessionId) {
-      // If found, restore the session and its messages
       setSessionId(lastSessionId);
       const loadedMessages = fetchMessagesForSession(lastSessionId);
       setMessages(loadedMessages);
       console.log('Loaded existing session for user:', user.username, 'Session:', lastSessionId);
     } else {
-      // If no existing session, create a new one
       createNewSession();
     }
   }, [createNewSession, fetchMessagesForSession, getUserKey, user.username]);
 
-  /**
-   * Effect hook to initialize AWS Bedrock client and fetch credentials
-   * Sets up the connection to AWS Bedrock service using stored configuration
-   */
   useEffect(() => {
-    /**
-     * Fetches AWS credentials and initializes Bedrock client
-     * Retrieves configuration from localStorage and establishes AWS session
-     */
     const fetchCredentials = async () => {
       try {
-        // Get configuration from localStorage
         const appConfig = JSON.parse(localStorage.getItem('appConfig'));
         const bedrockConfig = appConfig.bedrock;
         const strandsConfig = appConfig.strands;
         
-        // Check if Strands Agent is enabled
         setIsStrandsAgent(strandsConfig && strandsConfig.enabled);
         
-        // Check if AgentCore Agent is enabled
         const agentCoreConfig = appConfig.agentcore;
         setIsAgentCoreAgent(agentCoreConfig && agentCoreConfig.enabled);
         
-        // Fetch AWS authentication session
         const session = await AWSAuth.fetchAuthSession();
         
-        // Ottieni e salva il ruolo dell'utente
         const userAttributes = await AWSAuth.fetchUserAttributes();
         const ruolo = userAttributes['custom:ruolo'] || 'cliente';
         setUserRole(ruolo);
         console.log('Ruolo utente caricato:', ruolo);
         
-        // Initialize Bedrock client if needed
         if (!strandsConfig?.enabled && !agentCoreConfig?.enabled) {
           const newBedrockClient = new BedrockAgentRuntimeClient({
             region: bedrockConfig.region,
@@ -226,7 +205,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
             setAgentName({ value: bedrockConfig.agentName });
           }
         } 
-        // Initialize Lambda client for Strands Agent
         else if (strandsConfig && strandsConfig.enabled && !agentCoreConfig?.enabled) {
           const newLambdaClient = new LambdaClient({
             region: strandsConfig.region,
@@ -238,7 +216,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           }
         }
 
-        // Initialize AgentCore client if enabled
         if (agentCoreConfig && agentCoreConfig.enabled && agentCoreConfig.region) {
           const newAgentCoreClient = new BedrockAgentCoreClient({
             region: agentCoreConfig.region,
@@ -255,7 +232,8 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     };
 
     fetchCredentials();
-  }, []);
+    loadSavedChatsList(); // Carica la lista delle chat salvate all'avvio
+  }, [loadSavedChatsList]);
 
   useEffect(() => {
     if ((bedrockClient || lambdaClient || agentCoreClient) && !sessionId) {
@@ -263,45 +241,30 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     }
   }, [bedrockClient, lambdaClient, agentCoreClient, sessionId, loadExistingSession]);
 
-  /**
-   * Effect hook to scroll to latest messages
-   * Triggered whenever messages array is updated
-   */
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  /**
-   * Handles the submission of new messages to the chat
-   * Sends message to Bedrock agent or Strands agent and processes response
-   * @param {Event} e - Form submission event
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Only proceed if we have a message and active session
     if (newMessage.trim() && sessionId) {
       const appConfig = JSON.parse(localStorage.getItem('appConfig'));
       
-      // Clear input field
       setNewMessage('');
-      // Create message object with user information
       const userMessage = { text: newMessage, sender: user.username };
       setMessages(prevMessages => [...prevMessages, userMessage]);
-      setIsAgentResponding(true); // Set to true when starting to wait for response
+      setIsAgentResponding(true);
 
       try {
         let agentMessage;
         
-        // Handle Bedrock Agent
         if (!isStrandsAgent && bedrockClient) {
           const bedrockConfig = appConfig.bedrock;
           
-          // Ottieni ruolo e nome cliente da Cognito
           const userAttributes = await AWSAuth.fetchUserAttributes();
           const ruolo = userAttributes['custom:ruolo'] || 'cliente';
           const nomeCliente = userAttributes['custom:nomeCliente'] || null;
           
-          // Verifica che nomeCliente esista SOLO se non è admin
           if (ruolo !== 'admin' && !nomeCliente) {
             throw new Error('Attributo nomeCliente non trovato per questo utente. Contatta l\'amministratore.');
           }
@@ -357,16 +320,13 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           console.log('Full completion:', completion);
           agentMessage = { text: completion, sender: agentName.value };
         } 
-        // Handle Strands Agent
         else if (isStrandsAgent && lambdaClient) {
           const strandsConfig = appConfig.strands;
           
-          // Prepare payload for Lambda function
           const payload = {
             query: newMessage
           };
           
-          // Extract Lambda function name from ARN
           const lambdaArn = strandsConfig.lambdaArn;
           
           const command = new InvokeCommand({
@@ -377,13 +337,11 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           
           const response = await lambdaClient.send(command);
           
-          // Process Lambda response
           const responseBody = new TextDecoder().decode(response.Payload);
           const parsedResponse = JSON.parse(responseBody);
           
           console.log('Lambda response:', parsedResponse);
           
-          // Extract the response text from the Lambda result
           let responseText;
           if (parsedResponse.body) {
             const body = JSON.parse(parsedResponse.body);
@@ -396,7 +354,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           
           agentMessage = { text: responseText, sender: agentName.value };
         }
-        // Handle AgentCore Agent
         else if (isAgentCoreAgent && agentCoreClient) {
           const agentCoreConfig = appConfig.agentcore;
           
@@ -408,7 +365,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
 
           const response = await agentCoreClient.send(command);
           
-          // Handle ReadableStream response
           let responseBody = '';
           if (response.response && response.response.getReader) {
             const reader = response.response.getReader();
@@ -436,7 +392,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
         }
 
         setMessages(prevMessages => [...prevMessages, agentMessage]);
-        // Store the new messages
         storeMessages(sessionId, [userMessage, agentMessage]);
 
       } catch (err) {
@@ -448,7 +403,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
         setMessages(prevMessages => [...prevMessages, errorMessage]);
         storeMessages(sessionId, [userMessage, errorMessage]);
       } finally {
-        setIsAgentResponding(false); // Set to false when response is received
+        setIsAgentResponding(false);
         setTasksCompleted({ count: 0, latestRationale: '' });
       }
     }
@@ -470,11 +425,10 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           <TopNavigation
             identity={{
               href: "#",
-              title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}`,
+              title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}${currentChatName ? ` - ${currentChatName}` : ''}`,
             }}
             utilities={
               [
-                //This is the button to start a new conversation
                 {
                   type: "button",
                   iconName: "add-plus",
@@ -483,8 +437,26 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
                   disableUtilityCollapse: true,
                   onClick: () => createNewSession()
                 },
-                //This is the settings handler
+                // NUOVO: Bottone per salvare la chat
                 {
+                  type: "button",
+                  iconName: "download",
+                  title: "Save current chat",
+                  ariaLabel: "Save current chat",
+                  disableUtilityCollapse: true,
+                  disabled: messages.length === 0,
+                  onClick: () => setShowSaveModal(true)
+                },
+                // NUOVO: Bottone per vedere le chat salvate
+                {
+                  type: "button",
+                  iconName: "folder",
+                  title: "Saved chats",
+                  ariaLabel: "Saved chats",
+                  disableUtilityCollapse: true,
+                  onClick: () => setShowSavedChatsPanel(!showSavedChatsPanel)
+                },
+                ...(userRole === 'admin' ? [{
                   type: "menu-dropdown",
                   iconName: "settings",
                   ariaLabel: "Settings",
@@ -514,8 +486,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
                       type: "icon-button",
                     }
                   ]
-                },
-                //This is the user session menu options
+                }] : []),
                 {
                   type: "menu-dropdown",
                   text: user.username,
@@ -542,6 +513,60 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               ]
             }
           />
+
+          {/* NUOVO: Pannello laterale per le chat salvate */}
+          {showSavedChatsPanel && (
+            <div style={{ 
+              position: 'absolute', 
+              right: 0, 
+              top: '50px', 
+              width: '300px', 
+              height: 'calc(100% - 50px)', 
+              backgroundColor: 'white', 
+              borderLeft: '1px solid #ccc',
+              overflowY: 'auto',
+              zIndex: 1000,
+              padding: '10px'
+            }}>
+              <h3>Saved Chats ({savedChats.length})</h3>
+              {savedChats.length === 0 ? (
+                <p style={{ color: '#666', fontSize: '14px' }}>No saved chats yet</p>
+              ) : (
+                savedChats.map((chat) => (
+                  <div key={chat.id} style={{ 
+                    border: '1px solid #ddd', 
+                    borderRadius: '4px', 
+                    padding: '10px', 
+                    marginBottom: '10px',
+                    cursor: 'pointer'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div onClick={() => loadSavedChat(chat)} style={{ flex: 1 }}>
+                        <strong>{chat.name}</strong>
+                        <br />
+                        <small style={{ color: '#666' }}>
+                          {chat.messageCount} messages
+                          <br />
+                          {new Date(chat.savedAt).toLocaleString()}
+                        </small>
+                      </div>
+                      <Button 
+                        variant="icon" 
+                        iconName="remove"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete "${chat.name}"?`)) {
+                            deleteSavedChat(chat.id);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
           <div className="messages-container scrollable">
             {messages.map((message, index) => (
               <div key={index}>
@@ -560,7 +585,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
                   {message.text.split('\n').map((line, i) => (
                     <ReactMarkdown
                       key={'md-rendering' + i}
-                      rehypePlugins={[rehypeRaw]} // Enables HTML parsing
+                      rehypePlugins={[rehypeRaw]}
                     >
                       {line}
                     </ReactMarkdown>
@@ -592,9 +617,9 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               </LiveRegion>
             )}
           </div>
+          
           <form onSubmit={handleSubmit} className="message-form">
-            <Form
-            >
+            <Form>
               <FormField stretch>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <button
@@ -625,13 +650,40 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
                     />
                   </div>
                 </div>
-
               </FormField>
             </Form>
-
           </form>
-          {/* Clear Data Confirmation Modal */}
 
+          {/* Modal per salvare la chat */}
+          <Modal
+            onDismiss={() => {
+              setShowSaveModal(false);
+              setChatName('');
+            }}
+            visible={showSaveModal}
+            header="Save Chat"
+            footer={
+              <Box float="right">
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button variant="link" onClick={() => {
+                    setShowSaveModal(false);
+                    setChatName('');
+                  }}>Cancel</Button>
+                  <Button variant="primary" onClick={saveCurrentChat}>Save</Button>
+                </SpaceBetween>
+              </Box>
+            }
+          >
+            <FormField label="Chat name">
+              <Input
+                value={chatName}
+                onChange={({ detail }) => setChatName(detail.value)}
+                placeholder="Enter a name for this chat"
+              />
+            </FormField>
+          </Modal>
+
+          {/* Modal per conferma eliminazione */}
           <Modal
             onDismiss={() => setShowClearDataModal(false)}
             visible={showClearDataModal}
@@ -649,7 +701,6 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           </Modal>
         </div>
       </Container>
-
     </div>
   );
 };
