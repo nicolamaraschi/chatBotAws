@@ -25,7 +25,12 @@ import * as AWSAuth from '@aws-amplify/auth';
 import { BedrockAgentRuntimeClient, InvokeAgentCommand } from "@aws-sdk/client-bedrock-agent-runtime";
 import { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } from "@aws-sdk/client-bedrock-agentcore";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+import { useTheme } from './context/ThemeContext'; // Import useTheme hook
 import './ChatComponent.css';
+
+
+
+
 
 const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
   const [bedrockClient, setBedrockClient] = useState(null);
@@ -49,6 +54,9 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
   const [savedChats, setSavedChats] = useState([]);
   const [showSavedChatsPanel, setShowSavedChatsPanel] = useState(false);
   const [currentChatName, setCurrentChatName] = useState(null);
+  
+  // Get theme context
+  const { theme, toggleTheme } = useTheme();
 
   const getUserKey = useCallback((key) => {
     return `user_${user.username}_${key}`;
@@ -62,7 +70,7 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
     setShowClearDataModal(true);
   };
 
-  const { transcript, isListening, startListening, stopListening, speechRecognitionSupported } = useSpeechToText();
+const { transcript, isListening, startListening, stopListening, speechRecognitionSupported, language, changeLanguage } = useSpeechToText();
   
   useEffect(() => {
     if (transcript) {
@@ -431,12 +439,21 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               [
                 {
                   type: "button",
-                  iconName: "add-plus",
+                  text: "🗑️",  // Emoji cestino
                   title: "Start a new conversation",
                   ariaLabel: "Start a new conversation",
                   disableUtilityCollapse: true,
                   onClick: () => createNewSession()
                 },
+                // Theme toggle button
+                {
+                type: "button",
+                text: theme === 'light' ? "🌙" : "☀️",
+                title: theme === 'light' ? "Switch to dark mode" : "Switch to light mode",
+                ariaLabel: theme === 'light' ? "Switch to dark mode" : "Switch to light mode",
+                disableUtilityCollapse: true,
+                onClick: toggleTheme
+              },
                 // NUOVO: Bottone per salvare la chat
                 {
                   type: "button",
@@ -522,29 +539,31 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
               top: '50px', 
               width: '300px', 
               height: 'calc(100% - 50px)', 
-              backgroundColor: 'white', 
-              borderLeft: '1px solid #ccc',
+              backgroundColor: theme === 'dark' ? '#2a2a2a' : 'white', 
+              color: theme === 'dark' ? '#fff' : '#000',
+              borderLeft: `1px solid ${theme === 'dark' ? '#555' : '#ccc'}`,
               overflowY: 'auto',
               zIndex: 1000,
               padding: '10px'
             }}>
               <h3>Saved Chats ({savedChats.length})</h3>
               {savedChats.length === 0 ? (
-                <p style={{ color: '#666', fontSize: '14px' }}>No saved chats yet</p>
+                <p style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: '14px' }}>No saved chats yet</p>
               ) : (
                 savedChats.map((chat) => (
                   <div key={chat.id} style={{ 
-                    border: '1px solid #ddd', 
+                    border: `1px solid ${theme === 'dark' ? '#555' : '#ddd'}`, 
                     borderRadius: '4px', 
                     padding: '10px', 
                     marginBottom: '10px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    backgroundColor: theme === 'dark' ? '#333' : '#fff',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div onClick={() => loadSavedChat(chat)} style={{ flex: 1 }}>
                         <strong>{chat.name}</strong>
                         <br />
-                        <small style={{ color: '#666' }}>
+                        <small style={{ color: theme === 'dark' ? '#aaa' : '#666' }}>
                           {chat.messageCount} messages
                           <br />
                           {new Date(chat.savedAt).toLocaleString()}
@@ -619,40 +638,72 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
           </div>
           
           <form onSubmit={handleSubmit} className="message-form">
-            <Form>
-              <FormField stretch>
-                <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                  <button
-                    type="button"
-                    onClick={isListening ? stopListening : startListening}
-                    title={isListening ? "Stop Listening" : "Start Listening"}
-                    className="mic-button"
-                    hidden={!speechRecognitionSupported}
-                  >
-                    {isListening ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" height="28" width="28" fill="red" viewBox="0 0 24 24">
-                        <path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.1q-2.875-.35-4.437-2.35Q5 13.55 5 11h2q0 2.075 1.463 3.538Q9.925 16 12 16q2.075 0 3.538-1.462Q17 13.075 17 11h2q0 2.55-1.563 4.55-1.562 2-4.437 2.35V21Z" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" height="28" width="28" fill="black" viewBox="0 0 24 24">
-                        <path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.1q-2.875-.35-4.437-2.35Q5 13.55 5 11h2q0 2.075 1.463 3.538Q9.925 16 12 16q2.075 0 3.538-1.462Q17 13.075 17 11h2q0 2.55-1.563 4.55-1.562 2-4.437 2.35V21Z" />
-                      </svg>
-                    )}
-                  </button>
-                  <div style={{ flex: 1 }}>
-                    <PromptInput
-                      type='text'
-                      value={newMessage}
-                      onChange={({ detail }) => setNewMessage(detail.value)}
-                      placeholder='Type your question here...'
-                      actionButtonAriaLabel="Send message"
-                      actionButtonIconName="send"
-                    />
-                  </div>
-                </div>
-              </FormField>
-            </Form>
-          </form>
+  <Form>
+    <FormField stretch>
+      <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        {speechRecognitionSupported && (
+          <>
+            <button
+              type="button"
+              onClick={isListening ? stopListening : startListening}
+              title={isListening ? "Stop Listening" : "Start Listening"}
+              className="mic-button"
+              style={{
+                background: 'none',
+                border: 'none',
+                margin: '0 8px 0 0',
+                padding: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              {isListening ? (
+                <svg xmlns="http://www.w3.org/2000/svg" height="28" width="28" fill="red" viewBox="0 0 24 24">
+                  <path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.1q-2.875-.35-4.437-2.35Q5 13.55 5 11h2q0 2.075 1.463 3.538Q9.925 16 12 16q2.075 0 3.538-1.462Q17 13.075 17 11h2q0 2.55-1.563 4.55-1.562 2-4.437 2.35V21Z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" height="28" width="28" fill={theme === 'dark' ? 'white' : 'black'} viewBox="0 0 24 24">
+                  <path d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2q1.25 0 2.125.875T15 5v6q0 1.25-.875 2.125T12 14Zm-1 7v-3.1q-2.875-.35-4.437-2.35Q5 13.55 5 11h2q0 2.075 1.463 3.538Q9.925 16 12 16q2.075 0 3.538-1.462Q17 13.075 17 11h2q0 2.55-1.563 4.55-1.562 2-4.437 2.35V21Z" />
+                </svg>
+              )}
+            </button>
+            
+            {/* Selettore della lingua per il riconoscimento vocale */}
+            <div 
+              style={{ 
+                marginRight: '10px', 
+                fontSize: '12px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '4px',
+                backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0',
+              }}
+              onClick={() => {
+                const newLang = language === 'en-US' ? 'it-IT' : 'en-US';
+                changeLanguage(newLang);
+              }}
+              title={`Current language: ${language === 'en-US' ? 'English' : 'Italian'}. Click to change.`}
+            >
+              {language === 'en-US' ? '🇺🇸' : '🇮🇹'}
+            </div>
+          </>
+        )}
+        
+        <div style={{ flex: 1 }}>
+          <PromptInput
+            type='text'
+            value={newMessage}
+            onChange={({ detail }) => setNewMessage(detail.value)}
+            placeholder='Type your question here...'
+            actionButtonAriaLabel="Send message"
+            actionButtonIconName="send"
+          />
+        </div>
+      </div>
+    </FormField>
+  </Form>
+</form>
 
           {/* Modal per salvare la chat */}
           <Modal

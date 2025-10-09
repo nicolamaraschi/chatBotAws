@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 export default function useSpeechToText() {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [language, setLanguage] = useState(() => {
+    // Recupera la lingua dal localStorage o imposta inglese come default
+    return localStorage.getItem('speechRecognitionLang') || 'en-US';
+  });
   const recognitionRef = useRef(null);
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const speechRecognitionSupported = !!SpeechRecognition;
 
   useEffect(() => {
-
     if (!SpeechRecognition) {
       return;
     }
@@ -16,7 +19,7 @@ export default function useSpeechToText() {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = language;
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -32,11 +35,13 @@ export default function useSpeechToText() {
     };
 
     recognitionRef.current = recognition;
-  }, [SpeechRecognition]);
+  }, [SpeechRecognition, language]);
 
   const startListening = () => {
     if (recognitionRef.current && !isListening) {
       setTranscript('');
+      // Aggiorna la lingua ogni volta prima di iniziare il riconoscimento
+      recognitionRef.current.lang = language;
       recognitionRef.current.start();
       setIsListening(true);
     }
@@ -48,5 +53,19 @@ export default function useSpeechToText() {
     }
   };
 
-  return { transcript, isListening, startListening, stopListening, setTranscript, speechRecognitionSupported };
+  const changeLanguage = (newLanguage) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('speechRecognitionLang', newLanguage);
+  };
+
+  return { 
+    transcript, 
+    isListening, 
+    startListening, 
+    stopListening, 
+    setTranscript, 
+    speechRecognitionSupported,
+    language,
+    changeLanguage
+  };
 }

@@ -5,9 +5,11 @@ import { TopNavigation } from "@cloudscape-design/components";
 import PropTypes from 'prop-types';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
+import './styles/theme.css'; // Import our theme styles
 
 import ChatComponent from './ChatComponent';
 import ConfigComponent from './ConfigComponent';
+import { ThemeProvider } from './context/ThemeContext'; // Import ThemeProvider
 
 /**
  * Main App component that manages the application state and routing
@@ -19,7 +21,6 @@ function App() {
   const [isConfigured, setIsConfigured] = useState(false);
   // State to track if user is currently in configuration editing mode
   const [isEditingConfig, setIsEditingConfig] = useState(false);
-  //const [bedrockConfig, setBerockConfig] = useState(null);
 
   /**
    * Effect hook to check for stored configuration in localStorage
@@ -28,7 +29,6 @@ function App() {
   useEffect(() => {
     const storedConfig = localStorage.getItem('appConfig');
     if (storedConfig && !isEditingConfig) {
-      //setBerockConfig(JSON.parse(storedConfig).bedrock);
       setIsConfigured(true);
     }
   }, [isEditingConfig]);
@@ -45,23 +45,25 @@ function App() {
    * Render the appropriate component based on configuration and authentication state
    */
   return (
-    <div>
-      {!isConfigured || isEditingConfig ? (
-        // Show configuration component if not configured or editing
-        <ConfigComponent 
-          onConfigSet={handleConfigSet} 
-          isEditingConfig={isEditingConfig} 
-          setEditingConfig={setIsEditingConfig} 
-        />
-      ) : (
-        // Show authenticated component when configured
-        <Authenticator.Provider>
-          <AuthenticatedComponent onEditConfigClick={() => setIsEditingConfig(true)} />
-        </Authenticator.Provider>
-      )}
-    </div>
+    <ThemeProvider>
+      <div>
+        {!isConfigured || isEditingConfig ? (
+          // Show configuration component if not configured or editing
+          <ConfigComponent 
+            onConfigSet={handleConfigSet} 
+            isEditingConfig={isEditingConfig} 
+            setEditingConfig={setIsEditingConfig} 
+          />
+        ) : (
+          // Show authenticated component when configured
+          <Authenticator.Provider>
+            <AuthenticatedComponent onEditConfigClick={() => setIsEditingConfig(true)} />
+          </Authenticator.Provider>
+        )}
+      </div>
+    </ThemeProvider>
   );
-};
+}
 
 /**
  * Component that handles the authenticated state of the application
@@ -133,7 +135,6 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
         </Authenticator>
       </div>
     </div>
-    
   );
 }
 
