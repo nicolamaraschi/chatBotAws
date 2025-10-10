@@ -3,29 +3,22 @@ import { useState, useEffect } from 'react';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { TopNavigation } from "@cloudscape-design/components";
 import PropTypes from 'prop-types';
+import { ResizableBox } from 'react-resizable';
+
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
-import './styles/theme.css'; // Import our theme styles
+import './styles/theme.css';
+import 'react-resizable/css/styles.css'; // Styles for resizable box
 
 import ChatComponent from './ChatComponent';
 import ConfigComponent from './ConfigComponent';
+import SapDashboard from './pages/SapDashboard'; // Import the dashboard
 import { ThemeProvider } from './context/ThemeContext'; // Import ThemeProvider
 
-/**
- * Main App component that manages the application state and routing
- * Controls the configuration and authentication flow of the application
- * @returns {JSX.Element} The rendered App component
- */
 function App() {
-  // State to track if the application has been properly configured
   const [isConfigured, setIsConfigured] = useState(false);
-  // State to track if user is currently in configuration editing mode
   const [isEditingConfig, setIsEditingConfig] = useState(false);
 
-  /**
-   * Effect hook to check for stored configuration in localStorage
-   * Updates the configuration state when editing mode changes
-   */
   useEffect(() => {
     const storedConfig = localStorage.getItem('appConfig');
     if (storedConfig && !isEditingConfig) {
@@ -33,29 +26,20 @@ function App() {
     }
   }, [isEditingConfig]);
 
-  /**
-   * Callback handler for when configuration is successfully set
-   * Updates the isConfigured state to true
-   */
   const handleConfigSet = () => {
     setIsConfigured(true);
   };
 
-  /**
-   * Render the appropriate component based on configuration and authentication state
-   */
   return (
     <ThemeProvider>
       <div>
         {!isConfigured || isEditingConfig ? (
-          // Show configuration component if not configured or editing
           <ConfigComponent 
             onConfigSet={handleConfigSet} 
             isEditingConfig={isEditingConfig} 
             setEditingConfig={setIsEditingConfig} 
           />
         ) : (
-          // Show authenticated component when configured
           <Authenticator.Provider>
             <AuthenticatedComponent onEditConfigClick={() => setIsEditingConfig(true)} />
           </Authenticator.Provider>
@@ -65,35 +49,15 @@ function App() {
   );
 }
 
-/**
- * Component that handles the authenticated state of the application
- * Renders the top navigation and manages authentication status
- * @param {Object} props - Component properties
- * @param {Function} props.onEditConfigClick - Callback to handle configuration editing
- * @returns {JSX.Element} The authenticated view of the application
- */
 const AuthenticatedComponent = ({ onEditConfigClick }) => {
-  // Extract user and authentication status from Amplify's authentication context
   const { user, authStatus } = useAuthenticator((context) => [context.user, context.authStatus]);
-  // Track whether authentication is currently in progress
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  /**
-   * Update authentication processing state when auth status changes
-   */
   useEffect(() => {
     setIsAuthenticating(authStatus === 'processing');
   }, [authStatus]);
 
-  /**
-   * Navigation component configuration object
-   * Defines the structure and behavior of the top navigation bar
-   */
   const components = {
-    /**
-     * Header component that renders the top navigation bar
-     * @returns {JSX.Element} TopNavigation component with settings button
-     */
     Header() {
       return (
         <div>
@@ -103,7 +67,6 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
               title: `Welcome`,
             }}
             utilities={[
-              // Settings button configuration
               {
                 type: "button",
                 iconName: "settings",
@@ -119,15 +82,13 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
     }
   }
 
-  return (
-    <div>
+  if (!user) {
+    return (
       <div className="centered-container">
-        {!user && <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '400px', margin: '20px auto', display: 'block' }} />}
+        <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '400px', margin: '20px auto', display: 'block' }} />
         <Authenticator hideSignUp={true} components={components}>
           {isAuthenticating ? (
             <div>Authenticating...</div>
-          ) : user ? (
-            <ChatComponent user={user} onLogout={() => setIsAuthenticating(false)} onConfigEditorClick={onEditConfigClick}/>
           ) : (
             <div className="tool-bar">
               Please sign in to use the application
@@ -135,6 +96,28 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
           )}
         </Authenticator>
       </div>
+    );
+  }
+
+  return (
+    <div className="main-layout">
+      <section className="dashboard-section">
+        <SapDashboard />
+      </section>
+      
+      <ResizableBox 
+        className="chat-section-resizable"
+        width={window.innerWidth * 0.25} 
+        height={0}
+        axis="x"
+        minConstraints={[300, 0]}
+        maxConstraints={[window.innerWidth * 0.8, Infinity]}
+        resizeHandles={['w']}
+      >
+        <section className="chat-section">
+          <ChatComponent user={user} onLogout={() => setIsAuthenticating(false)} onConfigEditorClick={onEditConfigClick}/>
+        </section>
+      </ResizableBox>
     </div>
   );
 }

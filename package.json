@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:all": "concurrently \"npm run dev\" \"npm start --prefix aws-serverless-app\""
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.16.0",
@@ -21,17 +22,24 @@
     "@cloudscape-design/global-styles": "^1.0.32",
     "@vitejs/plugin-react": "^4.4.1",
     "aws-amplify": "^6.7.0",
+    "axios": "^1.12.2",
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.5.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.0.0",
+    "react-resizable": "^3.0.5",
     "rehype-raw": "^7.0.0"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.5.2",
     "@aws-amplify/backend-cli": "^1.3.0",
+    "concurrently": "^8.2.2",
     "@eslint/js": "^9.13.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

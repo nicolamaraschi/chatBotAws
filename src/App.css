@@ -1,23 +1,51 @@
-html, body {
+html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  width: 100vw;
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background: linear-gradient(135deg, rgb(71, 17, 118) 3%, rgb(131, 57, 157) 44%, rgb(149, 85, 182) 69%, rgb(145, 134, 215) 94%);
 }
 
-#root {
-  margin: 0 auto;
-  padding: 0;
-  text-align: center;
-  overflow: hidden;
-  width: 100vw;
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.dashboard-section {
+  flex: 1; /* Takes up remaining space */
+  height: 100vh;
+  overflow-y: auto;
+  min-width: 0; /* Prevents flexbox overflow */
+}
+
+.chat-section-resizable {
+  position: relative;
+  flex-shrink: 0; /* Prevent flexbox from shrinking this container */
+}
+
+.chat-section-resizable .react-resizable-handle-w {
+  position: absolute;
+  width: 8px;
+  height: 100%;
+  left: -4px;
+  top: 0;
+  cursor: col-resize;
+  background: #007bff;
+  z-index: 999;
+  opacity: 0.7;
+}
+
+.chat-section {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .centered-container {
@@ -25,19 +53,18 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 /* Styles for mobile devices with vertical screen orientation */
 @media (max-width: 920px), (orientation: portrait) {
-  .centered-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    overflow: hidden;
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-section, .chat-section-resizable, .chat-section {
+    width: 100% !important; /* Override inline styles from resizable */
+    height: 50vh;
   }
 }
-
