@@ -122,6 +122,7 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
   return (
     <div>
       <div className="centered-container">
+        {!user && <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '400px', margin: '20px auto', display: 'block' }} />}
         <Authenticator hideSignUp={true} components={components}>
           {isAuthenticating ? (
             <div>Authenticating...</div>

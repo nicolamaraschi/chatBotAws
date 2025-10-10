@@ -1,5 +1,5 @@
 .chat-component {
-  max-width: 900px; 
+  max-width: 1400px; 
   width: 99%; 
   margin: 0 auto; 
   margin-top: 20px;
@@ -112,4 +112,20 @@
       margin-top: 50px;
     }
 
+}
+
+.message-wrapper {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.message-actions {
+  position: absolute;
+  bottom: -15px;
+  left: 5px;
+  display: none;
+}
+
+.message-wrapper:hover .message-actions {
+  display: block;
 }

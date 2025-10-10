@@ -54,9 +54,21 @@ const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
   const [savedChats, setSavedChats] = useState([]);
   const [showSavedChatsPanel, setShowSavedChatsPanel] = useState(false);
   const [currentChatName, setCurrentChatName] = useState(null);
+  const [savedChatsSearchQuery, setSavedChatsSearchQuery] = useState('');
+  const [copiedMessageId, setCopiedMessageId] = useState(null);
   
   // Get theme context
   const { theme, toggleTheme } = useTheme();
+
+  const filteredSavedChats = savedChats.filter(chat => {
+    if (!savedChatsSearchQuery) {
+      return true;
+    }
+    const query = savedChatsSearchQuery.toLowerCase();
+    const chatNameMatch = chat.name.toLowerCase().includes(query);
+    const messageMatch = chat.messages.some(msg => msg.text.toLowerCase().includes(query));
+    return chatNameMatch || messageMatch;
+  });
 
   const getUserKey = useCallback((key) => {
     return `user_${user.username}_${key}`;
@@ -151,13 +163,42 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     console.log('Chat eliminata:', chatId);
   };
 
+  const downloadChat = (chat) => {
+    const chatContent = chat.messages.map(msg => `${msg.sender}: ${msg.text}`).join('\n');
+    const blob = new Blob([chatContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${chat.name}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const copyToClipboard = (text, messageId) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
   const createNewSession = useCallback(() => {
     const newSessionId = `agentcore-session-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
     setSessionId(newSessionId);
-    setMessages([]);
+
+    const welcomeMessage = {
+      text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.",
+      sender: "agent",
+    };
+    setMessages([welcomeMessage]);
     setCurrentChatName(null);
     localStorage.setItem(getUserKey('lastSessionId'), newSessionId);
-    localStorage.setItem(getUserKey(`messages_${newSessionId}`), JSON.stringify([]));
+    localStorage.setItem(getUserKey(`messages_${newSessionId}`), JSON.stringify([welcomeMessage]));
     console.log('New session created for user:', user.username, 'Session:', newSessionId);
   }, [getUserKey, user.username]);
 
@@ -177,12 +218,21 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     if (lastSessionId) {
       setSessionId(lastSessionId);
       const loadedMessages = fetchMessagesForSession(lastSessionId);
-      setMessages(loadedMessages);
+      if (loadedMessages.length === 0) {
+        const welcomeMessage = {
+          text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.",
+          sender: "agent",
+        };
+        setMessages([welcomeMessage]);
+        storeMessages(lastSessionId, [welcomeMessage]);
+      } else {
+        setMessages(loadedMessages);
+      }
       console.log('Loaded existing session for user:', user.username, 'Session:', lastSessionId);
     } else {
       createNewSession();
     }
-  }, [createNewSession, fetchMessagesForSession, getUserKey, user.username]);
+  }, [createNewSession, fetchMessagesForSession, getUserKey, user.username, storeMessages]);
 
   useEffect(() => {
     const fetchCredentials = async () => {
@@ -505,27 +555,13 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                   ]
                 }] : []),
                 {
-                  type: "menu-dropdown",
-                  text: user.username,
-                  iconName: "user-profile",
-                  title: user.username,
-                  ariaLabel: "User",
+                  type: "button",
+                  text: "Logout",
+                  iconName: "exit",
+                  title: "Logout",
+                  ariaLabel: "Logout",
                   disableUtilityCollapse: true,
-                  onItemClick: ({ detail }) => {
-                    switch (detail.id) {
-                      case "logout":
-                        handleLogout();
-                        break;
-                    }
-                  },
-                  items: [
-                    {
-                      id: "logout",
-                      text: "Logout",
-                      iconName: "exit",
-                      type: "icon-button",
-                    }
-                  ]
+                  onClick: handleLogout
                 }
               ]
             }
@@ -547,10 +583,17 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
               padding: '10px'
             }}>
               <h3>Saved Chats ({savedChats.length})</h3>
-              {savedChats.length === 0 ? (
-                <p style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: '14px' }}>No saved chats yet</p>
+              <div style={{ marginBottom: '10px' }}>
+                <Input
+                  value={savedChatsSearchQuery}
+                  onChange={({ detail }) => setSavedChatsSearchQuery(detail.value)}
+                  placeholder="Search by name or content"
+                />
+              </div>
+              {filteredSavedChats.length === 0 ? (
+                <p style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: '14px' }}>No matching chats found</p>
               ) : (
-                savedChats.map((chat) => (
+                filteredSavedChats.map((chat) => (
                   <div key={chat.id} style={{ 
                     border: `1px solid ${theme === 'dark' ? '#555' : '#ddd'}`, 
                     borderRadius: '4px', 
@@ -569,16 +612,26 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                           {new Date(chat.savedAt).toLocaleString()}
                         </small>
                       </div>
-                      <Button 
-                        variant="icon" 
-                        iconName="remove"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm(`Delete "${chat.name}"?`)) {
-                            deleteSavedChat(chat.id);
-                          }
-                        }}
-                      />
+                      <div>
+                        <Button 
+                          variant="icon" 
+                          iconName="download"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadChat(chat);
+                          }}
+                        />
+                        <Button 
+                          variant="icon" 
+                          iconName="remove"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`Delete "${chat.name}"?`)) {
+                              deleteSavedChat(chat.id);
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))
@@ -588,7 +641,7 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
 
           <div className="messages-container scrollable">
             {messages.map((message, index) => (
-              <div key={index}>
+              <div key={index} className="message-wrapper">
                 <ChatBubble
                   ariaLabel={`${message.sender} message`}
                   type={message.sender === user.username ? "outgoing" : "incoming"}
@@ -610,6 +663,13 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                     </ReactMarkdown>
                   ))}
                 </ChatBubble>
+                <div className="message-actions">
+                  <Button
+                    variant="icon"
+                    iconName={copiedMessageId === index ? "check" : "copy"}
+                    onClick={() => copyToClipboard(message.text, index)}
+                  />
+                </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
