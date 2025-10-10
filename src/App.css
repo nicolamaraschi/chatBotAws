@@ -26,7 +26,8 @@ body {
 
 .chat-section-resizable {
   position: relative;
-  flex-shrink: 0; /* Prevent flexbox from shrinking this container */
+  flex-shrink: 0;
+  /* The ugly debug border is gone! */
 }
 
 .chat-section-resizable .react-resizable-handle-w {
@@ -36,9 +37,23 @@ body {
   left: -4px;
   top: 0;
   cursor: col-resize;
-  background: #007bff;
+  
+  /* --- FIX for the "oblique" bug --- */
+  transform: none !important;
+  
+  /* Final production style for the handle */
+  background-color: #007bff;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="30"><path d="M3 0 v30 M5 0 v30" stroke="rgba(255,255,255,0.4)" stroke-width="1"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  
+  opacity: 0.4;
+  transition: all 0.2s ease-in-out;
   z-index: 999;
-  opacity: 0.7;
+}
+
+.chat-section-resizable .react-resizable-handle-w:hover {
+  opacity: 1;
 }
 
 .chat-section {

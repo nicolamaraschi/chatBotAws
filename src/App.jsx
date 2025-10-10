@@ -108,9 +108,8 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
       <ResizableBox 
         className="chat-section-resizable"
         width={window.innerWidth * 0.25} 
-        height={0}
         axis="x"
-        minConstraints={[300, 0]}
+        minConstraints={[300, Infinity]}
         maxConstraints={[window.innerWidth * 0.8, Infinity]}
         resizeHandles={['w']}
       >
