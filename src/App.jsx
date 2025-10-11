@@ -1,4 +1,3 @@
-// Import necessary dependencies and components
 import { useState, useEffect } from 'react';
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { TopNavigation } from "@cloudscape-design/components";
@@ -18,11 +17,16 @@ import { ThemeProvider } from './context/ThemeContext'; // Import ThemeProvider
 function App() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [isEditingConfig, setIsEditingConfig] = useState(false);
+  const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
     const storedConfig = localStorage.getItem('appConfig');
     if (storedConfig && !isEditingConfig) {
       setIsConfigured(true);
+    }
+    const storedBg = localStorage.getItem('backgroundImage');
+    if (storedBg) {
+      setBackgroundImage(storedBg);
     }
   }, [isEditingConfig]);
 
@@ -30,18 +34,28 @@ function App() {
     setIsConfigured(true);
   };
 
+  const handleBackgroundChange = (newBg) => {
+    setBackgroundImage(newBg);
+    localStorage.setItem('backgroundImage', newBg);
+  };
+
+  const backgroundStyle = backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {};
+
   return (
     <ThemeProvider>
-      <div>
+      <div className="app-background" style={backgroundStyle}>
         {!isConfigured || isEditingConfig ? (
           <ConfigComponent 
             onConfigSet={handleConfigSet} 
             isEditingConfig={isEditingConfig} 
-            setEditingConfig={setIsEditingConfig} 
+            setEditingConfig={setIsEditingConfig}
           />
         ) : (
           <Authenticator.Provider>
-            <AuthenticatedComponent onEditConfigClick={() => setIsEditingConfig(true)} />
+            <AuthenticatedComponent 
+              onEditConfigClick={() => setIsEditingConfig(true)} 
+              onBackgroundChange={handleBackgroundChange} 
+            />
           </Authenticator.Provider>
         )}
       </div>
@@ -49,7 +63,7 @@ function App() {
   );
 }
 
-const AuthenticatedComponent = ({ onEditConfigClick }) => {
+const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   const { user, authStatus } = useAuthenticator((context) => [context.user, context.authStatus]);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
@@ -102,7 +116,7 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
   return (
     <div className="main-layout">
       <section className="dashboard-section">
-        <SapDashboard />
+        <SapDashboard onBackgroundChange={onBackgroundChange} />
       </section>
       
       <ResizableBox 
@@ -122,7 +136,8 @@ const AuthenticatedComponent = ({ onEditConfigClick }) => {
 }
 
 AuthenticatedComponent.propTypes = {
-  onEditConfigClick: PropTypes.func.isRequired
+  onEditConfigClick: PropTypes.func.isRequired,
+  onBackgroundChange: PropTypes.func.isRequired
 };
 
 export default App;

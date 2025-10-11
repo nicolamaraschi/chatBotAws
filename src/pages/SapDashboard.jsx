@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import axios from 'axios';
@@ -6,6 +7,7 @@ import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler } from 'chart.js';
 import { API_URL } from '../config';
 import './SapDashboard.css';
+import BackgroundSelector from './BackgroundSelector'; // Importa il nuovo componente
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler);
 
@@ -23,7 +25,7 @@ const generateDateRange = (startDate, endDate) => {
   return dates;
 };
 
-const SAPDashboard = () => {
+const SAPDashboard = ({ onBackgroundChange }) => {
   const [availableClients, setAvailableClients] = useState([]);
   const [availableSIDs, setAvailableSIDs] = useState([]);
   const [selectedClients, setSelectedClients] = useState([]);
@@ -37,6 +39,7 @@ const SAPDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const dashboardRef = useRef(null);
+  const [isBgSelectorOpen, setIsBgSelectorOpen] = useState(false); // Stato per il popup
 
   // Funzione per calcolare le date in base al range selezionato
   const calculateDateRange = (rangeType) => {
@@ -555,13 +558,18 @@ Generated on: ${new Date().toLocaleString()}`;
     <div className="sap-dashboard" ref={dashboardRef}>
       <div className="dashboard-header">
         <h1>Dashboard SAP - Report Giornalieri</h1>
-        <div className="export-buttons">
-          <button onClick={() => handleExport('pdf')} className="export-btn">
-            Download PDF
+        <div className="header-actions">
+          <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">
+            🎨
           </button>
-          <button onClick={() => handleExport('email')} className="export-btn">
-            Send Email
-          </button>
+          <div className="export-buttons">
+            <button onClick={() => handleExport('pdf')} className="export-btn">
+              Download PDF
+            </button>
+            <button onClick={() => handleExport('email')} className="export-btn">
+              Send Email
+            </button>
+          </div>
         </div>
       </div>
       
@@ -822,8 +830,18 @@ Generated on: ${new Date().toLocaleString()}`;
           )}
         </>
       )}
+      {isBgSelectorOpen && (
+        <BackgroundSelector 
+          onBackgroundChange={onBackgroundChange} 
+          onClose={() => setIsBgSelectorOpen(false)} 
+        />
+      )}
     </div>
   );
+};
+
+SAPDashboard.propTypes = {
+  onBackgroundChange: PropTypes.func.isRequired,
 };
 
 export default SAPDashboard;
