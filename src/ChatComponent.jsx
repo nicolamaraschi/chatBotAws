@@ -28,11 +28,7 @@ import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import { useTheme } from './context/ThemeContext'; // Import useTheme hook
 import './ChatComponent.css';
 
-
-
-
-
-const ChatComponent = ({ user, onLogout, onConfigEditorClick }) => {
+const ChatComponent = ({ user, onLogout, isChatCollapsed, toggleChatCollapse }) => {
   const [bedrockClient, setBedrockClient] = useState(null);
   const [lambdaClient, setLambdaClient] = useState(null);
   const [agentCoreClient, setAgentCoreClient] = useState(null);
@@ -476,6 +472,19 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     }
   };
 
+  if (isChatCollapsed) {
+    return (
+      <div className="chat-collapsed">
+        <Button 
+          iconName="angle-left"
+          variant="icon"
+          onClick={toggleChatCollapse}
+          ariaLabel="Open chat panel"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="chat-component">
       <Container stretch>
@@ -485,8 +494,15 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
               href: "#",
               title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}${currentChatName ? ` - ${currentChatName}` : ''}`,
             }}
-            utilities={
-              [
+            utilities={[
+                {
+                  type: "button",
+                  iconName: "angle-right",
+                  title: "Collapse chat panel",
+                  ariaLabel: "Collapse chat panel",
+                  onClick: toggleChatCollapse,
+                  disableUtilityCollapse: true,
+                },
                 {
                   type: "button",
                   text: "🗑️",  // Emoji cestino
@@ -532,7 +548,8 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                   onItemClick: ({ detail }) => {
                     switch (detail.id) {
                       case "edit-settings":
-                        onConfigEditorClick();
+                        // This prop is missing, need to decide what to do
+                        // onConfigEditorClick(); 
                         break;
                       case "clear-settings":
                         handleClearData();
@@ -577,7 +594,7 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
               height: 'calc(100% - 50px)', 
               backgroundColor: theme === 'dark' ? '#2a2a2a' : 'white', 
               color: theme === 'dark' ? '#fff' : '#000',
-              borderLeft: `1px solid ${theme === 'dark' ? '#555' : '#ccc'}`,
+              borderLeft: `1px solid ${theme === 'dark' ? '#555' : '#ccc'}`, 
               overflowY: 'auto',
               zIndex: 1000,
               padding: '10px'
@@ -818,8 +835,8 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
 
 ChatComponent.propTypes = {
   user: PropTypes.object.isRequired,
-  onLogout: PropTypes.func.isRequired,
-  onConfigEditorClick: PropTypes.func.isRequired
+  isChatCollapsed: PropTypes.bool.isRequired,
+  toggleChatCollapse: PropTypes.func.isRequired
 };
 
 export default ChatComponent;

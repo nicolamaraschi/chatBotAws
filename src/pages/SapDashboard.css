@@ -437,7 +437,7 @@
   margin-bottom: 2rem;
 }
 
-.export-buttons {
+.header-actions {
   display: flex;
   gap: 1rem;
 }

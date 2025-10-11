@@ -110,12 +110,13 @@ const SAPDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClients]);
 
-  useEffect(() => {
-    if (availableClients.length > 0) {
-      const allClients = availableClients.map(c => c.nomecliente);
-      setSelectedClients(allClients);
-    }
-  }, [availableClients]);
+  // Rimosso: useEffect per selezionare tutti i clienti di default
+  // useEffect(() => {
+  //   if (availableClients.length > 0) {
+  //     const allClients = availableClients.map(c => c.nomecliente);
+  //     setSelectedClients(allClients);
+  //   }
+  // }, [availableClients]);
 
   useEffect(() => {
     if (selectedClients.length > 0) {

@@ -1,3 +1,10 @@
+.chat-collapsed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
 .chat-component {
   max-width: 1400px; 
   width: 99%; 
