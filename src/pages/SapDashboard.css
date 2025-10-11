@@ -729,3 +729,20 @@ body[data-theme="dark"] .excel-btn {
 body[data-theme="dark"] .excel-btn:hover {
   background-color: #154e30 !important;
 }
+
+/* ULTIMATE FIX per le legende Chart.js in dark mode */
+body[data-theme="dark"] .chart-card:has(canvas) ul li span,
+body[data-theme="dark"] .chart-container:has(canvas) span {
+  color: #e0e0e0 !important;
+}
+
+/* Override specifico per ogni span all'interno di chart-card in dark mode */
+body[data-theme="dark"] .chart-card span {
+  color: #e0e0e0 !important;
+}
+
+/* Se Chart.js usa text elements SVG */
+body[data-theme="dark"] .chart-container text,
+body[data-theme="dark"] .chart-card text {
+  fill: #e0e0e0 !important;
+}

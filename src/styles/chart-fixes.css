@@ -1,40 +1,19 @@
-/* src/styles/chart-fixes.css */
-
-/* Stile globale per Chart.js in modalità dark */
-body[data-theme="dark"] .chart-js-canvas-container + ul li span,
-body[data-theme="dark"] .chartjs-render-monitor + div span,
-body[data-theme="dark"] canvas[role="img"] + div span,
-body[data-theme="dark"] .chart-container + div span,
-body[data-theme="dark"] .chart-container + ul li span,
-body[data-theme="dark"] .chart-container ~ div span,
-body[data-theme="dark"] .chart-container ~ ul li span,
-body[data-theme="dark"] canvas + div span {
+/* NUCLEAR OPTION - Force all text in chart areas to be light in dark mode */
+body[data-theme="dark"] .chart-container *,
+body[data-theme="dark"] .chart-card *,
+body[data-theme="dark"] canvas + * *,
+body[data-theme="dark"] canvas ~ * * {
   color: #e0e0e0 !important;
 }
 
-/* Fix per le legende generate da Chart.js */
-body[data-theme="dark"] *[class*="legend"] span,
-body[data-theme="dark"] *[class*="Legend"] span,
-body[data-theme="dark"] .chart-card ul li,
-body[data-theme="dark"] .chart-card ul li span,
-body[data-theme="dark"] li[class*="legend-item"] span {
+/* Specific override for Chart.js generated elements */
+body[data-theme="dark"] canvas[role="img"] ~ ul li span {
   color: #e0e0e0 !important;
+  fill: #e0e0e0 !important;
 }
 
-/* Approccio universale per tutti gli elementi creati dopo un canvas */
-body[data-theme="dark"] canvas ~ * {
-  color: #e0e0e0;
-}
-
-/* Override specifico per Chart.js */
-body[data-theme="dark"] .chartjs-legend-item,
-body[data-theme="dark"] .chartjs-legend-item span {
-  color: #e0e0e0 !important;
-}
-
-/* Target specifico per canvas con role="img" */
-body[data-theme="dark"] canvas[role="img"] ~ ul li,
-body[data-theme="dark"] canvas[role="img"] ~ ul li span,
-body[data-theme="dark"] canvas[role="img"] ~ div span {
+/* Override any inline styles */
+body[data-theme="dark"] .chart-container [style*="color"],
+body[data-theme="dark"] .chart-card [style*="color"] {
   color: #e0e0e0 !important;
 }

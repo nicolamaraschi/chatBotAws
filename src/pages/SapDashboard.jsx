@@ -140,106 +140,148 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClients, selectedSIDs, dateRange]);
   
-  // Nuovo useEffect per il fix delle legende dei grafici in dark mode
-  useEffect(() => {
-    // Funzione per applicare il fix alle legende dei grafici
-    const fixLegends = () => {
-      // Usa un timeout per assicurarsi che Chart.js abbia completato il rendering
-      const applyFix = () => {
-        // Target specifico per canvas[role="img"] che hai mostrato nell'ispezione DOM
-        const canvases = document.querySelectorAll('canvas[role="img"]');
-        
-        canvases.forEach(canvas => {
-          // Trova il nodo padre e tutti gli elementi fratelli
-          const parent = canvas.parentNode;
-          if (!parent) return;
-          
-          // Cerca i fratelli del canvas per trovare elementi UI generati da Chart.js
-          let sibling = parent.nextElementSibling;
-          while (sibling) {
-            // Applica stile a tutti gli span e li nei fratelli
-            const textElements = sibling.querySelectorAll('span, li, ul');
-            textElements.forEach(el => {
-              if (theme === 'dark') {
-                el.style.setProperty('color', '#e0e0e0', 'important');
-              } else {
-                el.style.removeProperty('color');
-              }
-            });
-            
-            sibling = sibling.nextElementSibling;
-          }
-          
-          // Cerca anche nei contenitori esterni
-          let chartCard = parent;
-          while (chartCard && !chartCard.classList.contains('chart-card')) {
-            chartCard = chartCard.parentNode;
-          }
-          
-          if (chartCard) {
-            const legendElements = chartCard.querySelectorAll('ul li, span');
-            legendElements.forEach(el => {
-              if (theme === 'dark') {
-                el.style.setProperty('color', '#e0e0e0', 'important');
-              } else {
-                el.style.removeProperty('color');
-              }
-            });
-          }
-        });
-        
-        // Approccio aggressivo per qualsiasi elemento che potrebbe essere una legenda
-        const potentialLegends = document.querySelectorAll('.chart-container ~ *, .chart-container + *, [class*="legend"], [class*="Legend"]');
-        potentialLegends.forEach(el => {
-          const spans = el.querySelectorAll('span, li');
-          spans.forEach(span => {
-            if (theme === 'dark') {
-              span.style.setProperty('color', '#e0e0e0', 'important');
-            } else {
-              span.style.removeProperty('color');
-            }
-          });
-        });
-        
-        console.log(`Fixed legend colors for ${canvases.length} charts in ${theme} mode`);
-      };
-      
-      // Esegui il fix più volte per assicurarsi che Chart.js abbia avuto il tempo di renderizzare
-      setTimeout(applyFix, 100);   // Immediatamente dopo il rendering
-      setTimeout(applyFix, 500);   // Dopo mezzo secondo
-      setTimeout(applyFix, 1000);  // Dopo un secondo per sicurezza
-    };
+// Nuovo useEffect POTENZIATO per il fix delle legende dei grafici in dark mode
+useEffect(() => {
+  // Funzione NUCLEARE per forzare l'aggiornamento dei colori
+  const forceUpdateLegends = () => {
+    // 1. Target TUTTI gli span e li all'interno di chart containers
+    const allChartElements = document.querySelectorAll(
+      '.chart-container span, ' +
+      '.chart-card span, ' +
+      '.chart-container li, ' +
+      '.chart-card li, ' +
+      'canvas + div span, ' +
+      'canvas ~ * span, ' +
+      'canvas ~ * li'
+    );
     
-    // Esegui il fix quando cambia il tema o quando i dati vengono caricati
-    fixLegends();
-    
-    // Esegui anche quando cambiano i dati
-    if (dashboardData) {
-      fixLegends();
-    }
-    
-    // Crea un MutationObserver per intercettare quando Chart.js genera nuovi elementi DOM
-    const observer = new MutationObserver((mutations) => {
-      // Verifica se sono stati aggiunti nuovi nodi al DOM
-      const hasNodeAdditions = mutations.some(mutation => mutation.addedNodes.length > 0);
-      if (hasNodeAdditions) {
-        fixLegends();
+    allChartElements.forEach(el => {
+      if (theme === 'dark') {
+        el.style.setProperty('color', '#e0e0e0', 'important');
+      } else {
+        el.style.setProperty('color', '#333333', 'important');
       }
     });
     
-    // Osserva l'intero documento per modifiche
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
+    // 2. Target specifico per canvas[role="img"] 
+    const canvases = document.querySelectorAll('canvas[role="img"]');
+    
+    canvases.forEach(canvas => {
+      // Trova il nodo padre
+      const parent = canvas.parentNode;
+      if (!parent) return;
+      
+      // Cerca i fratelli del canvas
+      let sibling = parent.nextElementSibling;
+      while (sibling) {
+        const textElements = sibling.querySelectorAll('span, li, ul');
+        textElements.forEach(el => {
+          if (theme === 'dark') {
+            el.style.setProperty('color', '#e0e0e0', 'important');
+          } else {
+            el.style.setProperty('color', '#333333', 'important');
+          }
+        });
+        sibling = sibling.nextElementSibling;
+      }
+      
+      // Cerca anche nei contenitori esterni (chart-card)
+      let chartCard = parent;
+      while (chartCard && !chartCard.classList.contains('chart-card')) {
+        chartCard = chartCard.parentNode;
+      }
+      
+      if (chartCard) {
+        const legendElements = chartCard.querySelectorAll('ul li, span');
+        legendElements.forEach(el => {
+          if (theme === 'dark') {
+            el.style.setProperty('color', '#e0e0e0', 'important');
+          } else {
+            el.style.setProperty('color', '#333333', 'important');
+          }
+        });
+      }
     });
     
-    // Cleanup quando il componente viene smontato
-    return () => {
-      observer.disconnect();
-    };
+    // 3. Approccio aggressivo per QUALSIASI elemento che potrebbe essere una legenda
+    const potentialLegends = document.querySelectorAll(
+      '.chart-container ~ *, ' +
+      '.chart-container + *, ' +
+      '[class*="legend"], ' +
+      '[class*="Legend"], ' +
+      '[class*="chartjs"]'
+    );
     
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme, dashboardData]);
+    potentialLegends.forEach(el => {
+      const spans = el.querySelectorAll('span, li');
+      spans.forEach(span => {
+        if (theme === 'dark') {
+          span.style.setProperty('color', '#e0e0e0', 'important');
+        } else {
+          span.style.setProperty('color', '#333333', 'important');
+        }
+      });
+    });
+    
+    console.log(`🎨 Force-updated legend colors for ${canvases.length} charts in ${theme} mode`);
+  };
+  
+  // Esegui IMMEDIATAMENTE al caricamento
+  forceUpdateLegends();
+  
+  // Array per tenere traccia di tutti gli intervalli
+  const intervals = [];
+  
+  // Esegui a intervalli nei primi 5 secondi per catturare render ritardati
+  for (let i = 1; i <= 10; i++) {
+    intervals.push(setTimeout(forceUpdateLegends, i * 500));
+  }
+  
+  // Esegui quando cambiano i dati
+  if (dashboardData) {
+    setTimeout(forceUpdateLegends, 100);
+    setTimeout(forceUpdateLegends, 300);
+    setTimeout(forceUpdateLegends, 600);
+  }
+  
+  // MutationObserver per intercettare QUALSIASI modifica al DOM
+  const observer = new MutationObserver((mutations) => {
+    // Verifica se sono stati aggiunti nuovi nodi
+    const hasNodeAdditions = mutations.some(mutation => 
+      mutation.addedNodes.length > 0
+    );
+    
+    // Verifica se ci sono modifiche agli attributi che potrebbero indicare un re-render
+    const hasAttributeChanges = mutations.some(mutation => 
+      mutation.type === 'attributes'
+    );
+    
+    if (hasNodeAdditions || hasAttributeChanges) {
+      // Ritarda leggermente per permettere a Chart.js di completare il rendering
+      setTimeout(forceUpdateLegends, 50);
+    }
+  });
+  
+  // Osserva l'intera dashboard per qualsiasi modifica
+  const dashboardElement = document.querySelector('.sap-dashboard');
+  if (dashboardElement) {
+    observer.observe(dashboardElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+  }
+  
+  // Cleanup quando il componente viene smontato o cambiano le dipendenze
+  return () => {
+    observer.disconnect();
+    intervals.forEach(id => clearTimeout(id));
+    console.log('🧹 Cleaned up legend fix observers and intervals');
+  };
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [theme, dashboardData]);
 
   const loadAvailableClients = async () => {
     try {
@@ -409,7 +451,15 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName, 
       'rgba(158, 158, 158, 0.8)'
     ];
     
-    return { labels, datasets: [{ data: counts, backgroundColor: backgroundColors.slice(0, labels.length), borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.8)' }] };
+    return { 
+      labels, 
+      datasets: [{ 
+        data: counts, 
+        backgroundColor: backgroundColors.slice(0, labels.length), 
+        borderWidth: 2, 
+        borderColor: 'rgba(255, 255, 255, 0.8)' 
+      }] 
+    };
   };
 
   const getServicesTimelineChartData = () => {
@@ -773,45 +823,293 @@ const handleExportToExcel = () => {
       
       {dashboardData && (
         <>
-          <div className="kpi-grid"> <KPICard title="Total Dumps" value={dashboardData.kpis.totalDumps.value} trend={dashboardData.kpis.totalDumps.trend} trendLabel={dashboardData.kpis.totalDumps.trendLabel} /> <KPICard title="Failed Backups" value={dashboardData.kpis.failedBackups.value} trend={dashboardData.kpis.failedBackups.trend} trendLabel={dashboardData.kpis.failedBackups.trendLabel} status={dashboardData.kpis.failedBackups.value > 0 ? 'Richiede attenzione' : null} /> <KPICard title="Cancelled Jobs" value={dashboardData.kpis.cancelledJobs.value} trend={dashboardData.kpis.cancelledJobs.trend} trendLabel={dashboardData.kpis.cancelledJobs.trendLabel} /> <KPICard title="Services KO" value={dashboardData.kpis.servicesKO.value} trend={0} trendLabel="N/A" status={dashboardData.kpis.servicesKO.value > 0 ? 'Problemi rilevati' : 'Tutti OK'} /> </div>
-          <div className="charts-grid"> <div className="chart-card full-width"> <h2>Andamento Servizi nel Tempo</h2> <p className="chart-subtitle">Evoluzione dello stato dei servizi nel periodo selezionato ({dateRange.startDate} → {dateRange.endDate})</p> {getServicesTimelineChartData() ? ( <div className="chart-container-timeline"> <Line data={getProblemsTimelineChartData()} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Numero di occorrenze' } }, x: { title: { display: true, text: 'Data' } } }, interaction: { mode: 'index', intersect: false } }} /> </div> ) : ( <div className="no-data">Nessun dato disponibile</div> )} </div> <div className="chart-card"> <h2>Issues by Client (Aggregato)</h2> <p className="chart-subtitle">Totale problemi per cliente (somma tutti i SID)</p> {getIssuesByClientChartData() ? ( <div className="chart-container"> <Bar data={getIssuesByClientChartData()} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }} /> </div> ) : ( <div className="no-data">Nessun dato disponibile</div> )} </div> <div className="chart-card"> <h2>Issues by SID (Dettagliato)</h2> <p className="chart-subtitle">Problemi divisi per ogni SID selezionato</p> {getIssuesBySIDChartData() ? ( <div className="chart-container" style={{ height: `${Math.max(400, dashboardData.charts.issuesByClient.length * 50)}px` }}> <Bar data={getIssuesBySIDChartData()} options={{ responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'top' }, tooltip: { callbacks: { title: function(context) { return context[0].label; } } } }, scales: { x: { beginAtZero: true, title: { display: true, text: 'Numero di Issues' } }, y: { title: { display: true, text: 'Cliente - SID' } } } }} /> </div> ) : ( <div className="no-data">Nessun dato disponibile</div> )} </div> <div className="chart-card"> <h2>Dump Type Distribution</h2> <p className="chart-subtitle">Tipi di dump più frequenti (Top 15)</p> {getDumpTypesChartData() ? ( <div className="chart-container"> <Doughnut data={getDumpTypesChartData()} options={{ 
-  responsive: true, 
-  maintainAspectRatio: false, 
-  plugins: { 
-    legend: { 
-      position: 'right', 
-      labels: { 
-        boxWidth: 15, 
-        padding: 8, 
-        font: { size: 11 }, 
-        color: theme === 'dark' ? '#e0e0e0' : '#333333', // Imposta il colore in base al tema
-        generateLabels: (chart) => { 
-          const data = chart.data; 
-          if (data.labels.length && data.datasets.length) { 
-            return data.labels.slice(0, 15).map((label, i) => ({ 
-              text: label.length > 25 ? label.substring(0, 22) + '...' : label, 
-              fillStyle: data.datasets[0].backgroundColor[i], 
-              hidden: false, 
-              index: i 
-            })); 
-          } 
-          return []; 
-        } 
-      } 
-    }, 
-    tooltip: { 
-      callbacks: { 
-        label: function(context) { 
-          const label = context.label || ''; 
-          const value = context.parsed || 0; 
-          const total = context.dataset.data.reduce((a, b) => a + b, 0); 
-          const percentage = ((value / total) * 100).toFixed(1); 
-          return `${label}: ${value} (${percentage}%)`; 
-        } 
-      } 
-    } 
-  } 
-}} /> </div> ) : ( <div className="no-data">Nessun dato disponibile</div> )} </div> </div>
+      <div className="kpi-grid">
+  <KPICard title="Total Dumps" value={dashboardData.kpis.totalDumps.value} trend={dashboardData.kpis.totalDumps.trend} trendLabel={dashboardData.kpis.totalDumps.trendLabel} />
+  <KPICard title="Failed Backups" value={dashboardData.kpis.failedBackups.value} trend={dashboardData.kpis.failedBackups.trend} trendLabel={dashboardData.kpis.failedBackups.trendLabel} status={dashboardData.kpis.failedBackups.value > 0 ? 'Richiede attenzione' : null} />
+  <KPICard title="Cancelled Jobs" value={dashboardData.kpis.cancelledJobs.value} trend={dashboardData.kpis.cancelledJobs.trend} trendLabel={dashboardData.kpis.cancelledJobs.trendLabel} />
+  <KPICard title="Services KO" value={dashboardData.kpis.servicesKO.value} trend={0} trendLabel="N/A" status={dashboardData.kpis.servicesKO.value > 0 ? 'Problemi rilevati' : 'Tutti OK'} />
+</div>
+
+<div className="charts-grid">
+  {/* GRAFICO 1: Andamento Servizi nel Tempo */}
+  <div className="chart-card full-width">
+    <h2>Andamento Servizi nel Tempo</h2>
+    <p className="chart-subtitle">Evoluzione dello stato dei servizi nel periodo selezionato ({dateRange.startDate} → {dateRange.endDate})</p>
+    {getServicesTimelineChartData() ? (
+      <div className="chart-container-timeline">
+        <Line 
+          key={`line-timeline-${theme}`}
+          data={getProblemsTimelineChartData()} 
+          options={{ 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+              legend: { 
+                position: 'top',
+                labels: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333',
+                  font: {
+                    size: 12,
+                    family: 'Inter, system-ui, sans-serif'
+                  }
+                }
+              },
+              tooltip: {
+                bodyColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                titleColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                backgroundColor: theme === 'dark' ? '#333333' : '#ffffff',
+                borderColor: theme === 'dark' ? '#555555' : '#cccccc',
+                borderWidth: 1
+              }
+            }, 
+            scales: { 
+              y: { 
+                beginAtZero: true, 
+                title: { 
+                  display: true, 
+                  text: 'Numero di occorrenze',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              }, 
+              x: { 
+                title: { 
+                  display: true, 
+                  text: 'Data',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              } 
+            }, 
+            interaction: { 
+              mode: 'index', 
+              intersect: false 
+            } 
+          }} 
+        />
+      </div>
+    ) : (
+      <div className="no-data">Nessun dato disponibile</div>
+    )}
+  </div>
+
+  {/* GRAFICO 2: Issues by Client */}
+  <div className="chart-card">
+    <h2>Issues by Client (Aggregato)</h2>
+    <p className="chart-subtitle">Totale problemi per cliente (somma tutti i SID)</p>
+    {getIssuesByClientChartData() ? (
+      <div className="chart-container">
+        <Bar 
+          key={`bar-client-${theme}`}
+          data={getIssuesByClientChartData()} 
+          options={{ 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+              legend: { 
+                position: 'top',
+                labels: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333',
+                  font: {
+                    size: 12,
+                    family: 'Inter, system-ui, sans-serif'
+                  }
+                }
+              },
+              tooltip: {
+                bodyColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                titleColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                backgroundColor: theme === 'dark' ? '#333333' : '#ffffff',
+                borderColor: theme === 'dark' ? '#555555' : '#cccccc',
+                borderWidth: 1
+              }
+            }, 
+            scales: { 
+              y: { 
+                beginAtZero: true,
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              },
+              x: {
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              }
+            } 
+          }} 
+        />
+      </div>
+    ) : (
+      <div className="no-data">Nessun dato disponibile</div>
+    )}
+  </div>
+
+  {/* GRAFICO 3: Issues by SID */}
+  <div className="chart-card">
+    <h2>Issues by SID (Dettagliato)</h2>
+    <p className="chart-subtitle">Problemi divisi per ogni SID selezionato</p>
+    {getIssuesBySIDChartData() ? (
+      <div className="chart-container" style={{ height: `${Math.max(400, dashboardData.charts.issuesByClient.length * 50)}px` }}>
+        <Bar 
+          key={`bar-sid-${theme}`}
+          data={getIssuesBySIDChartData()} 
+          options={{ 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            indexAxis: 'y', 
+            plugins: { 
+              legend: { 
+                position: 'top',
+                labels: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333',
+                  font: {
+                    size: 12,
+                    family: 'Inter, system-ui, sans-serif'
+                  }
+                }
+              }, 
+              tooltip: { 
+                callbacks: { 
+                  title: function(context) { 
+                    return context[0].label; 
+                  } 
+                },
+                bodyColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                titleColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                backgroundColor: theme === 'dark' ? '#333333' : '#ffffff',
+                borderColor: theme === 'dark' ? '#555555' : '#cccccc',
+                borderWidth: 1
+              } 
+            }, 
+            scales: { 
+              x: { 
+                beginAtZero: true, 
+                title: { 
+                  display: true, 
+                  text: 'Numero di Issues',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              }, 
+              y: { 
+                title: { 
+                  display: true, 
+                  text: 'Cliente - SID',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                ticks: {
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333'
+                },
+                grid: {
+                  color: theme === 'dark' ? '#444444' : '#e0e0e0'
+                }
+              } 
+            } 
+          }} 
+        />
+      </div>
+    ) : (
+      <div className="no-data">Nessun dato disponibile</div>
+    )}
+  </div>
+
+  {/* GRAFICO 4: Dump Type Distribution - IL PIÙ IMPORTANTE */}
+  <div className="chart-card">
+    <h2>Dump Type Distribution</h2>
+    <p className="chart-subtitle">Tipi di dump più frequenti (Top 15)</p>
+    {getDumpTypesChartData() ? (
+      <div className="chart-container">
+        <Doughnut 
+          key={`doughnut-${theme}-${dashboardData?.charts?.dumpTypes?.length || 0}`}
+          data={getDumpTypesChartData()} 
+          options={{ 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+              legend: { 
+                position: 'right', 
+                labels: { 
+                  boxWidth: 15, 
+                  padding: 8, 
+                  font: { 
+                    size: 11,
+                    family: 'Inter, system-ui, sans-serif'
+                  }, 
+                  color: theme === 'dark' ? '#e0e0e0' : '#333333',
+                  generateLabels: (chart) => { 
+                    const data = chart.data; 
+                    if (data.labels.length && data.datasets.length) { 
+                      return data.labels.slice(0, 15).map((label, i) => ({ 
+                        text: label.length > 25 ? label.substring(0, 22) + '...' : label, 
+                        fillStyle: data.datasets[0].backgroundColor[i], 
+                        hidden: false, 
+                        index: i,
+                        fontColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                        strokeStyle: theme === 'dark' ? '#e0e0e0' : '#333333'
+                      })); 
+                    } 
+                    return []; 
+                  } 
+                } 
+              }, 
+              tooltip: { 
+                callbacks: { 
+                  label: function(context) { 
+                    const label = context.label || ''; 
+                    const value = context.parsed || 0; 
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0); 
+                    const percentage = ((value / total) * 100).toFixed(1); 
+                    return `${label}: ${value} (${percentage}%)`; 
+                  } 
+                },
+                bodyColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                titleColor: theme === 'dark' ? '#e0e0e0' : '#333333',
+                backgroundColor: theme === 'dark' ? '#333333' : '#ffffff',
+                borderColor: theme === 'dark' ? '#555555' : '#cccccc',
+                borderWidth: 1
+              } 
+            },
+            animation: {
+              onComplete: function() {
+                setTimeout(() => {
+                  const isDark = document.body.getAttribute('data-theme') === 'dark';
+                  const color = isDark ? '#e0e0e0' : '#333333';
+                  document.querySelectorAll('.chart-card span, .chart-container span').forEach(el => {
+                    el.style.setProperty('color', color, 'important');
+                  });
+                }, 100);
+              }
+            }
+          }} 
+        />
+      </div>
+    ) : (
+      <div className="no-data">Nessun dato disponibile</div>
+    )}
+  </div>
+</div>
           {dashboardData.charts.issuesByClient && dashboardData.charts.issuesByClient.length > 0 && ( <div className="details-table"> <h2>Riepilogo Dettagliato per Cliente e SID</h2> <table> <thead> <tr> <th>Cliente</th> <th>SID</th> <th>Dumps</th> <th>Backup Falliti</th> <th>Job Cancellati</th> <th>Totale Issues</th> </tr> </thead> <tbody> {dashboardData.charts.issuesByClient.map((item, index) => { const total = parseInt(item.dumps || 0) + parseInt(item.failed_backups || 0) + parseInt(item.cancelled_jobs || 0); const prevItem = index > 0 ? dashboardData.charts.issuesByClient[index - 1] : null; const isFirstOfClient = !prevItem || prevItem.nomecliente !== item.nomecliente; return ( <tr key={`${item.nomecliente}-${item.sid}`} className={isFirstOfClient ? 'first-of-client' : ''}> <td> {isFirstOfClient && <strong>{item.nomecliente}</strong>} </td> <td><em>{item.sid}</em></td> <td className={item.dumps > 0 ? 'warning' : ''}>{item.dumps || 0}</td> <td className={item.failed_backups > 0 ? 'error' : ''}>{item.failed_backups || 0}</td> <td className={item.cancelled_jobs > 0 ? 'warning' : ''}>{item.cancelled_jobs || 0}</td> <td><strong>{total}</strong></td> </tr> ); })} </tbody> </table> </div> )}
         </>
       )}
