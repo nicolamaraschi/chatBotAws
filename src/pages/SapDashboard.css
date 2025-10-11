@@ -703,3 +703,29 @@ body[data-theme="dark"] .export-btn {
 body[data-theme="dark"] .export-btn:hover {
   background-color: #003d82;
 }
+
+/* Stile per il pulsante Excel */
+.excel-btn {
+  background-color: #217346 !important; /* Colore verde Excel */
+  color: white !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.excel-btn::before {
+  content: '📊';
+  font-size: 1.1em;
+}
+
+.excel-btn:hover {
+  background-color: #1e6b3e !important;
+}
+
+body[data-theme="dark"] .excel-btn {
+  background-color: #185a37 !important;
+}
+
+body[data-theme="dark"] .excel-btn:hover {
+  background-color: #154e30 !important;
+}

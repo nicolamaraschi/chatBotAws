@@ -4,6 +4,8 @@ import { TopNavigation } from "@cloudscape-design/components";
 import PropTypes from 'prop-types';
 import { ResizableBox } from 'react-resizable';
 import { fetchUserAttributes } from '@aws-amplify/auth';
+// In App.jsx, aggiungi questa importazione insieme alle altre importazioni CSS
+import './styles/chart-fixes.css'; // Fix per le legende di Chart.js in dark mode
 
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';

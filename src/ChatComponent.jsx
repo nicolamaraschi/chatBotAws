@@ -511,15 +511,6 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                   disableUtilityCollapse: true,
                   onClick: () => createNewSession()
                 },
-                // Theme toggle button
-                {
-                type: "button",
-                text: theme === 'light' ? "🌙" : "☀️",
-                title: theme === 'light' ? "Switch to dark mode" : "Switch to light mode",
-                ariaLabel: theme === 'light' ? "Switch to dark mode" : "Switch to light mode",
-                disableUtilityCollapse: true,
-                onClick: toggleTheme
-              },
                 // NUOVO: Bottone per salvare la chat
                 {
                   type: "button",
@@ -570,16 +561,7 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
                       type: "icon-button",
                     }
                   ]
-                }] : []),
-                {
-                  type: "button",
-                  text: "Logout",
-                  iconName: "exit",
-                  title: "Logout",
-                  ariaLabel: "Logout",
-                  disableUtilityCollapse: true,
-                  onClick: handleLogout
-                }
+                }] : [])
               ]
             }
           />
