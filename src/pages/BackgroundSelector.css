@@ -23,6 +23,12 @@
   max-width: 400px;
 }
 
+body[data-theme="dark"] .modal-content {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
 .modal-content h3 {
   margin-top: 0;
   text-align: center;
@@ -34,6 +40,12 @@
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box; /* Ensures padding doesn't add to width */
+}
+
+body[data-theme="dark"] .modal-content input {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #444444;
 }
 
 .modal-actions {
@@ -52,4 +64,17 @@
 .modal-actions button:first-of-type {
   background-color: #007bff;
   color: white;
+}
+
+body[data-theme="dark"] .modal-actions button {
+  background-color: #333333;
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] .modal-actions button:first-of-type {
+  background-color: #0056b3;
+}
+
+body[data-theme="dark"] .modal-actions button:hover {
+  background-color: #444444;
 }

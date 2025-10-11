@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { initializeTheme, persistAndApplyTheme } from '../utils/theme-utils';
 
 // Create Theme Context
 const ThemeContext = createContext();
@@ -9,34 +10,23 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }) {
-  // Check if theme exists in localStorage, otherwise default to 'light'
+  // Inizializza il tema usando la funzione di utility
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'light';
+    return initializeTheme();
   });
 
   // Toggle between 'light' and 'dark' themes
   const toggleTheme = () => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', newTheme);
+      persistAndApplyTheme(newTheme);
       return newTheme;
     });
   };
 
   // Apply theme to body when it changes
   useEffect(() => {
-    document.body.dataset.theme = theme;
-    
-    // Update root element classes for cloudscape design system
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('awsui-dark-mode');
-      root.classList.remove('awsui-light-mode');
-    } else {
-      root.classList.add('awsui-light-mode');
-      root.classList.remove('awsui-dark-mode');
-    }
+    persistAndApplyTheme(theme);
   }, [theme]);
 
   return (

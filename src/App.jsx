@@ -8,6 +8,7 @@ import { fetchUserAttributes } from '@aws-amplify/auth';
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
 import './styles/theme.css';
+import './dashboard-theme.css'; // Importiamo il nuovo CSS per la dashboard
 import 'react-resizable/css/styles.css'; // Styles for resizable box
 
 import ChatComponent from './ChatComponent';

@@ -10,12 +10,35 @@ body {
   background: linear-gradient(135deg, rgb(71, 17, 118) 3%, rgb(131, 57, 157) 44%, rgb(149, 85, 182) 69%, rgb(145, 134, 215) 94%);
 }
 
+body[data-theme="dark"] {
+  background: linear-gradient(135deg, rgb(27, 6, 45) 3%, rgb(67, 29, 80) 44%, rgb(77, 44, 94) 69%, rgb(74, 69, 110) 94%);
+}
+
 .app-background {
   min-height: 100vh;
   width: 100%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+/* In modalità dark, aggiungiamo un overlay semi-trasparente per evitare problemi di trasparenza */
+body[data-theme="dark"] .app-background::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(18, 18, 18, 0.85); /* Colore scuro semi-trasparente */
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Se è stato impostato uno sfondo personalizzato, lo applichiamo sopra l'overlay */
+body[data-theme="dark"] .app-background[style*="background-image"] {
+  position: relative;
+  z-index: 0;
 }
 
 .main-layout {
