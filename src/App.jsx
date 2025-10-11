@@ -3,6 +3,7 @@ import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import { TopNavigation } from "@cloudscape-design/components";
 import PropTypes from 'prop-types';
 import { ResizableBox } from 'react-resizable';
+import { fetchUserAttributes } from '@aws-amplify/auth';
 
 import '@aws-amplify/ui-react/styles.css';
 import './App.css';
@@ -66,6 +67,29 @@ function App() {
 const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   const { user, authStatus, signOut } = useAuthenticator((context) => [context.user, context.authStatus, context.signOut]);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [userRole, setUserRole] = useState(undefined);
+  const [userClientName, setUserClientName] = useState(undefined);
+
+  const toggleChatCollapse = () => {
+    setIsChatCollapsed(!isChatCollapsed);
+  };
+
+  useEffect(() => {
+    if (authStatus === 'authenticated') {
+      const loadUserAttributes = async () => {
+        try {
+          const attributes = await fetchUserAttributes();
+          setUserRole(attributes['custom:ruolo'] || 'admin'); // Default to admin if attribute is missing
+          setUserClientName(attributes['custom:nomeCliente']);
+        } catch (e) {
+          console.error("Error fetching user attributes:", e);
+          setUserRole('admin'); // Default to admin on error for safety
+        }
+      };
+      loadUserAttributes();
+    }
+  }, [authStatus]);
 
   useEffect(() => {
     setIsAuthenticating(authStatus === 'processing');
@@ -96,7 +120,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     }
   }
 
-  if (!user) {
+  if (authStatus !== 'authenticated') {
     return (
       <div className="centered-container">
         <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '400px', margin: '20px auto', display: 'block' }} />
@@ -113,22 +137,37 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     );
   }
 
+  // ATTENDI che gli attributi utente siano caricati prima di renderizzare la dashboard
+  if (userRole === undefined) {
+    return <div className="centered-container">Loading user permissions...</div>;
+  }
+
   return (
     <div className="main-layout">
       <section className="dashboard-section">
-        <SapDashboard onBackgroundChange={onBackgroundChange} onLogout={signOut} />
+        <SapDashboard 
+          onBackgroundChange={onBackgroundChange} 
+          onLogout={signOut} 
+          userRole={userRole}
+          userClientName={userClientName}
+        />
       </section>
       
       <ResizableBox 
         className="chat-section-resizable"
-        width={window.innerWidth * 0.25} 
+        width={isChatCollapsed ? 0 : window.innerWidth * 0.25} 
         axis="x"
-        minConstraints={[300, Infinity]}
+        minConstraints={[isChatCollapsed ? 0 : 300, Infinity]}
         maxConstraints={[window.innerWidth * 0.8, Infinity]}
         resizeHandles={['w']}
       >
         <section className="chat-section">
-          <ChatComponent user={user} onConfigEditorClick={onEditConfigClick}/>
+          <ChatComponent 
+            user={user} 
+            onConfigEditorClick={onEditConfigClick}
+            isChatCollapsed={isChatCollapsed}
+            toggleChatCollapse={toggleChatCollapse}
+          />
         </section>
       </ResizableBox>
     </div>

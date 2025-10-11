@@ -54,7 +54,27 @@ app.post('/api/sap/dashboard', async (req, res) => {
   try {
     const filters = req.body;
     
-    console.log('Filtri ricevuti:', filters);
+    // --- INIZIO MODIFICA DI SICUREZZA ---
+    // Estrai i claims di Cognito dall'evento API Gateway
+    // Nota: il percorso esatto potrebbe variare leggermente in base alla configurazione
+    const claims = req.apiGateway?.event?.requestContext?.authorizer?.claims;
+
+    if (claims) {
+      const userRole = claims['custom:ruolo'];
+      const userClientName = claims['custom:nomeCliente'];
+
+      console.log(`Ruolo utente: ${userRole}, Cliente utente: ${userClientName}`);
+
+      // Se l'utente è un cliente, sovrascrivi il filtro dei clienti
+      // per garantire che possa vedere solo i suoi dati.
+      if (userRole === 'cliente' && userClientName) {
+        console.log(`FORZATURA FILTRO per cliente: ${userClientName}`);
+        filters.clients = [userClientName];
+      }
+    }
+    // --- FINE MODIFICA DI SICUREZZA ---
+
+    console.log('Filtri ricevuti (dopo controllo sicurezza):', filters);
 
     // Esegui tutte le query in parallelo per ottimizzare le performance
     const [
