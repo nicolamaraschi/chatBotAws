@@ -95,26 +95,12 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     setIsAuthenticating(authStatus === 'processing');
   }, [authStatus]);
 
-  const components = {
+  // Componenti per l'Authenticator di Amplify
+  const authComponents = {
     Header() {
       return (
-        <div>
-          <TopNavigation
-            identity={{
-              href: "#",
-              title: `Welcome`,
-            }}
-            utilities={[
-              {
-                type: "button",
-                iconName: "settings",
-                title: "Update settings",
-                ariaLabel: "Update settings",
-                disableUtilityCollapse: false,
-                onClick: onEditConfigClick
-              }
-            ]}
-          />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}>
+          <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '450px' }} />
         </div>
       );
     }
@@ -123,16 +109,17 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   if (authStatus !== 'authenticated') {
     return (
       <div className="centered-container">
-        <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '400px', margin: '20px auto', display: 'block' }} />
-        <Authenticator hideSignUp={true} components={components}>
-          {isAuthenticating ? (
-            <div>Authenticating...</div>
-          ) : (
-            <div className="tool-bar">
-              Please sign in to use the application
-            </div>
-          )}
-        </Authenticator>
+        <div style={{ width: '600px', transform: 'scale(1.1)', transformOrigin: 'center' }}>
+          <Authenticator hideSignUp={true} components={authComponents}>
+            {isAuthenticating ? (
+              <div>Authenticating...</div>
+            ) : (
+              <div className="tool-bar">
+                Please sign in to use the application
+              </div>
+            )}
+          </Authenticator>
+        </div>
       </div>
     );
   }
@@ -143,34 +130,54 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   }
 
   return (
-    <div className="main-layout">
-      <section className="dashboard-section">
-        <SapDashboard 
-          onBackgroundChange={onBackgroundChange} 
-          onLogout={signOut} 
-          userRole={userRole}
-          userClientName={userClientName}
-        />
-      </section>
-      
-      <ResizableBox 
-        className="chat-section-resizable"
-        width={isChatCollapsed ? 0 : window.innerWidth * 0.25} 
-        axis="x"
-        minConstraints={[isChatCollapsed ? 0 : 300, Infinity]}
-        maxConstraints={[window.innerWidth * 0.8, Infinity]}
-        resizeHandles={['w']}
-      >
-        <section className="chat-section">
-          <ChatComponent 
-            user={user} 
-            onConfigEditorClick={onEditConfigClick}
+    <>
+      <TopNavigation
+        identity={{
+          href: "#",
+          title: `Welcome, ${user.username}`,
+        }}
+        utilities={[
+          {
+            type: "button",
+            iconName: "settings",
+            title: "Update settings",
+            ariaLabel: "Update settings",
+            disableUtilityCollapse: false,
+            onClick: onEditConfigClick
+          }
+        ]}
+      />
+      <div className="main-layout">
+        <section className="dashboard-section">
+          <SapDashboard 
+            onBackgroundChange={onBackgroundChange} 
+            onLogout={signOut} 
+            userRole={userRole}
+            userClientName={userClientName}
             isChatCollapsed={isChatCollapsed}
             toggleChatCollapse={toggleChatCollapse}
           />
         </section>
-      </ResizableBox>
-    </div>
+        
+        <ResizableBox 
+          className="chat-section-resizable"
+          width={isChatCollapsed ? 0 : window.innerWidth * 0.25} 
+          axis="x"
+          minConstraints={[isChatCollapsed ? 0 : 300, Infinity]}
+          maxConstraints={[window.innerWidth * 0.8, Infinity]}
+          resizeHandles={['w']}
+        >
+          <section className="chat-section">
+            <ChatComponent 
+              user={user} 
+              onConfigEditorClick={onEditConfigClick}
+              isChatCollapsed={isChatCollapsed}
+              toggleChatCollapse={toggleChatCollapse}
+            />
+          </section>
+        </ResizableBox>
+      </div>
+    </>
   );
 }
 

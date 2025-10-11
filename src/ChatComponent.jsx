@@ -187,8 +187,8 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     const newSessionId = `agentcore-session-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
     setSessionId(newSessionId);
 
-    const welcomeMessage = {
-      text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.",
+    const welcomeMessage = { 
+      text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.", 
       sender: "agent",
     };
     setMessages([welcomeMessage]);
@@ -215,8 +215,8 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
       setSessionId(lastSessionId);
       const loadedMessages = fetchMessagesForSession(lastSessionId);
       if (loadedMessages.length === 0) {
-        const welcomeMessage = {
-          text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.",
+        const welcomeMessage = { 
+          text: "👋 Benvenuto! Sono il tuo assistente dati SAP. Ti aiuto a:\n- Consultare lo stato dei tuoi sistemi e servizi.\n- Analizzare report, backup, job ABAP ed eventuali errori.\n- Ottenere sintesi e analisi chiare sui dati dei tuoi ambienti.\nScrivimi cosa vuoi esplorare e preparo subito il riepilogo.", 
           sender: "agent",
         };
         setMessages([welcomeMessage]);
@@ -840,3 +840,4 @@ ChatComponent.propTypes = {
 };
 
 export default ChatComponent;
+

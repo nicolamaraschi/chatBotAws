@@ -25,7 +25,7 @@ const generateDateRange = (startDate, endDate) => {
   return dates;
 };
 
-const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName }) => {
+const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName, isChatCollapsed, toggleChatCollapse }) => {
   const [availableClients, setAvailableClients] = useState([]);
   const [availableSIDs, setAvailableSIDs] = useState([]);
   const [selectedClients, setSelectedClients] = useState([]);
@@ -198,7 +198,8 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName }
     if (isClientRole) return; // Non permettere la modifica se il ruolo è cliente
     if (selectedClients.length === availableClients.length) {
       setSelectedClients([]);
-    } else {
+    }
+    else {
       setSelectedClients(availableClients.map(c => c.nomecliente));
     }
   };
@@ -206,7 +207,8 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName }
   const handleSelectAllSIDs = () => {
     if (selectedSIDs.length === availableSIDs.length) {
       setSelectedSIDs([]);
-    } else {
+    }
+    else {
       setSelectedSIDs(availableSIDs.map(s => s.sid));
     }
   };
@@ -380,6 +382,7 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName }
         <div className="header-actions">
           <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">🎨</button>
           <button onClick={onLogout} className="icon-btn" title="Logout">⏻</button>
+          <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '«' : '»'}</button>
           <div className="export-buttons">
             <button onClick={() => handleExport('pdf')} className="export-btn">Download PDF</button>
             <button onClick={() => handleExport('email')} className="export-btn">Send Email</button>
@@ -480,6 +483,9 @@ SAPDashboard.propTypes = {
   onLogout: PropTypes.func.isRequired,
   userRole: PropTypes.string,
   userClientName: PropTypes.string,
+  isChatCollapsed: PropTypes.bool.isRequired,
+  toggleChatCollapse: PropTypes.func.isRequired,
 };
 
 export default SAPDashboard;
+
