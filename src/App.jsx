@@ -64,7 +64,7 @@ function App() {
 }
 
 const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
-  const { user, authStatus } = useAuthenticator((context) => [context.user, context.authStatus]);
+  const { user, authStatus, signOut } = useAuthenticator((context) => [context.user, context.authStatus, context.signOut]);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   return (
     <div className="main-layout">
       <section className="dashboard-section">
-        <SapDashboard onBackgroundChange={onBackgroundChange} />
+        <SapDashboard onBackgroundChange={onBackgroundChange} onLogout={signOut} />
       </section>
       
       <ResizableBox 
@@ -128,7 +128,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
         resizeHandles={['w']}
       >
         <section className="chat-section">
-          <ChatComponent user={user} onLogout={() => setIsAuthenticating(false)} onConfigEditorClick={onEditConfigClick}/>
+          <ChatComponent user={user} onConfigEditorClick={onEditConfigClick}/>
         </section>
       </ResizableBox>
     </div>

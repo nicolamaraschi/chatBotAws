@@ -25,7 +25,7 @@ const generateDateRange = (startDate, endDate) => {
   return dates;
 };
 
-const SAPDashboard = ({ onBackgroundChange }) => {
+const SAPDashboard = ({ onBackgroundChange, onLogout }) => {
   const [availableClients, setAvailableClients] = useState([]);
   const [availableSIDs, setAvailableSIDs] = useState([]);
   const [selectedClients, setSelectedClients] = useState([]);
@@ -562,6 +562,9 @@ Generated on: ${new Date().toLocaleString()}`;
           <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">
             🎨
           </button>
+          <button onClick={onLogout} className="icon-btn" title="Logout">
+            ⏻
+          </button>
           <div className="export-buttons">
             <button onClick={() => handleExport('pdf')} className="export-btn">
               Download PDF
@@ -842,6 +845,7 @@ Generated on: ${new Date().toLocaleString()}`;
 
 SAPDashboard.propTypes = {
   onBackgroundChange: PropTypes.func.isRequired,
+  onLogout: PropTypes.func.isRequired,
 };
 
 export default SAPDashboard;
