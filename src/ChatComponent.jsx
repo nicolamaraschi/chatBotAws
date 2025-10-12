@@ -230,19 +230,34 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     }
   }, [createNewSession, fetchMessagesForSession, getUserKey, user.username, storeMessages]);
 
-  useEffect(() => {
-    const fetchCredentials = async () => {
+// In src/ChatComponent.jsx
+
+useEffect(() => {
+  const fetchCredentials = async () => {
+    try {
+      // Assicurati che l'appConfig sia disponibile
+      const appConfig = JSON.parse(localStorage.getItem('appConfig'));
+      if (!appConfig) {
+        console.error('Configuration not found in localStorage');
+        return;
+      }
+      
+      const bedrockConfig = appConfig.bedrock;
+      const strandsConfig = appConfig.strands;
+      
+      setIsStrandsAgent(strandsConfig && strandsConfig.enabled);
+      
+      const agentCoreConfig = appConfig.agentcore;
+      setIsAgentCoreAgent(agentCoreConfig && agentCoreConfig.enabled);
+      
+      // Assicurati che la sessione sia completamente caricata
       try {
-        const appConfig = JSON.parse(localStorage.getItem('appConfig'));
-        const bedrockConfig = appConfig.bedrock;
-        const strandsConfig = appConfig.strands;
-        
-        setIsStrandsAgent(strandsConfig && strandsConfig.enabled);
-        
-        const agentCoreConfig = appConfig.agentcore;
-        setIsAgentCoreAgent(agentCoreConfig && agentCoreConfig.enabled);
-        
         const session = await AWSAuth.fetchAuthSession();
+        
+        if (!session || !session.credentials) {
+          console.error('No valid session or credentials found');
+          return;
+        }
         
         const userAttributes = await AWSAuth.fetchUserAttributes();
         const ruolo = userAttributes['custom:ruolo'] || 'cliente';
@@ -281,13 +296,16 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
           }
         }
       } catch (error) {
-        console.error('Error fetching credentials:', error);
+        console.error('Error fetching auth session:', error);
       }
-    };
+    } catch (error) {
+      console.error('Error parsing configuration:', error);
+    }
+  };
 
-    fetchCredentials();
-    loadSavedChatsList(); // Carica la lista delle chat salvate all'avvio
-  }, [loadSavedChatsList]);
+  fetchCredentials();
+  loadSavedChatsList(); // Carica la lista delle chat salvate all'avvio
+}, [loadSavedChatsList]);
 
   useEffect(() => {
     if ((bedrockClient || lambdaClient || agentCoreClient) && !sessionId) {
