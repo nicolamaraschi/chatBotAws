@@ -248,7 +248,8 @@ body[data-theme="dark"] .sap-dashboard {
   position: relative;
 }
 
-/* Aggiungiamo uno strato opaco dietro alla dashboard in dark mode */
+/* RIMUOVI O COMMENTA QUESTE SEZIONI (cerca e cancella/commenta) */
+/* 
 body[data-theme="dark"] .sap-dashboard::before {
   content: '';
   position: absolute;
@@ -258,8 +259,9 @@ body[data-theme="dark"] .sap-dashboard::before {
   height: 100%;
   background-color: var(--dashboard-bg-dark);
   z-index: -1;
-  opacity: 0.95; /* quasi opaco ma leggermente traslucido */
+  opacity: 0.95;
 }
+*/
 
 /* Assicuriamoci che tutti i componenti della dashboard abbiano un background solido in dark mode */
 body[data-theme="dark"] .kpi-card,
@@ -322,9 +324,59 @@ body[data-theme="dark"] .date-inputs input {
   border-color: var(--border-color-dark) !important;
 }
 
-/* Rimuovere tutte le trasparenze in dark mode */
-body[data-theme="dark"] .sap-dashboard * {
-  background-color: transparent;
+/* Fix per la trasparenza in dark mode */
+/* RIMUOVI ANCHE QUESTO SE PRESENTE
+body[data-theme="dark"] .sap-dashboard {
+  position: relative;
+}
+
+/* ========================================
+   WALLPAPER VISIBILITY - Box solidi con sfondo trasparente
+   ======================================== */
+
+/* Dashboard container trasparente per vedere il wallpaper */
+body[data-theme="light"] .sap-dashboard,
+body[data-theme="dark"] .sap-dashboard {
+  background-color: transparent !important;
+}
+
+/* IMPORTANTE: Tutti i componenti interni DEVONO rimanere solidi */
+body[data-theme="light"] .kpi-card,
+body[data-theme="light"] .chart-card,
+body[data-theme="light"] .filters-container,
+body[data-theme="light"] .dashboard-header,
+body[data-theme="light"] .details-table {
+  background-color: rgba(255, 255, 255, 0.95) !important; /* Quasi opaco per light mode */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+body[data-theme="dark"] .kpi-card,
+body[data-theme="dark"] .chart-card,
+body[data-theme="dark"] .filters-container,
+body[data-theme="dark"] .dashboard-header,
+body[data-theme="dark"] .details-table {
+  background-color: rgba(30, 30, 30, 0.95) !important; /* Quasi opaco per dark mode */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Opzioni di filtro anche solide */
+body[data-theme="light"] .filter-options {
+  background-color: rgba(250, 250, 250, 0.95) !important;
+}
+
+body[data-theme="dark"] .filter-options {
+  background-color: rgba(51, 51, 51, 0.95) !important;
+}
+
+/* Header actions buttons */
+body[data-theme="light"] .icon-btn {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="dark"] .icon-btn {
+  background-color: rgba(51, 51, 51, 0.9) !important;
 }
 
 
