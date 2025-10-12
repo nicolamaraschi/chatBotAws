@@ -29,6 +29,22 @@ import { useTheme } from './context/ThemeContext'; // Import useTheme hook
 import './ChatComponent.css';
 
 const ChatComponent = ({ user, onLogout, isChatCollapsed, toggleChatCollapse }) => {
+
+// PROTEZIONE AGGIUNTIVA: Se user non è ancora pronto, mostra un loader
+if (!user || !user?.username) {
+  return (
+    <div className="chat-component">
+      <div className="centered-container" style={{ height: '100vh' }}>
+        <div className="spinner"></div>
+        <p style={{ marginTop: '20px', color: '#666' }}>
+          Caricamento chat...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
   const [bedrockClient, setBedrockClient] = useState(null);
   const [lambdaClient, setLambdaClient] = useState(null);
   const [agentCoreClient, setAgentCoreClient] = useState(null);
@@ -67,8 +83,8 @@ const ChatComponent = ({ user, onLogout, isChatCollapsed, toggleChatCollapse }) 
   });
 
   const getUserKey = useCallback((key) => {
-    return `user_${user.username}_${key}`;
-  }, [user.username]);
+    return `user_${user?.username}_${key}`;
+  }, [user?.username]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,7 +107,7 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(`user_${user.username}_`)) {
+      if (key && key.startsWith(`user_${user?.username}_`)) {
         keysToRemove.push(key);
       }
     }
@@ -195,8 +211,8 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
     setCurrentChatName(null);
     localStorage.setItem(getUserKey('lastSessionId'), newSessionId);
     localStorage.setItem(getUserKey(`messages_${newSessionId}`), JSON.stringify([welcomeMessage]));
-    console.log('New session created for user:', user.username, 'Session:', newSessionId);
-  }, [getUserKey, user.username]);
+    console.log('New session created for user:', user?.username, 'Session:', newSessionId);
+  }, [getUserKey, user?.username]);
 
   const fetchMessagesForSession = useCallback((sessionId) => {
     const storedMessages = localStorage.getItem(getUserKey(`messages_${sessionId}`));
@@ -224,23 +240,25 @@ const { transcript, isListening, startListening, stopListening, speechRecognitio
       } else {
         setMessages(loadedMessages);
       }
-      console.log('Loaded existing session for user:', user.username, 'Session:', lastSessionId);
+      console.log('Loaded existing session for user:', user?.username, 'Session:', lastSessionId);
     } else {
       createNewSession();
     }
-  }, [createNewSession, fetchMessagesForSession, getUserKey, user.username, storeMessages]);
+  }, [createNewSession, fetchMessagesForSession, getUserKey, user?.username, storeMessages]);
 
 // In src/ChatComponent.jsx
 
 useEffect(() => {
   const fetchCredentials = async () => {
     try {
-      // Assicurati che l'appConfig sia disponibile
-      const appConfig = JSON.parse(localStorage.getItem('appConfig'));
-      if (!appConfig) {
-        console.error('Configuration not found in localStorage');
+      // Verifica che appConfig esista
+      const appConfigStr = localStorage.getItem('appConfig');
+      if (!appConfigStr) {
+        console.error('❌ Configuration not found in localStorage');
         return;
       }
+      
+      const appConfig = JSON.parse(appConfigStr);
       
       const bedrockConfig = appConfig.bedrock;
       const strandsConfig = appConfig.strands;
@@ -250,56 +268,92 @@ useEffect(() => {
       const agentCoreConfig = appConfig.agentcore;
       setIsAgentCoreAgent(agentCoreConfig && agentCoreConfig.enabled);
       
-      // Assicurati che la sessione sia completamente caricata
-      try {
-        const session = await AWSAuth.fetchAuthSession();
-        
-        if (!session || !session.credentials) {
-          console.error('No valid session or credentials found');
-          return;
-        }
-        
-        const userAttributes = await AWSAuth.fetchUserAttributes();
-        const ruolo = userAttributes['custom:ruolo'] || 'cliente';
-        setUserRole(ruolo);
-        console.log('Ruolo utente caricato:', ruolo);
-        
-        if (!strandsConfig?.enabled && !agentCoreConfig?.enabled) {
-          const newBedrockClient = new BedrockAgentRuntimeClient({
-            region: bedrockConfig.region,
-            credentials: session.credentials
-          });
-          setBedrockClient(newBedrockClient);
-          if (bedrockConfig.agentName && bedrockConfig.agentName.trim()) {
-            setAgentName({ value: bedrockConfig.agentName });
+      // NUOVO: Aggiungi retry con timeout per le credenziali AWS
+      let retries = 3;
+      let session = null;
+      
+      console.log('🔄 Fetching AWS credentials...');
+      
+      while (retries > 0 && !session) {
+        try {
+          session = await AWSAuth.fetchAuthSession();
+          
+          if (session && session.credentials) {
+            console.log('✅ AWS credentials fetched successfully');
+            break;
+          } else {
+            console.warn('⚠️ Session found but no credentials');
           }
-        } 
-        else if (strandsConfig && strandsConfig.enabled && !agentCoreConfig?.enabled) {
-          const newLambdaClient = new LambdaClient({
-            region: strandsConfig.region,
-            credentials: session.credentials
-          });
-          setLambdaClient(newLambdaClient);
-          if (strandsConfig.agentName && strandsConfig.agentName.trim()) {
-            setAgentName({ value: strandsConfig.agentName });
+        } catch (error) {
+          console.warn(`⚠️ Retry ${4 - retries}/3 fetching session...`, error.message);
+          retries--;
+          
+          if (retries > 0) {
+            // Attendi 1 secondo prima di riprovare
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
-
-        if (agentCoreConfig && agentCoreConfig.enabled && agentCoreConfig.region) {
-          const newAgentCoreClient = new BedrockAgentCoreClient({
-            region: agentCoreConfig.region,
-            credentials: session.credentials
-          });
-          setAgentCoreClient(newAgentCoreClient);
-          if (agentCoreConfig.agentName && agentCoreConfig.agentName.trim()) {
-            setAgentName({ value: agentCoreConfig.agentName });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching auth session:', error);
       }
+      
+      if (!session || !session.credentials) {
+        console.error('❌ No valid session or credentials found after retries');
+        return;
+      }
+      
+      // Fetch user attributes
+      console.log('🔄 Fetching user attributes...');
+      const userAttributes = await AWSAuth.fetchUserAttributes();
+      const ruolo = userAttributes['custom:ruolo'] || 'cliente';
+      setUserRole(ruolo);
+      console.log('✅ Ruolo utente caricato in ChatComponent:', ruolo);
+      
+      // Configura i client in base al tipo di agente
+      if (!strandsConfig?.enabled && !agentCoreConfig?.enabled) {
+        console.log('🔄 Setting up Bedrock Agent client...');
+        const newBedrockClient = new BedrockAgentRuntimeClient({
+          region: bedrockConfig.region,
+          credentials: session.credentials
+        });
+        setBedrockClient(newBedrockClient);
+        
+        if (bedrockConfig.agentName && bedrockConfig.agentName.trim()) {
+          setAgentName({ value: bedrockConfig.agentName });
+        }
+        console.log('✅ Bedrock Agent client ready');
+      } 
+      else if (strandsConfig && strandsConfig.enabled && !agentCoreConfig?.enabled) {
+        console.log('🔄 Setting up Strands Lambda client...');
+        const newLambdaClient = new LambdaClient({
+          region: strandsConfig.region,
+          credentials: session.credentials
+        });
+        setLambdaClient(newLambdaClient);
+        
+        if (strandsConfig.agentName && strandsConfig.agentName.trim()) {
+          setAgentName({ value: strandsConfig.agentName });
+        }
+        console.log('✅ Strands Lambda client ready');
+      }
+
+      if (agentCoreConfig && agentCoreConfig.enabled && agentCoreConfig.region) {
+        console.log('🔄 Setting up AgentCore client...');
+        const newAgentCoreClient = new BedrockAgentCoreClient({
+          region: agentCoreConfig.region,
+          credentials: session.credentials
+        });
+        setAgentCoreClient(newAgentCoreClient);
+        
+        if (agentCoreConfig.agentName && agentCoreConfig.agentName.trim()) {
+          setAgentName({ value: agentCoreConfig.agentName });
+        }
+        console.log('✅ AgentCore client ready');
+      }
+      
+      console.log('✅ All clients initialized successfully');
+      
     } catch (error) {
-      console.error('Error parsing configuration:', error);
+      console.error('❌ Error in fetchCredentials:', error);
+      console.error('Stack trace:', error.stack);
     }
   };
 
@@ -323,7 +377,7 @@ useEffect(() => {
       const appConfig = JSON.parse(localStorage.getItem('appConfig'));
       
       setNewMessage('');
-      const userMessage = { text: newMessage, sender: user.username };
+      const userMessage = { text: newMessage, sender: user?.username };
       setMessages(prevMessages => [...prevMessages, userMessage]);
       setIsAgentResponding(true);
 
@@ -661,12 +715,12 @@ useEffect(() => {
               <div key={index} className="message-wrapper">
                 <ChatBubble
                   ariaLabel={`${message.sender} message`}
-                  type={message.sender === user.username ? "outgoing" : "incoming"}
+                  type={message.sender === user?.username ? "outgoing" : "incoming"}
                   avatar={
                     <Avatar
                       ariaLabel={message.sender}
                       tooltipText={message.sender}
-                      color={message.sender === user.username ? "default" : "gen-ai"}
+                      color={message.sender === user?.username ? "default" : "gen-ai"}
                       initials={message.sender.substring(0, 2).toUpperCase()}
                     />
                   }

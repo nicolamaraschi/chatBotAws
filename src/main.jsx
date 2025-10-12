@@ -1,14 +1,13 @@
-// In src/main.jsx
 import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function AppWithLoader() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Assicurati che tutte le risorse siano caricate
     if (document.readyState === 'complete') {
       setTimeout(() => {
         setLoading(false);
@@ -21,9 +20,7 @@ function AppWithLoader() {
       });
     }
 
-    // Assicurati che localStorage sia accessibile
     try {
-      // Test di accesso a localStorage
       localStorage.getItem('test');
     } catch (error) {
       console.error('LocalStorage is not available:', error);
@@ -44,7 +41,9 @@ function AppWithLoader() {
           <div className="loading-text">Inizializzazione applicazione...</div>
         </div>
       )}
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </>
   );
 }

@@ -1110,7 +1110,40 @@ const handleExportToExcel = () => {
     )}
   </div>
 </div>
-          {dashboardData.charts.issuesByClient && dashboardData.charts.issuesByClient.length > 0 && ( <div className="details-table"> <h2>Riepilogo Dettagliato per Cliente e SID</h2> <table> <thead> <tr> <th>Cliente</th> <th>SID</th> <th>Dumps</th> <th>Backup Falliti</th> <th>Job Cancellati</th> <th>Totale Issues</th> </tr> </thead> <tbody> {dashboardData.charts.issuesByClient.map((item, index) => { const total = parseInt(item.dumps || 0) + parseInt(item.failed_backups || 0) + parseInt(item.cancelled_jobs || 0); const prevItem = index > 0 ? dashboardData.charts.issuesByClient[index - 1] : null; const isFirstOfClient = !prevItem || prevItem.nomecliente !== item.nomecliente; return ( <tr key={`${item.nomecliente}-${item.sid}`} className={isFirstOfClient ? 'first-of-client' : ''}> <td> {isFirstOfClient && <strong>{item.nomecliente}</strong>} </td> <td><em>{item.sid}</em></td> <td className={item.dumps > 0 ? 'warning' : ''}>{item.dumps || 0}</td> <td className={item.failed_backups > 0 ? 'error' : ''}>{item.failed_backups || 0}</td> <td className={item.cancelled_jobs > 0 ? 'warning' : ''}>{item.cancelled_jobs || 0}</td> <td><strong>{total}</strong></td> </tr> ); })} </tbody> </table> </div> )}
+{dashboardData.charts.issuesByClient && dashboardData.charts.issuesByClient.length > 0 && (
+  <div className="details-table">
+    <h2>Riepilogo Dettagliato per Cliente e SID</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>SID</th>
+          <th>Dumps</th>
+          <th>Backup Falliti</th>
+          <th>Job Cancellati</th>
+          <th>Totale Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        {dashboardData.charts.issuesByClient.map((item, index) => {
+          const total = parseInt(item.dumps || 0) + parseInt(item.failed_backups || 0) + parseInt(item.cancelled_jobs || 0);
+          const prevItem = index > 0 ? dashboardData.charts.issuesByClient[index - 1] : null;
+          const isFirstOfClient = !prevItem || prevItem.nomecliente !== item.nomecliente;
+          return (
+            <tr key={`${item.nomecliente}-${item.sid}`} className={isFirstOfClient ? 'first-of-client' : ''}>
+              <td>{isFirstOfClient && <strong>{item.nomecliente}</strong>}</td>
+              <td><em>{item.sid}</em></td>
+              <td className={item.dumps > 0 ? 'warning' : ''}>{item.dumps || 0}</td>
+              <td className={item.failed_backups > 0 ? 'error' : ''}>{item.failed_backups || 0}</td>
+              <td className={item.cancelled_jobs > 0 ? 'warning' : ''}>{item.cancelled_jobs || 0}</td>
+              <td><strong>{total}</strong></td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+)}
         </>
       )}
       {isBgSelectorOpen && ( <BackgroundSelector onBackgroundChange={onBackgroundChange} onClose={() => setIsBgSelectorOpen(false)} /> )}
