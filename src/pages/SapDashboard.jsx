@@ -38,6 +38,8 @@ const SAPDashboard = ({ onBackgroundChange, onLogout, userRole, userClientName, 
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [sidSearchTerm, setSidSearchTerm] = useState('');
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -789,8 +791,19 @@ const handleExportToExcel = () => {
               </button>
             )}
           </label>
+          {!isClientRole && (
+            <input
+              type="text"
+              placeholder="Cerca cliente..."
+              value={clientSearchTerm}
+              onChange={(e) => setClientSearchTerm(e.target.value)}
+              className="filter-search-input"
+            />
+          )}
           <div className="filter-options">
-            {availableClients.map(client => (
+            {availableClients
+              .filter(client => client.nomecliente.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+              .map(client => (
               <label key={client.nomecliente} className={`checkbox-label ${isClientRole ? 'disabled' : ''}`}>
                 <input type="checkbox" checked={selectedClients.includes(client.nomecliente)} onChange={() => handleClientToggle(client.nomecliente)} disabled={isClientRole} />
                 {client.nomecliente}
@@ -807,11 +820,20 @@ const handleExportToExcel = () => {
               </button>
             )}
           </label>
+          <input
+            type="text"
+            placeholder="Cerca SID..."
+            value={sidSearchTerm}
+            onChange={(e) => setSidSearchTerm(e.target.value)}
+            className="filter-search-input"
+          />
           <div className="filter-options">
             {availableSIDs.length === 0 ? (
               <p className="no-data">Seleziona un cliente</p>
             ) : (
-              availableSIDs.map(sid => (
+              availableSIDs
+                .filter(sid => sid.sid.toLowerCase().includes(sidSearchTerm.toLowerCase()))
+                .map(sid => (
                 <label key={`${sid.sid}-${sid.nomecliente}`} className="checkbox-label">
                   <input type="checkbox" checked={selectedSIDs.includes(sid.sid)} onChange={() => handleSIDToggle(sid.sid)} />
                   {sid.sid} ({sid.nomecliente})
