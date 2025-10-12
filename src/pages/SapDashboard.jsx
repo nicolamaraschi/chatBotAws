@@ -9,6 +9,7 @@ import { API_URL } from '../config';
 import './SapDashboard.css';
 import BackgroundSelector from './BackgroundSelector'; // Importa il nuovo componente
 import { useTheme } from '../context/ThemeContext'; // Importa il hook useTheme
+import { BsFileEarmarkPdfFill, BsFileEarmarkExcelFill } from "react-icons/bs";
 // Aggiungi questa importazione all'inizio del file SapDashboard.jsx
 import { setupChartLegendObserver } from '../utils/chart-legend-fix';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler);
@@ -737,11 +738,11 @@ const handleExportToExcel = () => {
         <button onClick={toggleTheme} className="icon-btn" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? '🌙' : '☀️'}</button>
         <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">🎨</button>
         <button onClick={onLogout} className="icon-btn" title="Logout">⏻</button>
-        <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '«' : '»'}</button>
         <div className="export-buttons">
-          <button onClick={() => handleExport('pdf')} className="export-btn">Download PDF</button>
-          <button onClick={handleExportToExcel} className="export-btn excel-btn">Export Excel</button>
+          <button onClick={() => handleExport('pdf')} className="icon-btn" title="Download PDF"><BsFileEarmarkPdfFill size={20} style={{ color: "red" }} /></button>
+          <button onClick={handleExportToExcel} className="icon-btn excel-btn" title="Export Excel"><BsFileEarmarkExcelFill size={20} style={{ color: "white" }} /></button>
         </div>
+        <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '«' : '»'}</button>
       </div>
       </div>
       

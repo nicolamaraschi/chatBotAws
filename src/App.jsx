@@ -12,6 +12,7 @@ import './App.css';
 import './styles/theme.css';
 import './dashboard-theme.css';
 import 'react-resizable/css/styles.css';
+import './styles/MobileLayout.css'; // Import mobile styles
 
 import ChatComponent from './ChatComponent';
 import ConfigComponent from './ConfigComponent';
@@ -93,6 +94,16 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   const [userRole, setUserRole] = useState(undefined);
   const [userClientName, setUserClientName] = useState(undefined);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileView, setMobileView] = useState('dashboard'); // 'dashboard' or 'chatbot'
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleChatCollapse = () => {
     setIsChatCollapsed(!isChatCollapsed);
@@ -236,6 +247,62 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   }
 
   console.log('🎨 Rendering main application interface');
+
+  if (isMobile) {
+    return (
+      <>
+        <TopNavigation
+          identity={{ href: "#", title: `Welcome, ${user.username}` }}
+          utilities={[{ type: "button", iconName: "settings", title: "Update settings", ariaLabel: "Update settings", disableUtilityCollapse: false, onClick: onEditConfigClick }]}
+        />
+        <div className="mobile-switcher">
+          <button className={mobileView === 'dashboard' ? 'active' : ''} onClick={() => setMobileView('dashboard')}>
+            Dashboard
+          </button>
+          <button className={mobileView === 'chatbot' ? 'active' : ''} onClick={() => setMobileView('chatbot')}>
+            Chatbot
+          </button>
+        </div>
+        <div className="main-layout">
+          {mobileView === 'dashboard' && (
+            <section className="dashboard-section">
+              <ErrorBoundary>
+                <SapDashboard 
+                  onBackgroundChange={onBackgroundChange} 
+                  onLogout={signOut} 
+                  userRole={userRole}
+                  userClientName={userClientName}
+                  isChatCollapsed={isChatCollapsed}
+                  toggleChatCollapse={toggleChatCollapse}
+                />
+              </ErrorBoundary>
+            </section>
+          )}
+          {mobileView === 'chatbot' && (
+            <section className="chat-section">
+              <ErrorBoundary>
+                {user && user.username ? (
+                  <ChatComponent 
+                    user={user} 
+                    onConfigEditorClick={onEditConfigClick}
+                    isChatCollapsed={isChatCollapsed}
+                    toggleChatCollapse={toggleChatCollapse}
+                  />
+                ) : (
+                  <div className="centered-container" style={{ height: '100%' }}>
+                    <div className="spinner"></div>
+                    <p style={{ marginTop: '20px', color: '#666' }}>
+                      Caricamento chat...
+                    </p>
+                  </div>
+                )}
+              </ErrorBoundary>
+            </section>
+          )}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

@@ -122,6 +122,7 @@ body[data-theme="dark"] .date-inputs span {
   gap: 0.5rem;
   max-height: 200px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Abilita lo scorrimento inerziale su iOS */
   padding: 0.5rem;
   border: 1px solid #eee;
   border-radius: 6px;
@@ -500,6 +501,23 @@ body[data-theme="dark"] .no-data {
   }
 }
 
+/* Stili per Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .filters-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .sap-dashboard {
     padding: 1rem;
@@ -713,10 +731,12 @@ body[data-theme="dark"] .export-btn:hover {
   gap: 5px;
 }
 
+/*
 .excel-btn::before {
   content: '📊';
   font-size: 1.1em;
 }
+*/
 
 .excel-btn:hover {
   background-color: #1e6b3e !important;

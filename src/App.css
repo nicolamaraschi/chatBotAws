@@ -2,7 +2,7 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  /* overflow: hidden; */ /* This was causing scrolling issues */
   width: 100vw;
 }
 
@@ -103,14 +103,14 @@ body[data-theme="dark"] .app-background[style*="background-image"] {
   height: 100%;
 }
 
-/* Styles for mobile devices with vertical screen orientation */
-@media (max-width: 920px), (orientation: portrait) {
+/* Styles for mobile and tablet devices */
+@media (max-width: 1024px), (orientation: portrait) {
   .main-layout {
     flex-direction: column;
   }
 
   .dashboard-section, .chat-section-resizable, .chat-section {
     width: 100% !important; /* Override inline styles from resizable */
-    height: 50vh;
+    height: 100%; /* Occupy full height in mobile/tablet view */
   }
 }
