@@ -745,12 +745,15 @@ const handleExportToExcel = () => {
       </div>
       </div>
       
-      <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '20px', borderRadius: '5px', fontSize: '12px' }}>
-        <strong>🔍 Debug Info:</strong><br/>
-        Ruolo: {userRole || 'N/D'}, Cliente: {userClientName || 'N/D'}<br/>
-        Clienti Selezionati: {selectedClients.length > 0 ? selectedClients.join(', ') : 'Nessuno'}<br/>
-        SID Selezionati: {selectedSIDs.length > 0 ? selectedSIDs.join(', ') : 'Tutti (nessun filtro)'}
-      </div>
+   {/* 
+<div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '20px', borderRadius: '5px', fontSize: '12px' }}>
+  <strong>🔍 Debug Info:</strong><br/>
+  Ruolo: {userRole || 'N/D'}, Cliente: {userClientName || 'N/D'}<br/>
+  Clienti Selezionati: {selectedClients.length > 0 ? selectedClients.join(', ') : 'Nessuno'}<br/>
+  SID Selezionati: {selectedSIDs.length > 0 ? selectedSIDs.join(', ') : 'Tutti (nessun filtro)'}
+</div> 
+*/}
+
       
       <div className={`filters-container ${isClientRole ? 'disabled-filters' : ''}`}>
         <div className="filter-section">
