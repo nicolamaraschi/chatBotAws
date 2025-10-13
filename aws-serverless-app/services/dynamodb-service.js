@@ -1,15 +1,15 @@
 const AWS = require('aws-sdk');
-const { v4: uuidv4 } = require('uuid'); // Per generare ID unici
-const config = require('../config'); // Assumendo che config.js contenga AWS_REGION
+const { v4: uuidv4 } = require('uuid');
+const config = require('../config');
 
 AWS.config.update({ region: config.AWS_REGION });
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const TABLE_NAME = 'AgendaTasks'; // Nome della tabella DynamoDB
+const TABLE_NAME = 'AgendaTasks';
 
 console.log('Inizializzazione servizio DynamoDB con tabella:', TABLE_NAME, 'nella regione:', config.AWS_REGION);
 
-// Funzione per creare una nuova attività
+// Crea una nuova attività
 const createTask = async (task) => {
   console.log('DynamoDB createTask - parametri:', task);
   
@@ -18,16 +18,16 @@ const createTask = async (task) => {
     TableName: TABLE_NAME,
     Item: {
       id: task.id || uuidv4(),
-      nomeCliente: task.nomeCliente,
+      nomeCliente: task.nomeCliente.toLowerCase(), // Normalizza a lowercase
       sid: task.sid,
-      data: task.data, // Formato YYYY-MM-DD
+      data: task.data,
       oraInizio: task.oraInizio,
       orarioFine: task.orarioFine,
       emailCliente: task.emailCliente,
       descrizione: task.descrizione,
       createdBy: task.createdBy,
       lastModifiedBy: task.lastModifiedBy,
-      canClientEdit: task.canClientEdit || false, // Default a false
+      canClientEdit: task.canClientEdit || false,
       createdAt: task.createdAt || now,
       updatedAt: task.updatedAt || now,
     },
@@ -43,7 +43,7 @@ const createTask = async (task) => {
   }
 };
 
-// Funzione per recuperare attività per un cliente e un mese specifico
+// Recupera attività per un cliente e un mese specifico
 const getTasksByClientAndMonth = async (nomeCliente, yearMonth) => {
   console.log(`DynamoDB getTasksByClientAndMonth - parametri: nomeCliente=${nomeCliente}, yearMonth=${yearMonth}`);
   
@@ -56,7 +56,7 @@ const getTasksByClientAndMonth = async (nomeCliente, yearMonth) => {
     },
     ExpressionAttributeValues: {
       ':nc': nomeCliente.toLowerCase(),
-      ':ym': yearMonth, // Formato YYYY-MM
+      ':ym': yearMonth,
     },
   };
   
@@ -70,24 +70,23 @@ const getTasksByClientAndMonth = async (nomeCliente, yearMonth) => {
   }
 };
 
-// Funzione per recuperare tutte le attività per un mese specifico (per admin)
+// Recupera tutte le attività per un mese (usa Scan perché non possiamo fare begins_with su HASH key)
 const getTasksByMonth = async (yearMonth) => {
   console.log(`DynamoDB getTasksByMonth - parametri: yearMonth=${yearMonth}`);
   
   const params = {
     TableName: TABLE_NAME,
-    IndexName: 'ByDateAndClientIndex',
-    KeyConditionExpression: 'begins_with(#data, :ym)',
+    FilterExpression: 'begins_with(#data, :ym)',
     ExpressionAttributeNames: {
       '#data': 'data',
     },
     ExpressionAttributeValues: {
-      ':ym': yearMonth, // Formato YYYY-MM
+      ':ym': yearMonth,
     },
   };
   
   try {
-    const result = await dynamodb.query(params).promise();
+    const result = await dynamodb.scan(params).promise();
     console.log(`DynamoDB getTasksByMonth - trovate ${result.Items.length} attività`);
     return result.Items;
   } catch (error) {
@@ -96,7 +95,7 @@ const getTasksByMonth = async (yearMonth) => {
   }
 };
 
-// Funzione per recuperare una singola attività per ID
+// Recupera una singola attività per ID
 const getTaskById = async (id) => {
   console.log(`DynamoDB getTaskById - parametri: id=${id}`);
   
@@ -115,7 +114,7 @@ const getTaskById = async (id) => {
   }
 };
 
-// Funzione per aggiornare un'attività esistente
+// Aggiorna un'attività esistente
 const updateTask = async (id, updates) => {
   console.log(`DynamoDB updateTask - parametri: id=${id}, updates=`, updates);
   
@@ -130,6 +129,9 @@ const updateTask = async (id, updates) => {
         updateExpressionParts.push(`#data = :data`);
         ExpressionAttributeNames['#data'] = 'data';
         ExpressionAttributeValues[':data'] = updates.data;
+      } else if (key === 'nomeCliente') {
+        updateExpressionParts.push(`nomeCliente = :nomeCliente`);
+        ExpressionAttributeValues[':nomeCliente'] = updates.nomeCliente.toLowerCase();
       } else {
         updateExpressionParts.push(`${key} = :${key}`);
         ExpressionAttributeValues[`:${key}`] = updates[key];
@@ -150,7 +152,6 @@ const updateTask = async (id, updates) => {
     ReturnValues: 'ALL_NEW',
   };
 
-  // Aggiungi ExpressionAttributeNames se ci sono
   if (Object.keys(ExpressionAttributeNames).length > 0) {
     params.ExpressionAttributeNames = ExpressionAttributeNames;
   }
@@ -165,7 +166,7 @@ const updateTask = async (id, updates) => {
   }
 };
 
-// Funzione per eliminare un'attività
+// Elimina un'attività
 const deleteTask = async (id) => {
   console.log(`DynamoDB deleteTask - parametri: id=${id}`);
   
