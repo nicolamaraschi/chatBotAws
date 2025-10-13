@@ -1,0 +1,86 @@
+.sidebar-layout {
+  display: flex;
+  height: 100%; /* Ensure it takes full height of its parent */
+}
+
+.sidebar-nav {
+  width: 180px; /* Fixed width for the sidebar */
+  background-color: #f8f9fa;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-right: 1px solid #e9ecef;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+body[data-theme="dark"] .sidebar-nav {
+  background-color: #2a2a2a;
+  border-right: 1px solid #444;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+}
+
+.sidebar-nav button {
+  background-color: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+body[data-theme="dark"] .sidebar-nav button {
+  color: #e0e0e0;
+}
+
+.sidebar-nav button:hover {
+  background-color: #e2e6ea;
+}
+
+body[data-theme="dark"] .sidebar-nav button:hover {
+  background-color: #3a3a3a;
+}
+
+.sidebar-nav button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+body[data-theme="dark"] .sidebar-nav button.active {
+  background-color: #0056b3;
+}
+
+.main-content-area {
+  flex-grow: 1;
+  overflow-y: auto; /* Allow content to scroll */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1024px) {
+  .sidebar-layout {
+    flex-direction: column;
+  }
+
+  .sidebar-nav {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    border-bottom: 1px solid #e9ecef;
+    border-right: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  body[data-theme="dark"] .sidebar-nav {
+    border-bottom: 1px solid #444;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .sidebar-nav button {
+    flex-grow: 1;
+    text-align: center;
+  }
+}

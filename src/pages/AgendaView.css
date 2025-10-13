@@ -1,0 +1,319 @@
+.agenda-view {
+  padding: 20px;
+  background-color: #f4f7f9;
+  min-height: 100%;
+}
+
+body[data-theme="dark"] .agenda-view {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body[data-theme="dark"] .agenda-header {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.agenda-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+body[data-theme="dark"] .agenda-header h2 {
+  color: #e0e0e0;
+}
+
+.agenda-header button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+body[data-theme="dark"] .agenda-header button {
+  background-color: #0056b3;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.day-name {
+  background-color: #e9ecef;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+body[data-theme="dark"] .day-name {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.calendar-day {
+  background-color: #fff;
+  min-height: 120px;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+body[data-theme="dark"] .calendar-day {
+  background-color: #1e1e1e;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.calendar-day:hover {
+  background-color: #e2f0ff;
+}
+
+body[data-theme="dark"] .calendar-day:hover {
+  background-color: #333;
+}
+
+.empty-day {
+  background-color: #f8f9fa;
+  min-height: 120px;
+  border-radius: 5px;
+}
+
+body[data-theme="dark"] .empty-day {
+  background-color: #2a2a2a;
+}
+
+.day-number {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+body[data-theme="dark"] .day-number {
+  color: #e0e0e0;
+}
+
+.day-tasks {
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.task-item {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+  font-size: 0.85rem;
+  position: relative;
+  cursor: pointer;
+}
+
+.task-item.my-task {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+body[data-theme="dark"] .task-item {
+  background-color: #1d3a24;
+  color: #48c774;
+}
+
+body[data-theme="dark"] .task-item.my-task {
+  background-color: #1a237e;
+  color: #3f51b5;
+}
+
+.delete-task-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+body[data-theme="dark"] .delete-task-btn {
+  color: #f14668;
+}
+
+/* Task Form Modal */
+.task-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.task-form-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+body[data-theme="dark"] .task-form-content {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.task-form-content h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+body[data-theme="dark"] .task-form-content h3 {
+  color: #e0e0e0;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+}
+
+body[data-theme="dark"] .form-group label {
+  color: #aaa;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group input[type="email"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+body[data-theme="dark"] .form-group input,
+body[data-theme="dark"] .form-group textarea {
+  background-color: #333;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+body[data-theme="dark"] .form-group input:disabled,
+body[data-theme="dark"] .form-group textarea:disabled {
+  background-color: #444;
+  color: #888;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #007bff;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+body[data-theme="dark"] .btn-primary {
+  background-color: #0056b3;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+body[data-theme="dark"] .btn-primary:hover {
+  background-color: #003d82;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+body[data-theme="dark"] .btn-secondary {
+  background-color: #555;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+body[data-theme="dark"] .btn-secondary:hover {
+  background-color: #666;
+}

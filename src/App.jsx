@@ -19,6 +19,7 @@ import ConfigComponent from './ConfigComponent';
 import SapDashboard from './pages/SapDashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import SidebarNavigation from './components/SidebarNavigation'; // Importa il nuovo componente SidebarNavigation
 
 function App() {
   const [isConfigured, setIsConfigured] = useState(false);
@@ -95,7 +96,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   const [userClientName, setUserClientName] = useState(undefined);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [mobileView, setMobileView] = useState('dashboard'); // 'dashboard' or 'chatbot'
+  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'chatbot', or 'agenda'
 
   useEffect(() => {
     const handleResize = () => {
@@ -243,11 +244,14 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
           utilities={userRole === 'admin' ? [{ type: "button", iconName: "settings", title: "Update settings", ariaLabel: "Update settings", disableUtilityCollapse: false, onClick: onEditConfigClick }] : []}
         />
         <div className="mobile-switcher">
-          <button className={mobileView === 'dashboard' ? 'active' : ''} onClick={() => setMobileView('dashboard')}>
+          <button className={activeView === 'dashboard' ? 'active' : ''} onClick={() => setActiveView('dashboard')}>
             Dashboard
           </button>
-          <button className={mobileView === 'chatbot' ? 'active' : ''} onClick={() => setMobileView('chatbot')}>
+          <button className={activeView === 'chatbot' ? 'active' : ''} onClick={() => setActiveView('chatbot')}>
             Chatbot
+          </button>
+          <button className={activeView === 'agenda' ? 'active' : ''} onClick={() => setActiveView('agenda')}>
+            Agenda
           </button>
         </div>
         <div className="main-layout">
@@ -309,49 +313,18 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
           }
         ] : []}
       />
-      <div className="main-layout">
-        <section className="dashboard-section">
-          <ErrorBoundary>
-            <SapDashboard 
-              onBackgroundChange={onBackgroundChange} 
-              onLogout={signOut} 
-              userRole={userRole}
-              userClientName={userClientName}
-              isChatCollapsed={isChatCollapsed}
-              toggleChatCollapse={toggleChatCollapse}
-            />
-          </ErrorBoundary>
-        </section>
-        
-        <ResizableBox 
-          className="chat-section-resizable"
-          width={isChatCollapsed ? 0 : window.innerWidth * 0.25} 
-          axis="x"
-          minConstraints={[isChatCollapsed ? 0 : 300, Infinity]}
-          maxConstraints={[window.innerWidth * 0.8, Infinity]}
-          resizeHandles={['w']}
-        >
-          <section className="chat-section">
-            <ErrorBoundary>
-              {user && user.username ? (
-                <ChatComponent 
-                  user={user} 
-                  onConfigEditorClick={onEditConfigClick}
-                  isChatCollapsed={isChatCollapsed}
-                  toggleChatCollapse={toggleChatCollapse}
-                />
-              ) : (
-                <div className="centered-container" style={{ height: '100%' }}>
-                  <div className="spinner"></div>
-                  <p style={{ marginTop: '20px', color: '#666' }}>
-                    Caricamento chat...
-                  </p>
-                </div>
-              )}
-            </ErrorBoundary>
-          </section>
-        </ResizableBox>
-      </div>
+      <SidebarNavigation
+        activeView={activeView}
+        setActiveView={setActiveView}
+        onBackgroundChange={onBackgroundChange}
+        onLogout={signOut}
+        userRole={userRole}
+        userClientName={userClientName}
+        isChatCollapsed={isChatCollapsed}
+        toggleChatCollapse={toggleChatCollapse}
+        onConfigEditorClick={onEditConfigClick}
+        user={user}
+      />
     </>
   );
 }
