@@ -113,44 +113,34 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     if (authStatus === 'authenticated') {
       const loadUserAttributes = async () => {
         try {
-          console.log('🔄 Waiting for user object...');
-          
-          // IMPORTANTE: Aspetta che user sia disponibile
+          // Aspetta che user sia disponibile
           let attempts = 0;
           const maxAttempts = 20; // 4 secondi totali
           
           while ((!user || !user.username) && attempts < maxAttempts) {
-            console.log(`⏳ Attempt ${attempts + 1}/${maxAttempts} - User not ready yet`);
             await new Promise(resolve => setTimeout(resolve, 200));
             attempts++;
           }
           
           if (!user || !user.username) {
-            console.error('❌ User object not available after waiting');
             // Forza un refresh come workaround
-            console.log('🔄 Force reloading page...');
             window.location.reload();
             return;
           }
-          
-          console.log('🔄 Loading user attributes...');
-          console.log('👤 User object:', { username: user.username, userId: user.userId });
           
           const attributes = await fetchUserAttributes();
           const role = attributes['custom:ruolo'] || 'admin';
           const clientName = attributes['custom:nomeCliente'];
           
-          console.log('✅ User attributes loaded:', { role, clientName });
           setUserRole(role);
           setUserClientName(clientName);
           
           // Attendi un momento per assicurarti che tutto sia pronto
           setTimeout(() => {
             setIsInitializing(false);
-            console.log('✅ Initialization complete - Ready to render dashboard');
           }, 300);
         } catch (e) {
-          console.error("❌ Error fetching user attributes:", e);
+          console.error("Error fetching user attributes:", e);
           setUserRole('admin');
           // Anche in caso di errore, continua dopo un timeout
           setTimeout(() => {
@@ -220,7 +210,6 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
 
   // Controllo di sicurezza aggiuntivo
   if (!user || !user.username) {
-    console.error('❌ User object missing despite authentication!');
     return (
       <div className="centered-container">
         <div style={{ textAlign: 'center', color: 'white' }}>
@@ -246,14 +235,12 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     );
   }
 
-  console.log('🎨 Rendering main application interface');
-
   if (isMobile) {
     return (
       <>
         <TopNavigation
           identity={{ href: "#", title: `Welcome, ${user.username}` }}
-          utilities={[{ type: "button", iconName: "settings", title: "Update settings", ariaLabel: "Update settings", disableUtilityCollapse: false, onClick: onEditConfigClick }]}
+          utilities={userRole === 'admin' ? [{ type: "button", iconName: "settings", title: "Update settings", ariaLabel: "Update settings", disableUtilityCollapse: false, onClick: onEditConfigClick }] : []}
         />
         <div className="mobile-switcher">
           <button className={mobileView === 'dashboard' ? 'active' : ''} onClick={() => setMobileView('dashboard')}>
@@ -311,7 +298,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
           href: "#",
           title: `Welcome, ${user.username}`,
         }}
-        utilities={[
+        utilities={userRole === 'admin' ? [
           {
             type: "button",
             iconName: "settings",
@@ -320,7 +307,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
             disableUtilityCollapse: false,
             onClick: onEditConfigClick
           }
-        ]}
+        ] : []}
       />
       <div className="main-layout">
         <section className="dashboard-section">
