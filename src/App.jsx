@@ -255,7 +255,33 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
           </button>
         </div>
         <div className="main-layout">
-          {mobileView === 'dashboard' && (
+        {activeView === 'agenda' && (
+            <section className="agenda-section">
+              <ErrorBoundary>
+                {user && user.username ? (
+                  <SidebarNavigation
+                    activeView={activeView}
+                    setActiveView={setActiveView}
+                    onBackgroundChange={onBackgroundChange}
+                    onLogout={signOut}
+                    userRole={userRole}
+                    userClientName={userClientName}
+                    isChatCollapsed={isChatCollapsed}
+                    toggleChatCollapse={toggleChatCollapse}
+                    onConfigEditorClick={onEditConfigClick}
+                    user={user}
+                  />
+                ) : (
+                  <div className="centered-container" style={{ height: '100%' }}>
+                    <div className="spinner"></div>
+                    <p style={{ marginTop: '20px', color: '#666' }}>
+                      Caricamento agenda...
+                    </p>
+                  </div>
+                )}
+              </ErrorBoundary>
+            </section>
+          )}          {activeView === 'dashboard' && (
             <section className="dashboard-section">
               <ErrorBoundary>
                 <SapDashboard 
@@ -269,7 +295,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
               </ErrorBoundary>
             </section>
           )}
-          {mobileView === 'chatbot' && (
+          {activeView === 'chatbot' && (
             <section className="chat-section">
               <ErrorBoundary>
                 {user && user.username ? (
@@ -290,6 +316,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
               </ErrorBoundary>
             </section>
           )}
+          
         </div>
       </>
     );
