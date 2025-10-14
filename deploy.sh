@@ -408,6 +408,11 @@ configure_environment_variables() {
     read -p "VITE_BEDROCK_AGENT_ALIAS_ID: " bedrock_alias_id
     read -p "VITE_BEDROCK_REGION (default: $REGION): " bedrock_region
     bedrock_region=${bedrock_region:-$REGION}
+
+    read -p "VITE_API_URL (default: https://basis.ai.horsacloudtech.net:3001): " api_url
+    api_url=${api_url:-"https://basis.ai.horsacloudtech.net:3001"}
+
+    
     
     # Costruisci il JSON delle variabili
     local env_vars="{"
@@ -419,6 +424,9 @@ configure_environment_variables() {
     [ -n "$bedrock_agent_id" ] && env_vars+="\"VITE_BEDROCK_AGENT_ID\":\"$bedrock_agent_id\","
     [ -n "$bedrock_alias_id" ] && env_vars+="\"VITE_BEDROCK_AGENT_ALIAS_ID\":\"$bedrock_alias_id\","
     [ -n "$bedrock_region" ] && env_vars+="\"VITE_BEDROCK_REGION\":\"$bedrock_region\","
+
+    # Aggiungi questa nuova riga
+[ -n "$api_url" ] && env_vars+="\"VITE_API_URL\":\"$api_url\","
     
     # Rimuovi l'ultima virgola
     env_vars="${env_vars%,}"

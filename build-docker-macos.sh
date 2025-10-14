@@ -35,6 +35,8 @@ VITE_BEDROCK_AGENT_NAME="SAPReportAnalyst"
 VITE_BEDROCK_AGENT_ID="93BV0V6G4L"
 VITE_BEDROCK_AGENT_ALIAS_ID="TSTALIASID"
 VITE_BEDROCK_REGION="eu-west-1"
+# Aggiungi questa nuova variabile per l'API URL
+VITE_API_URL="https://basis.ai.horsacloudtech.net:3001"
 
 # Verifica Docker
 echo -e "${YELLOW}🔍 Verifica Docker...${NC}"
@@ -92,6 +94,7 @@ if [ "$USE_BUILDX" = true ]; then
         --build-arg VITE_BEDROCK_AGENT_ID="${VITE_BEDROCK_AGENT_ID}" \
         --build-arg VITE_BEDROCK_AGENT_ALIAS_ID="${VITE_BEDROCK_AGENT_ALIAS_ID}" \
         --build-arg VITE_BEDROCK_REGION="${VITE_BEDROCK_REGION}" \
+        --build-arg VITE_API_URL="${VITE_API_URL}" \
         -t ${IMAGE_NAME}:${IMAGE_TAG} \
         --load \
         .
@@ -107,9 +110,11 @@ else
         --build-arg VITE_BEDROCK_AGENT_ID="${VITE_BEDROCK_AGENT_ID}" \
         --build-arg VITE_BEDROCK_AGENT_ALIAS_ID="${VITE_BEDROCK_AGENT_ALIAS_ID}" \
         --build-arg VITE_BEDROCK_REGION="${VITE_BEDROCK_REGION}" \
+        --build-arg VITE_API_URL="${VITE_API_URL}" \
         -t ${IMAGE_NAME}:${IMAGE_TAG} \
         .
 fi
+
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
