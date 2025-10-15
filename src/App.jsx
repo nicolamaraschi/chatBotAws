@@ -27,10 +27,45 @@ function App() {
   const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
+    // Controlla se esiste già una configurazione
     const storedConfig = localStorage.getItem('appConfig');
-    if (storedConfig && !isEditingConfig) {
+    
+    if (!storedConfig && !isEditingConfig) {
+      // Configurazione predefinita
+      const defaultConfig = {
+        cognito: {
+          region: "eu-west-1",
+          userPoolId: "eu-west-1_7WLST1Mlg",
+          userPoolClientId: "vpscdsoro31v6hioq7e52ktkv",
+          identityPoolId: "eu-west-1:36d062f2-d4f0-4b1d-ba60-5ce34cf991cc"
+        },
+        bedrock: {
+          agentName: "SAPReportAnalyst",
+          agentId: "93BV0V6G4L",
+          agentAliasId: "TSTALIASID",
+          region: "eu-west-1"
+        }
+      };
+      
+      // Salva in localStorage
+      localStorage.setItem('appConfig', JSON.stringify(defaultConfig));
       setIsConfigured(true);
-      // Configura Amplify immediatamente
+      
+      // Configura Amplify
+      Amplify.configure({
+        Auth: {
+          Cognito: {
+            region: defaultConfig.cognito.region,
+            userPoolId: defaultConfig.cognito.userPoolId,
+            userPoolClientId: defaultConfig.cognito.userPoolClientId,
+            identityPoolId: defaultConfig.cognito.identityPoolId
+          }
+        }
+      });
+      console.log("Configurazione predefinita applicata automaticamente");
+    } else if (storedConfig && !isEditingConfig) {
+      // Codice esistente per configurare quando esiste già storage
+      setIsConfigured(true);
       try {
         const config = JSON.parse(storedConfig);
         Amplify.configure({
@@ -40,13 +75,14 @@ function App() {
               userPoolId: config.cognito.userPoolId,
               userPoolClientId: config.cognito.userPoolClientId,
               identityPoolId: config.cognito.identityPoolId
-            },
+            }
           }
         });
       } catch (e) {
         console.error("Error configuring Amplify:", e);
       }
     }
+    
     const storedBg = localStorage.getItem('backgroundImage');
     if (storedBg) {
       setBackgroundImage(storedBg);

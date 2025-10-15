@@ -10,6 +10,7 @@ const TABLE_NAME = 'AgendaTasks';
 console.log('Inizializzazione servizio DynamoDB con tabella:', TABLE_NAME, 'nella regione:', config.AWS_REGION);
 
 // Crea una nuova attività
+// Crea una nuova attività
 const createTask = async (task) => {
   console.log('DynamoDB createTask - parametri:', task);
   
@@ -28,6 +29,7 @@ const createTask = async (task) => {
       createdBy: task.createdBy,
       lastModifiedBy: task.lastModifiedBy,
       canClientEdit: task.canClientEdit || false,
+      status: task.status || 'proposta', // Nuovo campo: 'proposta', 'accettata', 'rifiutata'
       createdAt: task.createdAt || now,
       updatedAt: task.updatedAt || now,
     },
@@ -38,7 +40,7 @@ const createTask = async (task) => {
     console.log('DynamoDB createTask - successo:', params.Item.id);
     return params.Item;
   } catch (error) {
-    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (createTask) !!!', JSON.stringify(error, null, 2));
+    console.error('DynamoDB createTask - errore:', error);
     throw error;
   }
 };
@@ -119,49 +121,59 @@ const updateTask = async (id, updates) => {
   console.log(`DynamoDB updateTask - parametri: id=${id}, updates=`, updates);
   
   const now = new Date().toISOString();
-  const updateExpressionParts = [];
-  const ExpressionAttributeValues = { ':updatedAt': updates.updatedAt || now };
-  const ExpressionAttributeNames = {};
-
-  for (const key in updates) {
-    if (updates.hasOwnProperty(key) && key !== 'id' && key !== 'createdAt') {
-      if (key === 'data') {
-        updateExpressionParts.push(`#data = :data`);
-        ExpressionAttributeNames['#data'] = 'data';
-        ExpressionAttributeValues[':data'] = updates.data;
-      } else if (key === 'nomeCliente') {
-        updateExpressionParts.push(`nomeCliente = :nomeCliente`);
-        ExpressionAttributeValues[':nomeCliente'] = updates.nomeCliente.toLowerCase();
+  
+  // Prepara oggetti per l'espressione di aggiornamento
+  const expressionParts = [];
+  const attributeValues = {};
+  const attributeNames = {};
+  
+  // Gestisci updatedAt separatamente
+  updates.updatedAt = updates.updatedAt || now;
+  
+  // Itera attraverso gli aggiornamenti e costruisci l'espressione
+  Object.entries(updates).forEach(([key, value]) => {
+    // Ignora l'id e createdAt che non dovrebbero essere modificati
+    if (key !== 'id' && key !== 'createdAt') {
+      // Usa expression attribute names per le parole riservate e tutti i campi per sicurezza
+      const attributeName = `#${key}`;
+      const attributeValue = `:${key}`;
+      
+      attributeNames[attributeName] = key;
+      
+      // Gestione speciale per nomeCliente (lowercase)
+      if (key === 'nomeCliente' && typeof value === 'string') {
+        attributeValues[attributeValue] = value.toLowerCase();
       } else {
-        updateExpressionParts.push(`${key} = :${key}`);
-        ExpressionAttributeValues[`:${key}`] = updates[key];
+        attributeValues[attributeValue] = value;
       }
+      
+      expressionParts.push(`${attributeName} = ${attributeValue}`);
     }
-  }
-  updateExpressionParts.push('updatedAt = :updatedAt');
-
-  if (updateExpressionParts.length === 0) {
+  });
+  
+  // Verifica che ci siano campi da aggiornare
+  if (expressionParts.length === 0) {
     throw new Error('No valid fields to update.');
   }
-
+  
+  // Costruisci i parametri per l'aggiornamento
   const params = {
     TableName: TABLE_NAME,
     Key: { id },
-    UpdateExpression: 'SET ' + updateExpressionParts.join(', '),
-    ExpressionAttributeValues,
-    ReturnValues: 'ALL_NEW',
+    UpdateExpression: `SET ${expressionParts.join(', ')}`,
+    ExpressionAttributeValues: attributeValues,
+    ExpressionAttributeNames: attributeNames,
+    ReturnValues: 'ALL_NEW'
   };
-
-  if (Object.keys(ExpressionAttributeNames).length > 0) {
-    params.ExpressionAttributeNames = ExpressionAttributeNames;
-  }
-
+  
   try {
+    console.log('Parametri di aggiornamento:', JSON.stringify(params, null, 2));
     const result = await dynamodb.update(params).promise();
     console.log(`DynamoDB updateTask - successo, attività aggiornata`);
     return result.Attributes;
   } catch (error) {
-    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (updateTask) !!!', JSON.stringify(error, null, 2));
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (updateTask) !!!', error);
+    console.error('DynamoDB updateTask - errore:', error);
     throw error;
   }
 };
