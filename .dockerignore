@@ -19,3 +19,31 @@ yarn-error.log*
 # Ignore local development files
 .DS_Store
 .vscode
+
+# Ignore test files
+*.test.js
+*.spec.js
+coverage/
+
+# Ignore Docker files (non necessari nel build)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Ignore documentation
+README.md
+IMPLEMENTATION_DETAILS.md
+CODE_DOCUMENTATION.md
+
+# Ignore scripts
+deploy.sh
+build-docker-macos.sh
+
+# AWS Amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
+amplify/
+
+# Package lock (se usi npm ci)
+# package-lock.json

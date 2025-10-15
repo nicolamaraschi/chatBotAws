@@ -1,0 +1,50 @@
+
+
+services:
+  backend:
+    build:
+      context: ./aws-serverless-app
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      # IMPORTANT: These will be read from your environment or a .env file
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} # Optional: for temporary credentials
+      - AWS_REGION=${AWS_REGION:-eu-west-1}
+      # These are the default values from your config.js
+      - ATHENA_DB=${ATHENA_DB:-cloudconnexa_logs_db}
+      - ATHENA_RESULTS_BUCKET=${ATHENA_RESULTS_BUCKET:-horsaruncloudconnexalog}
+      - ATHENA_WORKGROUP=${ATHENA_WORKGROUP:-hrun-cloudconnexa-wg}
+      - SAP_ATHENA_DB=${SAP_ATHENA_DB:-sap_reports_db}
+      - SAP_ATHENA_WORKGROUP=${SAP_ATHENA_WORKGROUP:-ReportCheckSistemiSap}
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # This tells Vite to use a relative path, which Nginx will handle
+        - VITE_API_URL=/api 
+        # Pass build-time variables for Cognito/Bedrock
+        - VITE_COGNITO_USER_POOL_ID=${VITE_COGNITO_USER_POOL_ID}
+        - VITE_COGNITO_USER_POOL_CLIENT_ID=${VITE_COGNITO_USER_POOL_CLIENT_ID}
+        - VITE_COGNITO_REGION=${VITE_COGNITO_REGION}
+        - VITE_COGNITO_IDENTITY_POOL_ID=${VITE_COGNITO_IDENTITY_POOL_ID}
+        - VITE_BEDROCK_AGENT_NAME=${VITE_BEDROCK_AGENT_NAME}
+        - VITE_BEDROCK_AGENT_ID=${VITE_BEDROCK_AGENT_ID}
+        - VITE_BEDROCK_AGENT_ALIAS_ID=${VITE_BEDROCK_AGENT_ALIAS_ID}
+        - VITE_BEDROCK_REGION=${VITE_BEDROCK_REGION}
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -290,7 +290,7 @@ useEffect(() => {
 
   const loadAvailableClients = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/sap/clients`);
+      const response = await axios.get(`${API_URL}/sap/clients`);
       setAvailableClients(response.data);
     } catch (err) {
       console.error('Errore nel caricamento dei clienti:', err);
@@ -299,7 +299,7 @@ useEffect(() => {
 
   const loadAvailableSIDs = async (clients) => {
     try {
-      const response = await axios.post(`${API_URL}/api/sap/sids`, { clients });
+      const response = await axios.post(`${API_URL}/sap/sids`, { clients });
       setAvailableSIDs(response.data);
     } catch (err) {
       console.error('Errore nel caricamento dei SID:', err);
@@ -322,7 +322,7 @@ useEffect(() => {
       
       console.log('📊 Invio filtri al backend:', filters);
       
-      const response = await axios.post(`${API_URL}/api/sap/dashboard`, filters);
+      const response = await axios.post(`${API_URL}/sap/dashboard`, filters);
       setDashboardData(response.data);
     } catch (err) {
       setError('Errore nel caricamento dei dati. Verifica la connessione al backend.');
@@ -742,7 +742,7 @@ const handleExportToExcel = () => {
         <button onClick={toggleTheme} className="icon-btn" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? '🌙' : '☀️'}</button>
         <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">🎨</button>
         <button onClick={onLogout} className="icon-btn" title="Logout">⏻</button>
-        <div className="export-buttons">
+       <div className="export-buttons">
   <button onClick={() => handleExport('pdf')} className="icon-btn" title="Download PDF">
     📄
   </button>
