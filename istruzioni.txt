@@ -1,0 +1,64 @@
+ 1. Devi incollare il docker-compose.yml in Portainer?
+
+
+  Sì, esatto. La procedura standard è proprio quella:
+   1. Vai su Stacks in Portainer.
+   2. Clicca su Add Stack.
+   3. Vedrai un Web editor: lì dentro copi e incolli l'intero contenuto del tuo file
+      docker-compose.yml.
+
+  2. Devi inserire TUTTE quelle variabili d'ambiente?
+
+
+  No, e questa è la distinzione fondamentale. Devi inserire SOLO quelle del backend.
+
+  Dividiamo la tua lista in due gruppi:
+
+  ---
+
+  Gruppo 1: Variabili per il Frontend (NON le devi inserire in Portainer)
+
+
+
+   1 # Variabili per il Frontend (Build)
+   2 VITE_COGNITO_USER_POOL_ID=...
+   3 VITE_COGNITO_USER_POOL_CLIENT_ID=...
+   4 VITE_COGNITO_REGION=...
+   5 VITE_COGNITO_IDENTITY_POOL_ID=...
+   6 VITE_BEDROCK_AGENT_NAME=...
+   7 VITE_BEDROCK_AGENT_ID=...
+   8 VITE_BEDROCK_AGENT_ALIAS_ID=...
+   9 VITE_BEDROCK_REGION=...
+
+
+
+  Queste variabili sono argomenti di build. Lo script build-docker-macos.sh le ha già "cotte"
+  e incorporate dentro l'immagine del frontend (sap-dashboard-frontend:latest). L'immagine
+  finale è già configurata e non ha più bisogno di queste variabili per funzionare.
+
+  ---
+
+  Gruppo 2: Variabili per il Backend (SOLO QUESTE vanno inserite in Portainer)
+
+
+
+   1 # Credenziali AWS per il Backend (DA COMPILARE)
+   2 AWS_ACCESS_KEY_ID=AKIAYUPNXOTUGBWSCUEJ
+   3 AWS_SECRET_ACCESS_KEY=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
+   4 # AWS_SESSION_TOKEN=...
+
+
+  Queste sono le uniche variabili che devi fornire a Portainer quando crei lo stack. Sono le
+  credenziali runtime che il container del backend userà per connettersi ad AWS (DynamoDB,
+  Athena, etc.).
+
+
+  Nella pagina di creazione dello Stack in Portainer, troverai una sezione chiamata
+  "Environment variables". Lì dovrai aggiungere, una per una:
+   * Una variabile con nome AWS_ACCESS_KEY_ID e il suo valore.
+   * Una variabile con nome AWS_SECRET_ACCESS_KEY e il suo valore.
+   * (Opzionale) AWS_SESSION_TOKEN se stai usando credenziali temporanee.
+
+
+  Fatto questo, Portainer avvierà il container del backend iniettando queste credenziali, e
+  tutto funzionerà.

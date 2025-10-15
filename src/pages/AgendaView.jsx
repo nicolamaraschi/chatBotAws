@@ -24,7 +24,7 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     setError(null);
     try {
       const yearMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-      let url = `${API_URL}/api/agenda/tasks?yearMonth=${yearMonth}`;
+      let url = `${API_URL}/agenda/tasks?yearMonth=${yearMonth}`;
 
       if (isClientRole && userClientName) {
         url += `&nomeCliente=${userClientName}`;
@@ -101,7 +101,7 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     if (!window.confirm('Sei sicuro di voler eliminare questa attività?')) return;
     setLoading(true);
     try {
-      await axios.delete(`${API_URL}/api/agenda/tasks/${taskId}`);
+      await axios.delete(`${API_URL}/agenda/tasks/${taskId}`);
       fetchTasks(); // Re-fetch tasks after deletion
     } catch (err) {
       console.error('Errore nell\'eliminazione attività:', err);
@@ -116,10 +116,10 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     try {
       if (taskData.id) {
         // Update existing task
-        await axios.put(`${API_URL}/api/agenda/tasks/${taskData.id}`, taskData);
+        await axios.put(`${API_URL}/agenda/tasks/${taskData.id}`, taskData);
       } else {
         // Create new task
-        await axios.post(`${API_URL}/api/agenda/tasks`, taskData);
+        await axios.post(`${API_URL}/agenda/tasks`, taskData);
       }
       setShowTaskForm(false);
       setEditingTask(null);

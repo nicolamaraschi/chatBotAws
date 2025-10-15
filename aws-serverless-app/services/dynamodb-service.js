@@ -38,7 +38,7 @@ const createTask = async (task) => {
     console.log('DynamoDB createTask - successo:', params.Item.id);
     return params.Item;
   } catch (error) {
-    console.error('DynamoDB createTask - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (createTask) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -65,7 +65,7 @@ const getTasksByClientAndMonth = async (nomeCliente, yearMonth) => {
     console.log(`DynamoDB getTasksByClientAndMonth - trovate ${result.Items.length} attività`);
     return result.Items;
   } catch (error) {
-    console.error('DynamoDB getTasksByClientAndMonth - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (getTasksByClientAndMonth) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -90,7 +90,7 @@ const getTasksByMonth = async (yearMonth) => {
     console.log(`DynamoDB getTasksByMonth - trovate ${result.Items.length} attività`);
     return result.Items;
   } catch (error) {
-    console.error('DynamoDB getTasksByMonth - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (getTasksByMonth) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -109,7 +109,7 @@ const getTaskById = async (id) => {
     console.log(`DynamoDB getTaskById - risultato:`, result.Item ? 'trovato' : 'non trovato');
     return result.Item;
   } catch (error) {
-    console.error('DynamoDB getTaskById - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (getTaskById) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -161,7 +161,7 @@ const updateTask = async (id, updates) => {
     console.log(`DynamoDB updateTask - successo, attività aggiornata`);
     return result.Attributes;
   } catch (error) {
-    console.error('DynamoDB updateTask - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (updateTask) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };
@@ -180,7 +180,7 @@ const deleteTask = async (id) => {
     console.log(`DynamoDB deleteTask - successo, attività eliminata`);
     return { message: 'Task deleted successfully' };
   } catch (error) {
-    console.error('DynamoDB deleteTask - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (deleteTask) !!!', JSON.stringify(error, null, 2));
     throw error;
   }
 };

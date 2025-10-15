@@ -11,20 +11,21 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     🐳 Docker Build - SAP Dashboard                      ║${NC}"
+echo -e "${BLUE}║     🐳 Docker Build - SAP Dashboard (Full Stack)          ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 # Configurazione
-IMAGE_NAME="sap-dashboard"
+FRONTEND_IMAGE_NAME="sap-dashboard-frontend"
+BACKEND_IMAGE_NAME="sap-dashboard-backend"
 IMAGE_TAG="latest"
 PLATFORM="linux/amd64"
 
 # ============================================
-# CONFIGURAZIONE API
+# CONFIGURAZIONE API FRONTEND
 # ============================================
-echo -e "${YELLOW}Scegli la configurazione API:${NC}"
-echo "1) Proxy Nginx (/api) - Backend nello stesso host"
+echo -e "${YELLOW}Scegli la configurazione API per il Frontend:${NC}"
+echo "1) Proxy Nginx (/api) - Backend nello stesso host (scelta per Portainer)"
 echo "2) Backend esterno - Specifica URL completo"
 echo ""
 read -p "Scelta (1-2): " api_choice
@@ -47,7 +48,7 @@ esac
 
 echo ""
 
-# Variabili d'ambiente
+# Variabili d'ambiente per il Frontend
 VITE_COGNITO_USER_POOL_ID="eu-west-1_7WLST1Mlg"
 VITE_COGNITO_USER_POOL_CLIENT_ID="vpscdsoro31v6hioq7e52ktkv"
 VITE_COGNITO_REGION="eu-west-1"
@@ -60,7 +61,7 @@ VITE_BEDROCK_REGION="eu-west-1"
 # Verifica prerequisiti
 echo -e "${YELLOW}🔍 Verifica prerequisiti...${NC}"
 
-if [ ! -f "package.json" ]; then
+if [ ! -f "package.json" ] || [ ! -d "aws-serverless-app" ]; then
     echo -e "${RED}❌ Esegui lo script dalla root del progetto${NC}"
     exit 1
 fi
@@ -86,9 +87,11 @@ else
     USE_BUILDX=false
 fi
 
-# Build
+# ============================================
+# Build Frontend
+# ============================================
 echo ""
-echo -e "${YELLOW}📦 Build in corso...${NC}"
+echo -e "${YELLOW}📦 Build Frontend in corso...${NC}"
 echo ""
 
 if [ "$USE_BUILDX" = true ]; then
@@ -103,7 +106,7 @@ if [ "$USE_BUILDX" = true ]; then
         --build-arg VITE_BEDROCK_AGENT_ALIAS_ID="${VITE_BEDROCK_AGENT_ALIAS_ID}" \
         --build-arg VITE_BEDROCK_REGION="${VITE_BEDROCK_REGION}" \
         --build-arg VITE_API_URL="${VITE_API_URL}" \
-        -t ${IMAGE_NAME}:${IMAGE_TAG} \
+        -t ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG} \
         --load \
         .
 else
@@ -118,38 +121,76 @@ else
         --build-arg VITE_BEDROCK_AGENT_ALIAS_ID="${VITE_BEDROCK_AGENT_ALIAS_ID}" \
         --build-arg VITE_BEDROCK_REGION="${VITE_BEDROCK_REGION}" \
         --build-arg VITE_API_URL="${VITE_API_URL}" \
-        -t ${IMAGE_NAME}:${IMAGE_TAG} \
+        -t ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG} \
         .
 fi
 
 echo ""
-echo -e "${GREEN}✅ BUILD COMPLETATA!${NC}"
+echo -e "${GREEN}✅ BUILD FRONTEND COMPLETATA!${NC}"
 echo ""
-echo -e "${CYAN}📦 Immagine: ${IMAGE_NAME}:${IMAGE_TAG}${NC}"
-echo -e "${CYAN}📊 Dimensione: $(docker images ${IMAGE_NAME}:${IMAGE_TAG} --format "{{.Size}}")${NC}"
+
+# ============================================
+# Build Backend
+# ============================================
+echo ""
+echo -e "${YELLOW}📦 Build Backend in corso...${NC}"
+echo ""
+
+if [ "$USE_BUILDX" = true ]; then
+    docker buildx build \
+        --platform ${PLATFORM} \
+        -t ${BACKEND_IMAGE_NAME}:${IMAGE_TAG} \
+        --load \
+        ./aws-serverless-app
+else
+    docker build \
+        --platform ${PLATFORM} \
+        -t ${BACKEND_IMAGE_NAME}:${IMAGE_TAG} \
+        ./aws-serverless-app
+fi
+
+echo ""
+echo -e "${GREEN}✅ BUILD BACKEND COMPLETATO!${NC}"
+echo ""
+
+# ============================================
+# Riepilogo
+# ============================================
+echo -e "${CYAN}📦 Immagine Frontend: ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}${NC}"
+echo -e "${CYAN}📊 Dimensione: $(docker images ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG} --format "{{.Size}}")${NC}"
+echo -e "${CYAN}📦 Immagine Backend: ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}${NC}"
+echo -e "${CYAN}📊 Dimensione: $(docker images ${BACKEND_IMAGE_NAME}:${IMAGE_TAG} --format "{{.Size}}")${NC}"
 echo ""
 
 # Menu
 echo -e "${BLUE}Cosa vuoi fare?${NC}"
-echo "1) 🧪 Test locale (porta 8080)"
-echo "2) 💾 Salva in .tar.gz"
+echo "1) 🧪 Test locale (SOLO FRONTEND - porta 8080)"
+echo "2) 💾 Salva entrambe le immagini in .tar.gz"
 echo "3) ❌ Esci"
 echo ""
 read -p "Scelta: " choice
 
 case $choice in
     1)
-        docker rm -f sap-dashboard-test 2>/dev/null || true
-        docker run -d --name sap-dashboard-test -p 8080:80 ${IMAGE_NAME}:${IMAGE_TAG}
+        docker rm -f sap-dashboard-test-frontend 2>/dev/null || true
+        docker run -d --name sap-dashboard-test-frontend -p 8080:80 ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}
         sleep 2
-        echo -e "${GREEN}✅ Container avviato su http://localhost:8080${NC}"
-        docker logs --tail 20 sap-dashboard-test
+        echo -e "${GREEN}✅ Container Frontend avviato su http://localhost:8080${NC}"
+        echo -e "${YELLOW}NOTA: Il backend non è in esecuzione. Le chiamate API falliranno.${NC}"
+        docker logs --tail 20 sap-dashboard-test-frontend
         ;;
     2)
-        OUTPUT_FILE="${IMAGE_NAME}-${IMAGE_TAG}.tar"
-        docker save -o ${OUTPUT_FILE} ${IMAGE_NAME}:${IMAGE_TAG}
-        gzip -f ${OUTPUT_FILE}
-        echo -e "${GREEN}✅ Salvato: ${OUTPUT_FILE}.gz${NC}"
+        OUTPUT_FILE_FE="${FRONTEND_IMAGE_NAME}-${IMAGE_TAG}.tar"
+        OUTPUT_FILE_BE="${BACKEND_IMAGE_NAME}-${IMAGE_TAG}.tar"
+        echo "Salvataggio Frontend..."
+        docker save -o ${OUTPUT_FILE_FE} ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}
+        gzip -f ${OUTPUT_FILE_FE}
+        echo "Salvataggio Backend..."
+        docker save -o ${OUTPUT_FILE_BE} ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}
+        gzip -f ${OUTPUT_FILE_BE}
+        echo -e "${GREEN}✅ Immagini salvate:${NC}"
+        echo -e "  - ${OUTPUT_FILE_FE}.gz"
+        echo -e "  - ${OUTPUT_FILE_BE}.gz"
         ;;
     3)
         echo -e "${GREEN}👋 Ciao!${NC}"
