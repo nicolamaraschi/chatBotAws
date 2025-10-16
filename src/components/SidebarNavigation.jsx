@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import DashboardWithChat from '../pages/DashboardWithChat';
+import Dashboard from '../pages/Dashboard'; // Import the new Dashboard component
 import ChatComponent from '../ChatComponent';
 import AgendaView from '../pages/AgendaView';
 import ErrorBoundary from './ErrorBoundary';
@@ -17,24 +18,10 @@ const SidebarNavigation = ({
   isChatCollapsed,
   toggleChatCollapse,
   onConfigEditorClick,
-  user
+  user,
+  isMobile,
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
-
-  // Gestisce il ridimensionamento della finestra
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024);
-      // In modalità mobile, la sidebar non deve essere collassata
-      if (window.innerWidth <= 1024) {
-        setSidebarCollapsed(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -107,16 +94,27 @@ const SidebarNavigation = ({
 
       <div className="main-content-area">
         {activeView === 'dashboard' && (
-          <DashboardWithChat
-            onBackgroundChange={onBackgroundChange}
-            onLogout={onLogout}
-            userRole={userRole}
-            userClientName={userClientName}
-            user={user}
-            onConfigEditorClick={onConfigEditorClick}
-            isChatCollapsed={isChatCollapsed}
-            toggleChatCollapse={toggleChatCollapse}
-          />
+          isMobile ? (
+            <Dashboard
+              onBackgroundChange={onBackgroundChange}
+              onLogout={onLogout}
+              userRole={userRole}
+              userClientName={userClientName}
+              user={user}
+            />
+          ) : (
+            <DashboardWithChat
+              onBackgroundChange={onBackgroundChange}
+              onLogout={onLogout}
+              userRole={userRole}
+              userClientName={userClientName}
+              user={user}
+              onConfigEditorClick={onConfigEditorClick}
+              isChatCollapsed={isChatCollapsed}
+              toggleChatCollapse={toggleChatCollapse}
+              isMobile={isMobile}
+            />
+          )
         )}
         {activeView === 'chatbot' && (
           <section className="chat-section">
@@ -166,6 +164,7 @@ SidebarNavigation.propTypes = {
   toggleChatCollapse: PropTypes.func.isRequired,
   onConfigEditorClick: PropTypes.func.isRequired,
   user: PropTypes.object.isRequired,
+  isMobile: PropTypes.bool.isRequired,
 };
 
 export default SidebarNavigation;

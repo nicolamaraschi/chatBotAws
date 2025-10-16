@@ -15,22 +15,13 @@ const DashboardWithChat = ({
   onConfigEditorClick,
   isChatCollapsed,
   toggleChatCollapse,
+  isMobile,
 }) => {
   const [chatWidth, setChatWidth] = useState(450); // Larghezza predefinita della chat
   const startX = useRef(0);
   const startWidth = useRef(0);
   const isResizing = useRef(false);
   const chatContainerRef = useRef(null);
-
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Funzione per iniziare il ridimensionamento
   const startResize = (e) => {
@@ -128,6 +119,7 @@ DashboardWithChat.propTypes = {
   onConfigEditorClick: PropTypes.func.isRequired,
   isChatCollapsed: PropTypes.bool.isRequired,
   toggleChatCollapse: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool.isRequired,
 };
 
 export default DashboardWithChat;

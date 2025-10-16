@@ -58,6 +58,7 @@ body[data-theme="dark"] .agenda-header button:hover {
   border-radius: 5px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  min-width: 800px; /* Add this to force a minimum width */
 }
 
 body[data-theme="dark"] .calendar-grid {

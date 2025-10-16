@@ -1,6 +1,6 @@
 /* src/styles/MobileLayout.css */
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .main-layout {
     display: flex; /* Ensure it's a flex container */
     flex-direction: column;

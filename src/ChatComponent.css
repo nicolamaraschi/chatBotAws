@@ -35,7 +35,7 @@
 }
 
 /* Styles for mobile devices with vertical screen orientation */
-@media (max-width: 920px), (orientation: portrait) {
+@media (max-width: 1024px), (orientation: portrait) {
     .chat-component {
       margin-top: 0; /* No margin-top in mobile */
       height: 100%;

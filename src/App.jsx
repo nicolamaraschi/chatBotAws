@@ -131,7 +131,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   const [userRole, setUserRole] = useState(undefined);
   const [userClientName, setUserClientName] = useState(undefined);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'chatbot', or 'agenda'
 
   useEffect(() => {
@@ -285,6 +285,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
         toggleChatCollapse={toggleChatCollapse}
         onConfigEditorClick={onEditConfigClick}
         user={user}
+        isMobile={isMobile}
       />
     );
   }
@@ -318,6 +319,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
         toggleChatCollapse={toggleChatCollapse}
         onConfigEditorClick={onEditConfigClick}
         user={user}
+        isMobile={isMobile}
       />
     </>
   );
