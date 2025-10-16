@@ -559,9 +559,8 @@ useEffect(() => {
 
   return (
     <div className="chat-component">
-      <Container stretch>
-        <div className="chat-container">
-          <TopNavigation
+      <div className="chat-container">
+        <TopNavigation
             identity={{
               href: "#",
               title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}${currentChatName ? ` - ${currentChatName}` : ''}`,
@@ -882,7 +881,6 @@ useEffect(() => {
             <strong>This action cannot be undone.</strong> Your chat history with {agentName.value} will be permanently deleted. Do you want to continue?
           </Modal>
         </div>
-      </Container>
     </div>
   );
 };

@@ -107,6 +107,8 @@ body[data-theme="dark"] .app-background[style*="background-image"] {
 @media (max-width: 1024px), (orientation: portrait) {
   .main-layout {
     flex-direction: column;
+    flex-grow: 1; /* Allow main-layout to take remaining space */
+    height: auto; /* Let flexbox manage height */
   }
 
   .dashboard-section, .chat-section-resizable, .chat-section {

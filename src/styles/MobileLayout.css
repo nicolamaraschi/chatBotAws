@@ -2,21 +2,24 @@
 
 @media (max-width: 768px) {
   .main-layout {
+    display: flex; /* Ensure it's a flex container */
     flex-direction: column;
-    height: calc(100vh - 48px); /* Full height minus TopNavigation */
+    height: calc(100vh - 98px); /* Full height minus TopNav and switcher */
   }
 
   .dashboard-section,
+  .chat-section {
+    flex-grow: 1; /* Make section grow to fill space */
+    overflow-y: auto; /* Allow scrolling within the section */
+    height: 100%; /* Fallback for browsers that need it */
+  }
+
   .chat-section-resizable {
-    width: 100% !important; /* Override resizable box style */
+    width: 100% !important;
     max-width: 100% !important;
-    transform: none !important; /* Override resizable box style */
+    transform: none !important;
     height: 100%;
     overflow-y: auto;
-  }
-  
-  .chat-section {
-    height: 100%;
   }
 
   .mobile-switcher {
