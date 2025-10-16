@@ -114,6 +114,8 @@ const SidebarNavigation = ({
             userClientName={userClientName}
             user={user}
             onConfigEditorClick={onConfigEditorClick}
+            isChatCollapsed={isChatCollapsed}
+            toggleChatCollapse={toggleChatCollapse}
           />
         )}
         {activeView === 'chatbot' && (

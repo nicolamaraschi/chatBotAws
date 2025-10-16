@@ -13,17 +13,24 @@ const DashboardWithChat = ({
   userClientName,
   user,
   onConfigEditorClick,
+  isChatCollapsed,
+  toggleChatCollapse,
 }) => {
-  const [isChatCollapsed, setIsChatCollapsed] = useState(true); // Default to collapsed
   const [chatWidth, setChatWidth] = useState(450); // Larghezza predefinita della chat
   const startX = useRef(0);
   const startWidth = useRef(0);
   const isResizing = useRef(false);
   const chatContainerRef = useRef(null);
 
-  const toggleChatCollapse = () => {
-    setIsChatCollapsed(!isChatCollapsed);
-  };
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Funzione per iniziare il ridimensionamento
   const startResize = (e) => {
@@ -79,6 +86,7 @@ const DashboardWithChat = ({
       </div>
       
       {/* Chat panel */}
+      {!isMobile && (
       <div 
         className={`chat-container ${isChatCollapsed ? 'collapsed' : 'expanded'}`}
         style={{ width: isChatCollapsed ? '60px' : `${chatWidth}px` }}
@@ -106,6 +114,7 @@ const DashboardWithChat = ({
           ></div>
         )}
       </div>
+      )}
     </div>
   );
 };
@@ -117,6 +126,8 @@ DashboardWithChat.propTypes = {
   userClientName: PropTypes.string,
   user: PropTypes.object.isRequired,
   onConfigEditorClick: PropTypes.func.isRequired,
+  isChatCollapsed: PropTypes.bool.isRequired,
+  toggleChatCollapse: PropTypes.func.isRequired,
 };
 
 export default DashboardWithChat;
