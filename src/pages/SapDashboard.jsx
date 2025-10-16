@@ -750,7 +750,7 @@ const handleExportToExcel = () => {
     📊
   </button>
 </div>
-        <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '«' : '»'}</button>
+        <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '»' : '«'}</button>
       </div>
     </div>
       

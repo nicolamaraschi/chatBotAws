@@ -1,0 +1,281 @@
+/* DashboardWithChat.css */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+.dashboard-with-chat-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Contenitore principale dashboard */
+.dashboard-main-container {
+  flex-grow: 1;
+  height: 100%;
+  overflow-y: auto;
+  transition: width 0.3s ease;
+  position: relative;
+  min-width: 0; /* Previene l'overflow del flexbox */
+  z-index: 1;
+}
+
+.dashboard-main-container.with-chat {
+  width: calc(100% - 450px);
+}
+
+/* Contenitore della chat */
+.chat-container {
+  position: relative;
+  height: 100%;
+  background-color: #f8f9fa;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+  transition: width 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 5;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body[data-theme="dark"] .chat-container {
+  background-color: #2a2a2a;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.chat-container.collapsed {
+  width: 60px !important;
+}
+
+.chat-container.expanded {
+  /* La width è impostata inline in modo dinamico */
+}
+
+/* Pulsante per espandere/contrarre la chat */
+.chat-toggle-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  width: 24px;
+  height: 60px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px 0 0 3px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
+}
+
+.chat-toggle-btn:hover {
+  background-color: #0056b3;
+}
+
+body[data-theme="dark"] .chat-toggle-btn {
+  background-color: #0056b3;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .chat-toggle-btn:hover {
+  background-color: #003d82;
+}
+
+/* Contenitore per il componente chat */
+.chat-component-wrapper {
+  flex-grow: 1;
+  overflow-y: auto; /* Allow scrolling within the chat component wrapper */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* Handle per il ridimensionamento */
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 15;
+}
+
+.resize-handle:hover, 
+.resize-handle:active {
+  background-color: rgba(0, 123, 255, 0.2);
+}
+
+body[data-theme="dark"] .resize-handle:hover, 
+body[data-theme="dark"] .resize-handle:active {
+  background-color: rgba(0, 86, 179, 0.2);
+}
+
+/* Stili per ChatComponent header e pulsanti */
+.chat-container .chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+body[data-theme="dark"] .chat-container .chat-header {
+  background-color: #333333;
+  border-bottom: 1px solid #444444;
+}
+
+.chat-container .chat-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+body[data-theme="dark"] .chat-container .chat-title {
+  color: #e0e0e0;
+}
+
+.chat-container .chat-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-container .chat-action-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+body[data-theme="dark"] .chat-container .chat-action-button {
+  color: #aaa;
+}
+
+.chat-container .chat-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #007bff;
+}
+
+body[data-theme="dark"] .chat-container .chat-action-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #3f90f7;
+}
+
+/* Chat quando è in modalità collassata */
+.chat-container.collapsed .chat-component-wrapper {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.chat-container.collapsed .chat-toggle-btn {
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+}
+
+/* Stile per animazione espansione/chiusura */
+.chat-container.expanded {
+  animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(20px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Stile per la modalità mobile */
+@media (max-width: 1024px) {
+  .dashboard-with-chat-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-main-container,
+  .dashboard-main-container.with-chat {
+    width: 100%;
+    height: calc(100vh - 350px);
+  }
+
+  .chat-container,
+  .chat-container.collapsed,
+  .chat-container.expanded {
+    width: 100% !important;
+    height: 350px;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  body[data-theme="dark"] .chat-container {
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .chat-toggle-btn {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 60px;
+    height: 24px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .chat-toggle-btn i {
+    transform: rotate(90deg);
+  }
+
+  .resize-handle {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 10px;
+    cursor: row-resize;
+  }
+}
+
+/* Aggiustamenti per mostrare bene il CloudScape UI */
+.chat-container .awsui {
+  --font-family-base: inherit;
+  --line-height-body-m: 1.4;
+}
+
+/* Evita che il contenuto CloudScape modifichi il layout */
+.chat-container :where(.awsui-polaris-dark-mode, .awsui-polaris-light-mode) {
+  min-height: 0;
+  height: auto;
+}
+
+/* Stili specifici per i componenti della chat */
+.chat-container .chat-messages-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-container .chat-input-area {
+  padding: 10px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+body[data-theme="dark"] .chat-container .chat-input-area {
+  border-top: 1px solid #444444;
+  background-color: #333333;
+}

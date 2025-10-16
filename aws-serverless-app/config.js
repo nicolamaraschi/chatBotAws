@@ -7,9 +7,8 @@ module.exports = {
   AWS_REGION: 'eu-west-1',
   
   // Configurazione CloudConnexa
-  ATHENA_DB: 'cloudconnexa_logs_db',
-  ATHENA_RESULTS_BUCKET: 'horsaruncloudconnexalog',
-  ATHENA_WORKGROUP: 'hrun-cloudconnexa-wg',
+
+  ATHENA_RESULTS_BUCKET: 'horsarun-reportclienti-bucket',
   
   // Configurazione SAP
   SAP_ATHENA_DB: 'sap_reports_db',
