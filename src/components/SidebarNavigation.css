@@ -200,7 +200,7 @@
   flex-grow: 1;
   overflow: auto;
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: transparent; /* Make it transparent */
   transition: margin-left 0.3s ease;
 }
 
@@ -259,7 +259,7 @@ body[data-theme="dark"] .role {
 }
 
 body[data-theme="dark"] .main-content-area {
-  background-color: #1e1e1e;
+  background-color: transparent; /* Make it transparent */
 }
 
 /* Responsive design per mobile */
