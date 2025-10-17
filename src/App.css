@@ -79,7 +79,7 @@ body[data-theme="dark"] .app-background[style*="background-image"] {
   background-position: center;
   
   opacity: 0.4;
-  transition: all 0.2s ease-in-out;
+  
   z-index: 999;
 }
 

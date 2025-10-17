@@ -197,7 +197,7 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     Header() {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}>
-          <img src="/logoHorsa.jpg" alt="Horsa AI Logo" style={{ width: '450px' }} />
+         
         </div>
       );
     }

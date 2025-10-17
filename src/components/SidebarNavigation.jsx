@@ -1,12 +1,13 @@
 // SidebarNavigation.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import DashboardWithChat from '../pages/DashboardWithChat';
-import Dashboard from '../pages/Dashboard'; // Import the new Dashboard component
+import Dashboard from '../pages/Dashboard';
 import ChatComponent from '../ChatComponent';
 import AgendaView from '../pages/AgendaView';
 import ErrorBoundary from './ErrorBoundary';
 import './SidebarNavigation.css';
+import { useTheme } from '../context/ThemeContext';
 
 const SidebarNavigation = ({
   activeView,
@@ -22,6 +23,7 @@ const SidebarNavigation = ({
   isMobile,
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -32,7 +34,6 @@ const SidebarNavigation = ({
     dashboard: <i className="menu-icon fas fa-chart-line"></i>,
     chatbot: <i className="menu-icon fas fa-comments"></i>,
     agenda: <i className="menu-icon fas fa-calendar-alt"></i>,
-    settings: <i className="menu-icon fas fa-cog"></i>
   };
 
   return (
@@ -43,8 +44,8 @@ const SidebarNavigation = ({
             {!sidebarCollapsed && <span className="app-logo">APP</span>}
           </div>
           {!isMobile && (
-            <button 
-              className="toggle-sidebar" 
+            <button
+              className="toggle-sidebar"
               onClick={toggleSidebar}
               aria-label={sidebarCollapsed ? "Espandi sidebar" : "Comprimi sidebar"}
             >
@@ -80,6 +81,19 @@ const SidebarNavigation = ({
             {!sidebarCollapsed && <span className="btn-text">Agenda</span>}
           </button>
         </div>
+
+        {/* --- SEZIONE AGGIUNTA --- */}
+        <div className="sidebar-actions">
+           <button onClick={toggleTheme} title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}>
+             <i className={`menu-icon fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+             {!sidebarCollapsed && <span className="btn-text">{theme === 'light' ? 'Tema Scuro' : 'Tema Chiaro'}</span>}
+           </button>
+           <button onClick={onLogout} title="Logout">
+             <i className="menu-icon fas fa-sign-out-alt"></i>
+             {!sidebarCollapsed && <span className="btn-text">Logout</span>}
+           </button>
+        </div>
+        {/* --- FINE SEZIONE AGGIUNTA --- */}
 
         {!sidebarCollapsed && (
           <div className="user-profile">
@@ -117,14 +131,14 @@ const SidebarNavigation = ({
           )
         )}
         {activeView === 'chatbot' && (
-          <section className="chat-section">
+          <section className="chat-section-fullscreen">
             <ErrorBoundary>
               {user && user.username ? (
                 <ChatComponent
                   user={user}
                   onConfigEditorClick={onConfigEditorClick}
-                  isChatCollapsed={false} /* Always expanded in full-screen view */
-                  toggleChatCollapse={toggleChatCollapse} /* Pass the main toggle function */
+                  isChatCollapsed={false}
+                  toggleChatCollapse={() => { }} // Pass an empty function
                 />
               ) : (
                 <div className="centered-container" style={{ height: '100%' }}>

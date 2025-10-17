@@ -1,4 +1,4 @@
-import useSpeechToText from './js/useSpeechToText';
+import useSpeechToText from '/src/js/useSpeechToText';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from 'rehype-raw'
@@ -25,8 +25,8 @@ import * as AWSAuth from '@aws-amplify/auth';
 import { BedrockAgentRuntimeClient, InvokeAgentCommand } from "@aws-sdk/client-bedrock-agent-runtime";
 import { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } from "@aws-sdk/client-bedrock-agentcore";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
-import { useTheme } from './context/ThemeContext'; // Import useTheme hook
-import './ChatComponent.css';
+import { useTheme } from '/src/context/ThemeContext'; // Import useTheme hook
+import '/src/ChatComponent.css';
 
 const ChatComponent = ({ user, onLogout, isChatCollapsed, toggleChatCollapse }) => {
 
@@ -59,6 +59,14 @@ if (!user || !user?.username) {
   const [isStrandsAgent, setIsStrandsAgent] = useState(false);
   const [isAgentCoreAgent, setIsAgentCoreAgent] = useState(false);
   const [userRole, setUserRole] = useState('cliente');
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   // NUOVI STATE per gestione chat salvate
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -558,7 +566,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="chat-component">
+    <div className={`chat-component ${isReady ? 'ready' : ''}`}>
       <div className="chat-container">
         <TopNavigation
             identity={{
@@ -887,9 +895,9 @@ useEffect(() => {
 
 ChatComponent.propTypes = {
   user: PropTypes.object.isRequired,
+  onLogout: PropTypes.func,
   isChatCollapsed: PropTypes.bool.isRequired,
   toggleChatCollapse: PropTypes.func.isRequired
 };
 
 export default ChatComponent;
-
