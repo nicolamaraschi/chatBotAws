@@ -94,8 +94,8 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     }
     
     if (validColor) {
-      // Crea un background CSS per il colore
-      const colorBg = validColor;
+      // Aggiungi il prefisso "color:" per indicare che è un colore
+      const colorBg = `color:${validColor}`;
       onBackgroundChange(colorBg);
       addToRecentColors(colorBg);
       onClose();
@@ -109,10 +109,13 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
   };
 
   const handleSelectRecentColor = (color) => {
-    onBackgroundChange(color);
-    addToRecentColors(color); // Sposta in cima alla lista
+    // Se il colore non inizia già con 'color:' aggiungi il prefisso
+    const formattedColor = color.startsWith('color:') ? color : `color:${color}`;
+    onBackgroundChange(formattedColor);
+    addToRecentColors(formattedColor); // Sposta in cima alla lista
     onClose();
   };
+  
 
   const handleRemoveBackground = () => {
     onBackgroundChange('');
