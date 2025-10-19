@@ -572,6 +572,58 @@ body[data-theme="dark"] .no-data {
     padding: 0.6rem 0.4rem;
     font-size: 0.85rem;
   }
+  
+  /* Miglioramenti per gli input di data su mobile */
+  .date-inputs {
+    display: flex;
+    flex-direction: column; /* Layout verticale su mobile */
+    gap: 8px;
+    width: 100%;
+  }
+  
+  /* Modifica lo stile della freccia tra le date */
+  .date-inputs span {
+    display: none; /* Nascondi la freccia su mobile */
+  }
+  
+  /* Aggiorna gli input di data per mobile */
+  .date-inputs input[type="date"] {
+    width: 100%;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  /* Miglioramento dello stile del calendario */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: auto; /* Sposta l'indicatore del calendario a destra */
+  }
+  
+  /* Aggiungere etichette per chiarezza */
+  .date-inputs input[type="date"]:first-child::before {
+    content: "Da: ";
+    color: #888;
+  }
+  
+  .date-inputs input[type="date"]:last-child::before {
+    content: "A: ";
+    color: #888;
+  }
+  
+  /* Migliora anche il titolo della sezione Date */
+  .filter-section:nth-child(2) label {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+  }
+  
+  /* Migliora il campo di ricerca SID */
+  input[type="search"], 
+  input[placeholder="Cerca SID..."] {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    width: 100%;
+  }
 }
 
 /* Scrollbar personalizzata per filter-options */

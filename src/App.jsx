@@ -93,12 +93,35 @@ function App() {
     setIsConfigured(true);
   };
 
-  const handleBackgroundChange = (newBg) => {
-    setBackgroundImage(newBg);
-    localStorage.setItem('backgroundImage', newBg);
-  };
+// 1. Aggiorna la funzione handleBackgroundChange per supportare colori
+const handleBackgroundChange = (newBg) => {
+  setBackgroundImage(newBg);
+  localStorage.setItem('backgroundImage', newBg);
+};
 
-  const backgroundStyle = backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {};
+// 2. Modifica la definizione di backgroundStyle
+const backgroundStyle = backgroundImage ? 
+  (backgroundImage.startsWith('color:') 
+    ? { backgroundColor: backgroundImage.substring(6) } 
+    : { backgroundImage: `url(${backgroundImage})` }) 
+  : {};
+
+// 3. Aggiungi questo effect per gestire la classe CSS speciale
+useEffect(() => {
+  // Aggiungi o rimuovi classe CSS per disattivare i gradienti predefiniti
+  if (backgroundImage && backgroundImage.startsWith('color:')) {
+    document.body.classList.add('custom-background-color');
+  } else {
+    document.body.classList.remove('custom-background-color');
+  }
+}, [backgroundImage]);
+
+// 4. Aggiorna l'elemento div dell'app-background
+<div className="app-background" style={{
+  ...backgroundStyle,
+  position: 'relative', 
+  zIndex: 1
+}}></div>
 
   return (
     <ThemeProvider>

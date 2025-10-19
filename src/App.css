@@ -116,3 +116,32 @@ body[data-theme="dark"] .app-background[style*="background-image"] {
     height: 100%; /* Occupy full height in mobile/tablet view */
   }
 }
+
+/* Regole per disattivare i gradienti e gli overlay predefiniti quando si usa un colore personalizzato */
+.custom-background-color {
+  background: none !important;
+}
+
+.custom-background-color .app-background {
+  position: relative;
+  z-index: 1;
+}
+
+.custom-background-color .app-background::before {
+  content: none !important; 
+  display: none !important;
+}
+
+body[data-theme="dark"].custom-background-color .app-background::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Assicuriamo che i gradienti predefiniti siano completamente disabilitati */
+body.custom-background-color {
+  background: none !important;
+}
+
+body[data-theme="dark"].custom-background-color {
+  background: none !important;
+}

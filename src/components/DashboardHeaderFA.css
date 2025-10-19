@@ -1,0 +1,215 @@
+/* Dashboard Header Styles using Font Awesome */
+.dashboard-header-fa {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 16px 24px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+body[data-theme="light"] .dashboard-header-fa {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(250, 250, 250, 0.9));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="dark"] .dashboard-header-fa {
+  background: linear-gradient(to right, rgba(42, 42, 42, 0.9), rgba(33, 33, 33, 0.85));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Header Left Side */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-header-fa h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+body[data-theme="light"] .dashboard-header-fa h1 {
+  color: #333;
+}
+
+body[data-theme="dark"] .dashboard-header-fa h1 {
+  color: #f5f5f5;
+}
+
+.title-icon {
+  font-size: 1.8rem;
+}
+
+body[data-theme="light"] .title-icon {
+  color: #0066cc;
+}
+
+body[data-theme="dark"] .title-icon {
+  color: #5599ff;
+}
+
+/* Header Actions */
+.header-actions-fa {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.icon-btn-fa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+}
+
+body[data-theme="light"] .icon-btn-fa {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #444;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="dark"] .icon-btn-fa {
+  background-color: rgba(66, 66, 66, 0.7);
+  color: #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.icon-btn-fa:hover {
+  transform: translateY(-2px);
+}
+
+body[data-theme="light"] .icon-btn-fa:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #0066cc;
+}
+
+body[data-theme="dark"] .icon-btn-fa:hover {
+  background-color: rgba(77, 77, 77, 0.9);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: #5599ff;
+}
+
+.icon-btn-fa:active {
+  transform: translateY(0);
+}
+
+/* Logout button styling */
+.logout-btn-fa {
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="light"] .logout-btn-fa {
+  color: #d63031;
+  border: 1px solid rgba(214, 48, 49, 0.2);
+}
+
+body[data-theme="dark"] .logout-btn-fa {
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+body[data-theme="light"] .logout-btn-fa:hover {
+  background: rgba(214, 48, 49, 0.1);
+}
+
+body[data-theme="dark"] .logout-btn-fa:hover {
+  background: rgba(255, 107, 107, 0.15);
+}
+
+/* Chat toggle button styling */
+.chat-toggle-btn-fa {
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="light"] .chat-toggle-btn-fa {
+  background: linear-gradient(45deg, rgba(45, 52, 54, 0.05), rgba(99, 110, 114, 0.1));
+  border: 1px solid rgba(45, 52, 54, 0.15);
+}
+
+body[data-theme="dark"] .chat-toggle-btn-fa {
+  background: linear-gradient(45deg, rgba(223, 230, 233, 0.05), rgba(178, 190, 195, 0.1));
+  border: 1px solid rgba(223, 230, 233, 0.15);
+}
+
+body[data-theme="light"] .chat-toggle-btn-fa:hover {
+  background: linear-gradient(45deg, rgba(45, 52, 54, 0.1), rgba(99, 110, 114, 0.15));
+}
+
+body[data-theme="dark"] .chat-toggle-btn-fa:hover {
+  background: linear-gradient(45deg, rgba(223, 230, 233, 0.1), rgba(178, 190, 195, 0.15));
+}
+
+/* Per schermi più piccoli (tablet e mobile) */
+@media (max-width: 768px) {
+  .btn-label-fa {
+    display: none;
+  }
+  
+  .icon-btn-fa {
+    padding: 8px;
+    min-width: 32px;
+    justify-content: center;
+  }
+  
+  .dashboard-header-fa h1 {
+    font-size: 1.1rem;
+  }
+  
+  /* Aumenta lo spazio tra il titolo e le azioni su mobile */
+  .dashboard-header-fa {
+    padding: 10px 12px;
+  }
+  
+  /* Riduci ulteriormente per telefoni molto piccoli */
+  .header-actions-fa {
+    gap: 4px;
+  }
+  
+  /* Rendi l'icona del titolo più piccola */
+  .title-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* Per iPad e tablet in orientamento portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-header-fa h1 {
+    font-size: 1.3rem;
+  }
+  
+  .btn-label-fa {
+    display: none; /* Nascondi le etichette anche su iPad */
+  }
+  
+  .header-actions-fa {
+    gap: 8px;
+  }
+  
+  .icon-btn-fa {
+    padding: 8px 10px;
+  }
+  
+  .title-icon {
+    font-size: 1.5rem;
+  }
+}

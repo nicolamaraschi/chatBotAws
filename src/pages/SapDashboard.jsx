@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+import DashboardHeaderFA from '../components/DashboardHeaderFA';
 import PropTypes from 'prop-types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -7,11 +9,12 @@ import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler } from 'chart.js';
 import { API_URL } from '../config';
 import './SapDashboard.css';
-import BackgroundSelector from './BackgroundSelector'; // Importa il nuovo componente
+import BackgroundSelectorEnhanced from './BackgroundSelectorEnhanced';
 import { useTheme } from '../context/ThemeContext'; // Importa il hook useTheme
 import { BsFileEarmarkPdfFill, BsFileEarmarkExcelFill } from "react-icons/bs";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import { GrDocumentPdf } from "react-icons/gr";
+
 // Aggiungi questa importazione all'inizio del file SapDashboard.jsx
 import { setupChartLegendObserver } from '../utils/chart-legend-fix';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler);
@@ -736,23 +739,22 @@ const handleExportToExcel = () => {
 
   return (
     <div className="sap-dashboard" ref={dashboardRef}>
-    <div className="dashboard-header">
-      <h1>Dashboard SAP - Report Giornalieri</h1>
-      <div className="header-actions">
-        <button onClick={toggleTheme} className="icon-btn" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>{theme === 'light' ? '🌙' : '☀️'}</button>
-        <button onClick={() => setIsBgSelectorOpen(true)} className="icon-btn" title="Change Background">🎨</button>
-        <button onClick={onLogout} className="icon-btn" title="Logout">⏻</button>
-       <div className="export-buttons">
-  <button onClick={() => handleExport('pdf')} className="icon-btn" title="Download PDF">
-    📄
-  </button>
-  <button onClick={handleExportToExcel} className="icon-btn excel-btn" title="Export Excel">
-    📊
-  </button>
-</div>
-        <button onClick={toggleChatCollapse} className="icon-btn" title={isChatCollapsed ? 'Open Chat' : 'Close Chat'}>{isChatCollapsed ? '»' : '«'}</button>
-      </div>
-    </div>
+        <DashboardHeaderFA
+            title="Dashboard SAP - Report Giornalieri"
+            onExport={(type) => {
+              if (type === 'pdf') {
+                handleExport('pdf');
+              } else if (type === 'print') {
+                handleExportToExcel();
+              }
+            }}
+            toggleTheme={toggleTheme}
+            currentTheme={theme}
+            onBgChange={setIsBgSelectorOpen}
+            onLogout={onLogout}
+            toggleChatCollapse={toggleChatCollapse}
+            isChatCollapsed={isChatCollapsed}
+          />
       
    {/* 
 <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '20px', borderRadius: '5px', fontSize: '12px' }}>
@@ -1178,7 +1180,7 @@ const handleExportToExcel = () => {
 )}
         </>
       )}
-      {isBgSelectorOpen && ( <BackgroundSelector onBackgroundChange={onBackgroundChange} onClose={() => setIsBgSelectorOpen(false)} /> )}
+     {isBgSelectorOpen && ( <BackgroundSelectorEnhanced onBackgroundChange={onBackgroundChange} onClose={() => setIsBgSelectorOpen(false)} /> )}
     </div>
   );
 };

@@ -1,0 +1,147 @@
+# ============================================
+# STAGE 1: Build React Frontend
+# ============================================
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /app
+
+# Passa tutte le variabili VITE
+ARG VITE_COGNITO_USER_POOL_ID
+ARG VITE_COGNITO_USER_POOL_CLIENT_ID
+ARG VITE_COGNITO_REGION
+ARG VITE_COGNITO_IDENTITY_POOL_ID
+ARG VITE_BEDROCK_AGENT_NAME
+ARG VITE_BEDROCK_AGENT_ID
+ARG VITE_BEDROCK_AGENT_ALIAS_ID
+ARG VITE_BEDROCK_REGION
+ARG VITE_API_URL
+
+ENV VITE_API_URL=${VITE_API_URL:-/api}
+ENV VITE_COGNITO_USER_POOL_ID=$VITE_COGNITO_USER_POOL_ID
+ENV VITE_COGNITO_USER_POOL_CLIENT_ID=$VITE_COGNITO_USER_POOL_CLIENT_ID
+ENV VITE_COGNITO_REGION=$VITE_COGNITO_REGION
+ENV VITE_COGNITO_IDENTITY_POOL_ID=$VITE_COGNITO_IDENTITY_POOL_ID
+ENV VITE_BEDROCK_AGENT_NAME=$VITE_BEDROCK_AGENT_NAME
+ENV VITE_BEDROCK_AGENT_ID=$VITE_BEDROCK_AGENT_ID
+ENV VITE_BEDROCK_AGENT_ALIAS_ID=$VITE_BEDROCK_AGENT_ALIAS_ID
+ENV VITE_BEDROCK_REGION=$VITE_BEDROCK_REGION
+
+# Installa dipendenze frontend
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copia sorgente frontend e builda
+COPY . .
+RUN npm run build
+
+# ============================================
+# STAGE 2: Prepara Backend
+# ============================================
+FROM node:20-alpine AS backend-build
+
+WORKDIR /app-backend
+
+# Installa dipendenze backend
+COPY aws-serverless-app/package.json aws-serverless-app/package-lock.json* ./
+RUN npm install
+
+# Copia sorgente backend
+COPY aws-serverless-app/ .
+
+# ============================================
+# STAGE 3: Immagine Finale (Nginx + Node + Supervisor)
+# ============================================
+FROM node:20-alpine
+
+# Mettiamo tutto in /app
+WORKDIR /app
+
+# 1. Installa Nginx, Supervisor e curl (per healthcheck)
+RUN apk add --no-cache nginx supervisor curl
+
+# 2. Copia il Frontend buildato (da STAGE 1)
+COPY --from=frontend-build /app/dist /usr/share/nginx/html
+
+# 3. Copia il Backend pronto (da STAGE 2)
+COPY --from=backend-build /app-backend .
+
+# 4. Crea una configurazione Nginx a prova di bomba
+RUN echo 'user node;' > /etc/nginx/nginx.conf && \
+    echo 'pid /tmp/nginx.pid;' >> /etc/nginx/nginx.conf && \
+    echo 'worker_processes auto;' >> /etc/nginx/nginx.conf && \
+    echo 'events { worker_connections 1024; }' >> /etc/nginx/nginx.conf && \
+    echo 'http {' >> /etc/nginx/nginx.conf && \
+    echo '    include       /etc/nginx/mime.types;' >> /etc/nginx/nginx.conf && \
+    echo '    default_type  application/octet-stream;' >> /etc/nginx/nginx.conf && \
+    echo '    sendfile        on;' >> /etc/nginx/nginx.conf && \
+    echo '    keepalive_timeout  65;' >> /etc/nginx/nginx.conf && \
+    echo '    server {' >> /etc/nginx/nginx.conf && \
+    echo '        listen 8080;' >> /etc/nginx/nginx.conf && \
+    echo '        root /usr/share/nginx/html;' >> /etc/nginx/nginx.conf && \
+    echo '        location / {' >> /etc/nginx/nginx.conf && \
+    echo '            try_files $uri $uri/ /index.html;' >> /etc/nginx/nginx.conf && \
+    echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '        location /api/ {' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_pass http://localhost:3001;' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_set_header Connection "upgrade";' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+    echo '            proxy_cache_bypass $http_upgrade;' >> /etc/nginx/nginx.conf && \
+    echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '        location /health {' >> /etc/nginx/nginx.conf && \
+    echo '            access_log off;' >> /etc/nginx/nginx.conf && \
+    echo '            return 200 "OK";' >> /etc/nginx/nginx.conf && \
+    echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '    }' >> /etc/nginx/nginx.conf && \
+    echo '}' >> /etc/nginx/nginx.conf
+
+# 5. Crea una configurazione supervisord a prova di bomba
+RUN echo '[supervisord]' > /etc/supervisord.conf && \
+    echo 'nodaemon=true' >> /etc/supervisord.conf && \
+    echo 'user=root' >> /etc/supervisord.conf && \
+    echo '' >> /etc/supervisord.conf && \
+    echo '[program:nginx]' >> /etc/supervisord.conf && \
+    echo 'command=nginx -g "daemon off; pid /tmp/nginx.pid;"' >> /etc/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile=/dev/stdout' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo '' >> /etc/supervisord.conf && \
+    echo '[program:backend]' >> /etc/supervisord.conf && \
+    echo 'command=node index.js' >> /etc/supervisord.conf && \
+    echo 'directory=/app' >> /etc/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile=/dev/stdout' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf
+
+# 6. Fix TUTTI i permessi necessari
+RUN mkdir -p /run/nginx && \
+    mkdir -p /tmp && \
+    mkdir -p /var/lib/nginx/tmp && \
+    mkdir -p /var/log/nginx && \
+    chmod -R 777 /run && \
+    chmod -R 777 /var/lib/nginx && \
+    chmod -R 777 /var/log/nginx && \
+    chmod -R 777 /tmp && \
+    chmod -R 777 /usr/share/nginx/html && \
+    chown -R node:node /run && \
+    chown -R node:node /var/lib/nginx && \
+    chown -R node:node /var/log/nginx && \
+    chown -R node:node /tmp && \
+    chown -R node:node /usr/share/nginx/html
+
+# Esponi la porta 8080
+EXPOSE 8080
+
+# Health check: controlla che Nginx risponda sulla porta 8080 (non 80!)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Avvia Supervisor, che avvierà Nginx E Node
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
