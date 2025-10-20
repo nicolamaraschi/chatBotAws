@@ -56,13 +56,16 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
 
   // Funzione per aggiungere un nuovo colore alla cronologia
   const addToRecentColors = (color) => {
-    if (!color) return;
+    if (!color || typeof color !== 'string') return;
+    
+    // Standardizza il formato per tutti i colori
+    const standardizedColor = color.startsWith('color:') ? color : `color:${color}`;
     
     // Crea una nuova lista di colori recenti
     const updatedColors = [
-      color,
+      standardizedColor,
       // Filtra i colori esistenti rimuovendo duplicati e limitando la lunghezza
-      ...recentColors.filter(item => item !== color)
+      ...recentColors.filter(item => item !== standardizedColor)
     ].slice(0, MAX_RECENT_ITEMS);
     
     // Aggiorna lo stato
@@ -75,6 +78,8 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
       console.error('Errore nel salvare i colori recenti:', error);
     }
   };
+  
+  
 
   const handleSetBackground = () => {
     if (newBg) {
@@ -109,8 +114,18 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
   };
 
   const handleSelectRecentColor = (color) => {
-    // Se il colore non inizia già con 'color:' aggiungi il prefisso
-    const formattedColor = color.startsWith('color:') ? color : `color:${color}`;
+    // Verifica se color è una stringa e gestisce il caso in cui non lo sia
+    if (typeof color !== 'string') {
+      console.error('Errore: Il colore selezionato non è una stringa valida', color);
+      return;
+    }
+  
+    // Se il colore è una stringa che inizia con 'color:', estrai il colore reale
+    const actualColor = color.startsWith('color:') ? color.substring(6) : color;
+    
+    // Quindi aggiungi il prefisso "color:" per standardizzare
+    const formattedColor = `color:${actualColor}`;
+    
     onBackgroundChange(formattedColor);
     addToRecentColors(formattedColor); // Sposta in cima alla lista
     onClose();

@@ -1,6 +1,13 @@
 /* DashboardWithChat.css */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
+/* Nascondi la scrollbar esterna del body e html */
+html, body, #root, .app-background {
+  overflow: hidden !important;
+  height: 100vh;
+  width: 100vw;
+}
+
 .dashboard-with-chat-layout {
   display: flex;
   width: 100%;
@@ -14,10 +21,58 @@
   flex-grow: 1;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   transition: width 0.3s ease;
   position: relative;
   min-width: 0; /* Previene l'overflow del flexbox */
   z-index: 1;
+}
+
+/* Regola per nascondere la scrollbar in Chrome/Safari senza rimuovere la funzionalità */
+.dashboard-with-chat-layout::-webkit-scrollbar,
+body::-webkit-scrollbar,
+html::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+.app-background::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  background: transparent;
+}
+
+/* Per Firefox */
+.dashboard-with-chat-layout, body, html, #root, .app-background {
+  scrollbar-width: none;
+}
+
+/* Personalizza la scrollbar visibile nel contenitore principale */
+.dashboard-main-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-main-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.dashboard-main-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.dashboard-main-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .dashboard-main-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body[data-theme="dark"] .dashboard-main-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body[data-theme="dark"] .dashboard-main-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .dashboard-main-container.with-chat {
@@ -43,7 +98,33 @@ body[data-theme="dark"] .chat-container {
 }
 
 .chat-container.collapsed {
-  width: 60px !important;
+  width: 0px !important;  /* Invece di 60px */
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: none;
+  visibility: hidden;  /* Nasconde completamente l'elemento */
+  opacity: 0;          /* Rende l'elemento trasparente */
+}
+
+.dashboard-main-container:not(.with-chat) .chat-toggle-btn-fa {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Inverte l'icona quando la chat è collassata */
+.dashboard-main-container:not(.with-chat) .chat-toggle-btn-fa i {
+  transform: rotate(180deg);
+}
+
+/* Assicuriamoci che il pulsante sia visibile anche quando la chat è nascosta */
+.icon-btn-fa.chat-toggle-btn-fa {
+  z-index: 1000;
 }
 
 .chat-container.expanded {

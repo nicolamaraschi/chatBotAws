@@ -82,18 +82,23 @@ const SidebarNavigation = ({
           </button>
         </div>
 
-        {/* --- SEZIONE AGGIUNTA --- */}
         <div className="sidebar-actions">
            <button onClick={toggleTheme} title={theme === 'light' ? 'Passa al tema scuro' : 'Passa al tema chiaro'}>
              <i className={`menu-icon fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
              {!sidebarCollapsed && <span className="btn-text">{theme === 'light' ? 'Tema Scuro' : 'Tema Chiaro'}</span>}
            </button>
+           
+           {/* Bottone Sfondo aggiunto qui, dopo il bottone del tema */}
+           <button onClick={onBackgroundChange} title="Cambia sfondo">
+             <i className="menu-icon fas fa-image"></i>
+             {!sidebarCollapsed && <span className="btn-text">Sfondo</span>}
+           </button>
+           
            <button onClick={onLogout} title="Logout">
              <i className="menu-icon fas fa-sign-out-alt"></i>
              {!sidebarCollapsed && <span className="btn-text">Logout</span>}
            </button>
         </div>
-        {/* --- FINE SEZIONE AGGIUNTA --- */}
 
         {!sidebarCollapsed && (
           <div className="user-profile">

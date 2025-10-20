@@ -100,16 +100,17 @@ const handleBackgroundChange = (newBg) => {
 };
 
 // 2. Modifica la definizione di backgroundStyle
-const backgroundStyle = backgroundImage ? 
-  (backgroundImage.startsWith('color:') 
-    ? { backgroundColor: backgroundImage.substring(6) } 
-    : { backgroundImage: `url(${backgroundImage})` }) 
+// Definizione corretta di backgroundStyle con controllo del tipo
+const backgroundStyle = backgroundImage 
+  ? (typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')
+      ? { backgroundColor: backgroundImage.substring(6) } 
+      : { backgroundImage: `url(${backgroundImage})` }) 
   : {};
 
-// 3. Aggiungi questo effect per gestire la classe CSS speciale
+// Effect corretto con controllo del tipo
 useEffect(() => {
   // Aggiungi o rimuovi classe CSS per disattivare i gradienti predefiniti
-  if (backgroundImage && backgroundImage.startsWith('color:')) {
+  if (backgroundImage && typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')) {
     document.body.classList.add('custom-background-color');
   } else {
     document.body.classList.remove('custom-background-color');
@@ -314,37 +315,19 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
   }
 
   return (
-    <>
-      <TopNavigation
-        identity={{
-          href: "#",
-          title: `Welcome, ${user.username}`,
-        }}
-        utilities={userRole === 'admin' ? [
-          {
-            type: "button",
-            iconName: "settings",
-            title: "Update settings",
-            ariaLabel: "Update settings",
-            disableUtilityCollapse: false,
-            onClick: onEditConfigClick
-          }
-        ] : []}
-      />
-      <SidebarNavigation
-        activeView={activeView}
-        setActiveView={setActiveView}
-        onBackgroundChange={onBackgroundChange}
-        onLogout={signOut}
-        userRole={userRole}
-        userClientName={userClientName}
-        isChatCollapsed={isChatCollapsed}
-        toggleChatCollapse={toggleChatCollapse}
-        onConfigEditorClick={onEditConfigClick}
-        user={user}
-        isMobile={isMobile}
-      />
-    </>
+    <SidebarNavigation
+      activeView={activeView}
+      setActiveView={setActiveView}
+      onBackgroundChange={onBackgroundChange}
+      onLogout={signOut}
+      userRole={userRole}
+      userClientName={userClientName}
+      isChatCollapsed={isChatCollapsed}
+      toggleChatCollapse={toggleChatCollapse}
+      onConfigEditorClick={onEditConfigClick}
+      user={user}
+      isMobile={isMobile}
+    />
   );
 }
 

@@ -1,9 +1,12 @@
-/* SAP Dashboard Styles */
+/* SAP Dashboard Styles - Versione pulita */
 
 .sap-dashboard {
   padding: 2rem;
   max-width: 1600px;
   margin: 0 auto;
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 body[data-theme="dark"] .sap-dashboard {
@@ -657,8 +660,6 @@ body[data-theme="dark"] .filter-options::-webkit-scrollbar-thumb:hover {
   background: #888;
 }
 
-/* Aggiungi queste regole alla fine del file SapDashboard.css */
-
 /* Stili per la tabella dettagliata Cliente/SID */
 .details-table tbody tr.first-of-client {
   border-top: 3px solid #007bff;
@@ -715,108 +716,6 @@ body[data-theme="dark"] .details-table tbody tr:hover {
   box-shadow: inset 0 0 0 1px #3f51b5;
 }
 
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  background-color: #f0f0f0;
-  padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-body[data-theme="dark"] .dashboard-header {
-  background-color: #2a2a2a;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-btn {
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-body[data-theme="dark"] .icon-btn {
-  background: #333333;
-  border: 1px solid #444444;
-  color: #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.icon-btn:hover {
-  background: #f0f0f0;
-}
-
-body[data-theme="dark"] .icon-btn:hover {
-  background: #444444;
-}
-
-.export-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-body[data-theme="dark"] .export-btn {
-  background-color: #0056b3;
-}
-
-.export-btn:hover {
-  background-color: #0056b3;
-}
-
-body[data-theme="dark"] .export-btn:hover {
-  background-color: #003d82;
-}
-
-/* Stile per il pulsante Excel */
-.excel-btn {
-  background-color: #217346 !important; /* Colore verde Excel */
-  color: white !important;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/*
-.excel-btn::before {
-  content: '📊';
-  font-size: 1.1em;
-}
-*/
-
-.excel-btn:hover {
-  background-color: #1e6b3e !important;
-}
-
-body[data-theme="dark"] .excel-btn {
-  background-color: #185a37 !important;
-}
-
-body[data-theme="dark"] .excel-btn:hover {
-  background-color: #154e30 !important;
-}
-
 /* ULTIMATE FIX per le legende Chart.js in dark mode */
 body[data-theme="dark"] .chart-card:has(canvas) ul li span,
 body[data-theme="dark"] .chart-container:has(canvas) span {
@@ -832,4 +731,37 @@ body[data-theme="dark"] .chart-card span {
 body[data-theme="dark"] .chart-container text,
 body[data-theme="dark"] .chart-card text {
   fill: #e0e0e0 !important;
+}
+
+/* Rimuove lo scrollbar principale sul lato destro */
+html {
+  overflow: hidden;
+}
+
+/* Contenitore principale senza scrollbar visibile, ma con funzionalità di scroll */
+.dashboard-with-chat-layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Mantieni l'overflow per il contenuto principale, ma nascondi la scrollbar */
+.dashboard-main-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Nascondi la scrollbar in Chrome, Safari, Edge */
+.dashboard-main-container::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Nascondi la scrollbar in Firefox */
+.dashboard-main-container {
+  scrollbar-width: none;
+}
+
+/* Nascondi la scrollbar in IE e Edge vecchi */
+.dashboard-main-container {
+  -ms-overflow-style: none;
 }

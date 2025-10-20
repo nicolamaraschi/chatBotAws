@@ -60,31 +60,32 @@ const DashboardWithChat = ({
     };
   }, []);
 
-  return (
-    <div className="dashboard-with-chat-layout">
-      {/* Dashboard principale */}
-      <div className={`dashboard-main-container ${!isChatCollapsed ? 'with-chat' : ''}`}>
-        <ErrorBoundary>
-          <SapDashboard 
-            onBackgroundChange={onBackgroundChange} 
-            onLogout={onLogout} 
-            userRole={userRole}
-            userClientName={userClientName}
-            isChatCollapsed={isChatCollapsed}
-            toggleChatCollapse={toggleChatCollapse}
-          />
-        </ErrorBoundary>
-      </div>
-      
-      {/* Chat panel */}
-      {!isMobile && (
+// DashboardWithChat.jsx - Codice aggiornato
+// Sostituisci tutta la sezione return con questo codice:
+
+return (
+  <div className="dashboard-with-chat-layout">
+    {/* Dashboard principale */}
+    <div className={`dashboard-main-container ${!isChatCollapsed ? 'with-chat' : ''}`}>
+      <ErrorBoundary>
+        <SapDashboard 
+          onBackgroundChange={onBackgroundChange} 
+          onLogout={onLogout} 
+          userRole={userRole}
+          userClientName={userClientName}
+          isChatCollapsed={isChatCollapsed}
+          toggleChatCollapse={toggleChatCollapse}
+        />
+      </ErrorBoundary>
+    </div>
+    
+    {/* Chat panel - renderizzato solo quando non è collassato */}
+    {!isMobile && !isChatCollapsed && (
       <div 
-        className={`chat-container ${isChatCollapsed ? 'collapsed' : 'expanded'}`}
-        style={{ width: isChatCollapsed ? '60px' : `${chatWidth}px` }}
+        className="chat-container expanded"
+        style={{ width: `${chatWidth}px` }}
         ref={chatContainerRef}
       >
-       
-        
         {/* Chat Component */}
         <div className="chat-component-wrapper">
           <ErrorBoundary>
@@ -98,16 +99,14 @@ const DashboardWithChat = ({
         </div>
         
         {/* Handle per il ridimensionamento manuale */}
-        {!isChatCollapsed && (
-          <div 
-            className="resize-handle"
-            onMouseDown={startResize}
-          ></div>
-        )}
+        <div 
+          className="resize-handle"
+          onMouseDown={startResize}
+        ></div>
       </div>
-      )}
-    </div>
-  );
+    )}
+  </div>
+);
 };
 
 DashboardWithChat.propTypes = {
