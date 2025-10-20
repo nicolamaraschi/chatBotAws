@@ -574,14 +574,7 @@ useEffect(() => {
               title: `Chat with ${agentName.value}${userRole === 'admin' ? ' 👑 [ADMIN]' : ''}${currentChatName ? ` - ${currentChatName}` : ''}`,
             }}
             utilities={[
-                {
-                  type: "button",
-                  iconName: "angle-right",
-                  title: "Collapse chat panel",
-                  ariaLabel: "Collapse chat panel",
-                  onClick: toggleChatCollapse,
-                  disableUtilityCollapse: true,
-                },
+              
                 {
                   type: "button",
                   text: "🗑️",  // Emoji cestino

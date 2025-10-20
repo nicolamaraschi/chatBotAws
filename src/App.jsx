@@ -19,12 +19,14 @@ import ConfigComponent from './ConfigComponent';
 import SapDashboard from './pages/SapDashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import SidebarNavigation from './components/SidebarNavigation'; // Importa il nuovo componente SidebarNavigation
+import SidebarNavigation from './components/SidebarNavigation';
+import BackgroundSelectorEnhanced from './pages/BackgroundSelectorEnhanced'; // Importa il componente per il cambio sfondo
 
 function App() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [isEditingConfig, setIsEditingConfig] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState('');
+  const [isBgSelectorOpen, setIsBgSelectorOpen] = useState(false); // Stato per gestire l'apertura del selettore di sfondo
 
   useEffect(() => {
     // Controlla se esiste già una configurazione
@@ -93,40 +95,42 @@ function App() {
     setIsConfigured(true);
   };
 
-// 1. Aggiorna la funzione handleBackgroundChange per supportare colori
-const handleBackgroundChange = (newBg) => {
-  setBackgroundImage(newBg);
-  localStorage.setItem('backgroundImage', newBg);
-};
+  // Funzione aggiornata per gestire l'apertura del selettore o l'applicazione diretta dello sfondo
+  const handleBackgroundChange = (newBg) => {
+    if (newBg === undefined) {
+      // Se chiamato senza parametri, apri il selettore
+      setIsBgSelectorOpen(true);
+    } else {
+      // Altrimenti, imposta direttamente il nuovo sfondo
+      setBackgroundImage(newBg);
+      localStorage.setItem('backgroundImage', newBg);
+    }
+  };
 
-// 2. Modifica la definizione di backgroundStyle
-// Definizione corretta di backgroundStyle con controllo del tipo
-const backgroundStyle = backgroundImage 
-  ? (typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')
-      ? { backgroundColor: backgroundImage.substring(6) } 
-      : { backgroundImage: `url(${backgroundImage})` }) 
-  : {};
+  // Definizione corretta di backgroundStyle con controllo del tipo
+  const backgroundStyle = backgroundImage 
+    ? (typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')
+        ? { backgroundColor: backgroundImage.substring(6) } 
+        : { backgroundImage: `url(${backgroundImage})` }) 
+    : {};
 
-// Effect corretto con controllo del tipo
-useEffect(() => {
-  // Aggiungi o rimuovi classe CSS per disattivare i gradienti predefiniti
-  if (backgroundImage && typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')) {
-    document.body.classList.add('custom-background-color');
-  } else {
-    document.body.classList.remove('custom-background-color');
-  }
-}, [backgroundImage]);
-
-// 4. Aggiorna l'elemento div dell'app-background
-<div className="app-background" style={{
-  ...backgroundStyle,
-  position: 'relative', 
-  zIndex: 1
-}}></div>
+  // Effect per gestire la classe CSS per i colori di sfondo
+  useEffect(() => {
+    // Aggiungi o rimuovi classe CSS per disattivare i gradienti predefiniti
+    if (backgroundImage && typeof backgroundImage === 'string' && backgroundImage.startsWith('color:')) {
+      document.body.classList.add('custom-background-color');
+    } else {
+      document.body.classList.remove('custom-background-color');
+    }
+  }, [backgroundImage]);
 
   return (
     <ThemeProvider>
-      <div className="app-background" style={backgroundStyle}>
+      <div className="app-background" style={{
+        ...backgroundStyle,
+        position: 'relative', 
+        zIndex: 1
+      }}>
         {!isConfigured || isEditingConfig ? (
           <ConfigComponent 
             onConfigSet={handleConfigSet} 
@@ -138,7 +142,9 @@ useEffect(() => {
             <ErrorBoundary>
               <AuthenticatedComponent 
                 onEditConfigClick={() => setIsEditingConfig(true)} 
-                onBackgroundChange={handleBackgroundChange} 
+                onBackgroundChange={handleBackgroundChange}
+                isBgSelectorOpen={isBgSelectorOpen}
+                setIsBgSelectorOpen={setIsBgSelectorOpen} 
               />
             </ErrorBoundary>
           </Authenticator.Provider>
@@ -148,7 +154,12 @@ useEffect(() => {
   );
 }
 
-const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
+const AuthenticatedComponent = ({ 
+  onEditConfigClick, 
+  onBackgroundChange, 
+  isBgSelectorOpen,
+  setIsBgSelectorOpen 
+}) => {
   const { user, authStatus, signOut } = useAuthenticator((context) => [context.user, context.authStatus, context.signOut]);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(true);
@@ -296,8 +307,8 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
     );
   }
 
-  if (isMobile) {
-    return (
+  return (
+    <>
       <SidebarNavigation
         activeView={activeView}
         setActiveView={setActiveView}
@@ -311,29 +322,26 @@ const AuthenticatedComponent = ({ onEditConfigClick, onBackgroundChange }) => {
         user={user}
         isMobile={isMobile}
       />
-    );
-  }
-
-  return (
-    <SidebarNavigation
-      activeView={activeView}
-      setActiveView={setActiveView}
-      onBackgroundChange={onBackgroundChange}
-      onLogout={signOut}
-      userRole={userRole}
-      userClientName={userClientName}
-      isChatCollapsed={isChatCollapsed}
-      toggleChatCollapse={toggleChatCollapse}
-      onConfigEditorClick={onEditConfigClick}
-      user={user}
-      isMobile={isMobile}
-    />
+      
+      {/* Mostra il selettore di sfondo quando necessario */}
+      {isBgSelectorOpen && (
+        <BackgroundSelectorEnhanced
+          onBackgroundChange={(newBg) => {
+            onBackgroundChange(newBg);
+            setIsBgSelectorOpen(false);
+          }}
+          onClose={() => setIsBgSelectorOpen(false)} 
+        />
+      )}
+    </>
   );
-}
+};
 
 AuthenticatedComponent.propTypes = {
   onEditConfigClick: PropTypes.func.isRequired,
-  onBackgroundChange: PropTypes.func.isRequired
+  onBackgroundChange: PropTypes.func.isRequired,
+  isBgSelectorOpen: PropTypes.bool.isRequired,
+  setIsBgSelectorOpen: PropTypes.func.isRequired
 };
 
 export default App;

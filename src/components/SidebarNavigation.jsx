@@ -66,19 +66,19 @@ const SidebarNavigation = ({
           <button
             className={activeView === 'chatbot' ? 'active' : ''}
             onClick={() => setActiveView('chatbot')}
-            title="Chatbot"
+            title="Agent AI"
           >
             {menuIcons.chatbot}
-            {!sidebarCollapsed && <span className="btn-text">Chatbot</span>}
-            {!sidebarCollapsed && <span className="badge">3</span>}
+            {!sidebarCollapsed && <span className="btn-text">Agent AI</span>}
+            {/* Numero rimosso */}
           </button>
           <button
             className={activeView === 'agenda' ? 'active' : ''}
             onClick={() => setActiveView('agenda')}
-            title="Agenda"
+            title="Patching Schedule"
           >
             {menuIcons.agenda}
-            {!sidebarCollapsed && <span className="btn-text">Agenda</span>}
+            {!sidebarCollapsed && <span className="btn-text">Patching Schedule</span>}
           </button>
         </div>
 
@@ -88,8 +88,10 @@ const SidebarNavigation = ({
              {!sidebarCollapsed && <span className="btn-text">{theme === 'light' ? 'Tema Scuro' : 'Tema Chiaro'}</span>}
            </button>
            
-           {/* Bottone Sfondo aggiunto qui, dopo il bottone del tema */}
-           <button onClick={onBackgroundChange} title="Cambia sfondo">
+           <button 
+             onClick={() => onBackgroundChange()} 
+             title="Cambia sfondo"
+           >
              <i className="menu-icon fas fa-image"></i>
              {!sidebarCollapsed && <span className="btn-text">Sfondo</span>}
            </button>
@@ -115,7 +117,7 @@ const SidebarNavigation = ({
         {activeView === 'dashboard' && (
           isMobile ? (
             <Dashboard
-              onBackgroundChange={onBackgroundChange}
+              onBackgroundChange={() => onBackgroundChange()}
               onLogout={onLogout}
               userRole={userRole}
               userClientName={userClientName}
@@ -123,7 +125,7 @@ const SidebarNavigation = ({
             />
           ) : (
             <DashboardWithChat
-              onBackgroundChange={onBackgroundChange}
+              onBackgroundChange={() => onBackgroundChange()}
               onLogout={onLogout}
               userRole={userRole}
               userClientName={userClientName}
