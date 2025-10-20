@@ -11,6 +11,9 @@ const AgendaView = ({ userRole, userClientName, user }) => {
   const [error, setError] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [taskToReject, setTaskToReject] = useState(null);
 
   const isClientRole = userRole === 'cliente';
   const isAdminRole = userRole === 'admin';
@@ -149,13 +152,107 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     }
   };
 
-  const TaskForm = ({ task, onSave, onCancel, userRole, userClientName }) => {
+  const handleRejectTask = (task) => {
+    setTaskToReject(task);
+    setRejectionReason("");
+    setShowRejectionModal(true);
+  };
+
+  const submitRejection = async () => {
+    if (!taskToReject) return;
+    
+    setLoading(true);
+    try {
+      const updatedTask = {
+        id: taskToReject.id,
+        status: 'rifiutata',
+        motivazioneRifiuto: rejectionReason
+      };
+      
+      await axios.put(`${API_URL}/agenda/tasks/${taskToReject.id}`, updatedTask);
+      setShowRejectionModal(false);
+      setTaskToReject(null);
+      setRejectionReason("");
+      setShowTaskForm(false);
+      fetchTasks();
+    } catch (err) {
+      console.error('Errore nel rifiuto dell\'attività:', err);
+      setError('Impossibile registrare il rifiuto dell\'attività.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }) => {
     const [formData, setFormData] = useState({
       status: 'proposta',
       ...task
     });
+    const [clients, setClients] = useState([]);
+    const [sids, setSids] = useState([]);
+    const [loadingClients, setLoadingClients] = useState(false);
+    const [loadingSids, setLoadingSids] = useState(false);
+    const [loadingError, setLoadingError] = useState(null);
     
     const isReadOnly = formData.readOnly === true;
+    const isClientRole = userRole === 'cliente';
+    const isAdminRole = userRole === 'admin';
+
+    // Carica la lista dei clienti all'inizializzazione
+    useEffect(() => {
+      if (isAdminRole) {
+        fetchClients();
+      }
+    }, [isAdminRole]);
+
+    // Carica i SID quando viene selezionato un cliente
+    useEffect(() => {
+      if (isAdminRole && formData.nomeCliente) {
+        fetchSids(formData.nomeCliente);
+      }
+    }, [isAdminRole, formData.nomeCliente]);
+
+    const fetchClients = async () => {
+      setLoadingClients(true);
+      setLoadingError(null);
+      try {
+        // Utilizziamo l'endpoint API esistente per ottenere i clienti
+        const response = await axios.get(`${API_URL}/sap/clients`);
+        setClients(response.data);
+      } catch (err) {
+        console.error('Errore nel recupero dei clienti:', err);
+        setLoadingError('Impossibile caricare la lista dei clienti. Riprova più tardi.');
+      } finally {
+        setLoadingClients(false);
+      }
+    };
+
+    const fetchSids = async (clientName) => {
+      if (!clientName) return;
+      
+      setLoadingSids(true);
+      setLoadingError(null);
+      try {
+        // Utilizziamo l'endpoint API esistente per ottenere i SID
+        const response = await axios.get(`${API_URL}/sap/sids?clientName=${encodeURIComponent(clientName)}`);
+        setSids(response.data);
+        
+        // Se non c'è un SID selezionato o non è nella lista, seleziona il primo
+        if (!formData.sid || !response.data.some(s => s.sid === formData.sid)) {
+          if (response.data.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              sid: response.data[0].sid
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('Errore nel recupero dei SID:', err);
+        setLoadingError('Impossibile caricare la lista dei SID per il cliente selezionato.');
+      } finally {
+        setLoadingSids(false);
+      }
+    };
     
     const handleChange = (e) => {
       const { name, value, type, checked } = e.target;
@@ -180,34 +277,104 @@ const AgendaView = ({ userRole, userClientName, user }) => {
       }
     };
     
+    // Se il cliente sceglie "rifiutata", mostriamo il modal
+    const handleStatusChange = (e) => {
+      const newStatus = e.target.value;
+      
+      if (isClientRole && newStatus === 'rifiutata') {
+        // Se è previsto un handler per il rifiuto con motivazione
+        if (onReject && formData.id) {
+          e.preventDefault(); // Previene il cambiamento diretto dello stato
+          onReject(formData);
+          return;
+        }
+      }
+      
+      // Altrimenti procedi normalmente
+      handleChange(e);
+    };
+    
     return (
       <div className="task-form-overlay">
         <div className="task-form-content">
           <h3>{formData.id ? 'Gestione Attività' : 'Nuova Attività'}</h3>
+          {loadingError && <div className="form-error">{loadingError}</div>}
+          
           <form onSubmit={handleSubmit}>
-            {/* Campi principali - disabilitati se in readOnly */}
-            <div className="form-group">
-              <label>Cliente:</label>
-              <input 
-                type="text" 
-                name="nomeCliente" 
-                value={formData.nomeCliente} 
-                onChange={handleChange} 
-                required 
-                disabled={isReadOnly || (userRole === 'cliente')} 
-              />
-            </div>
-            <div className="form-group">
-              <label>SID:</label>
-              <input 
-                type="text" 
-                name="sid" 
-                value={formData.sid} 
-                onChange={handleChange} 
-                required 
-                disabled={isReadOnly || (userRole === 'cliente')} 
-              />
-            </div>
+            {/* Per admin, usiamo il selettore di clienti e SID */}
+            {isAdminRole ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="clientSelector">Cliente:</label>
+                  <div className="selector-wrapper">
+                    <select 
+                      id="clientSelector"
+                      name="nomeCliente"
+                      value={formData.nomeCliente} 
+                      onChange={handleChange}
+                      disabled={loadingClients}
+                      required
+                    >
+                      <option value="">-- Seleziona cliente --</option>
+                      {clients.map((client) => (
+                        <option key={client.nomecliente} value={client.nomecliente}>
+                          {client.nomecliente}
+                        </option>
+                      ))}
+                    </select>
+                    {loadingClients && <span className="loading-indicator">⟳</span>}
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="sidSelector">SID:</label>
+                  <div className="selector-wrapper">
+                    <select 
+                      id="sidSelector"
+                      name="sid"
+                      value={formData.sid} 
+                      onChange={handleChange}
+                      disabled={loadingSids || !formData.nomeCliente}
+                      required
+                    >
+                      <option value="">-- Seleziona SID --</option>
+                      {sids.map((sidObj) => (
+                        <option key={sidObj.sid} value={sidObj.sid}>
+                          {sidObj.sid}
+                        </option>
+                      ))}
+                    </select>
+                    {loadingSids && <span className="loading-indicator">⟳</span>}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="form-group">
+                  <label>Cliente:</label>
+                  <input 
+                    type="text" 
+                    name="nomeCliente" 
+                    value={formData.nomeCliente} 
+                    onChange={handleChange} 
+                    required 
+                    disabled={isReadOnly || (userRole === 'cliente')} 
+                  />
+                </div>
+                <div className="form-group">
+                  <label>SID:</label>
+                  <input 
+                    type="text" 
+                    name="sid" 
+                    value={formData.sid} 
+                    onChange={handleChange} 
+                    required 
+                    disabled={isReadOnly || (userRole === 'cliente')} 
+                  />
+                </div>
+              </>
+            )}
+
             <div className="form-group">
               <label>Data:</label>
               <input 
@@ -278,7 +445,7 @@ const AgendaView = ({ userRole, userClientName, user }) => {
             {isClientRole && formData.id && (!formData.status || formData.status === 'proposta') && (
               <div className="form-group">
                 <label>Risposta alla proposta:</label>
-                <select name="status" value={formData.status || 'proposta'} onChange={handleChange}>
+                <select name="status" value={formData.status || 'proposta'} onChange={handleStatusChange}>
                   <option value="proposta">In attesa</option>
                   <option value="accettata">Accettare</option>
                   <option value="rifiutata">Rifiutare</option>
@@ -289,41 +456,35 @@ const AgendaView = ({ userRole, userClientName, user }) => {
             {/* Checkbox canClientEdit - solo per admin */}
             {isAdminRole && (
               <div className="form-group checkbox-group">
-                <input 
-                  type="checkbox" 
-                  name="canClientEdit" 
-                  checked={formData.canClientEdit} 
-                  onChange={handleChange} 
-                  id="canClientEdit" 
-                />
-                <label htmlFor="canClientEdit">Il cliente può modificare i dettagli dell'attività</label>
+                <div className="edit-permission-container">
+                  <input 
+                    type="checkbox" 
+                    name="canClientEdit" 
+                    checked={formData.canClientEdit} 
+                    onChange={handleChange} 
+                    id="canClientEdit" 
+                  />
+                  <label htmlFor="canClientEdit">
+                    {formData.canClientEdit ? '🔓' : '🔒'} 
+                    Il cliente può modificare i dettagli dell'attività
+                  </label>
+                </div>
+              </div>
+            )}
+            
+            {/* Motivazione di rifiuto (solo admin può visualizzare) */}
+            {isAdminRole && formData.motivazioneRifiuto && (
+              <div className="form-group">
+                <label>Motivazione del rifiuto:</label>
+                <div className="rejection-reason">
+                  {formData.motivazioneRifiuto}
+                </div>
               </div>
             )}
             
             <div className="form-actions">
-              {/* Se è in readOnly e il cliente non ha scelto, mostriamo opzioni di accettazione dirette */}
-              {isReadOnly && isClientRole && (!formData.status || formData.status === 'proposta') ? (
-                <>
-                  <button type="button" className="btn-accept" onClick={() => {
-                    setFormData(prev => ({...prev, status: 'accettata'}));
-                    setTimeout(() => handleSubmit({preventDefault: () => {}}), 100);
-                  }}>
-                    Accetta
-                  </button>
-                  <button type="button" className="btn-reject" onClick={() => {
-                    setFormData(prev => ({...prev, status: 'rifiutata'}));
-                    setTimeout(() => handleSubmit({preventDefault: () => {}}), 100);
-                  }}>
-                    Rifiuta
-                  </button>
-                  <button type="button" onClick={onCancel} className="btn-secondary">Annulla</button>
-                </>
-              ) : (
-                <>
-                  <button type="submit" className="btn-primary">Salva</button>
-                  <button type="button" onClick={onCancel} className="btn-secondary">Annulla</button>
-                </>
-              )}
+              <button type="submit">Salva</button>
+              <button type="button" onClick={onCancel}>Annulla</button>
             </div>
           </form>
         </div>
@@ -331,83 +492,131 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     );
   };
 
-  TaskForm.propTypes = {
-    task: PropTypes.object,
-    onSave: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
-    userRole: PropTypes.string,
-    userClientName: PropTypes.string,
+  const RejectionModal = () => {
+    return (
+      <div className="rejection-modal-overlay">
+        <div className="rejection-modal-content">
+          <h3>Motivazione del rifiuto</h3>
+          <p>Per favore, fornisci una motivazione per il rifiuto dell'attività:</p>
+          <textarea
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder="Scrivi qui la motivazione del rifiuto..."
+            rows={4}
+            autoFocus={true}
+          />
+          <div className="rejection-modal-actions">
+            <button 
+              onClick={submitRejection} 
+              disabled={!rejectionReason.trim()}
+              className={!rejectionReason.trim() ? "disabled" : ""}
+            >
+              Conferma rifiuto
+            </button>
+            <button onClick={() => setShowRejectionModal(false)}>Annulla</button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  const days = getDaysInMonth(currentDate);
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-  const startingDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Adjust to start from Monday (0 for Monday)
+  const monthNames = [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ];
+
+  const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 
   return (
-    <div className="agenda-view">
-      <div className="agenda-header">
-        <button onClick={handlePrevMonth}>&lt;</button>
-        <h2>{currentDate.toLocaleString('it-IT', { month: 'long', year: 'numeric' })}</h2>
-        <button onClick={handleNextMonth}>&gt;</button>
+    <div className="agenda-container">
+      <div className="calendar-header">
+        <div className="month-navigation">
+          <button onClick={handlePrevMonth} className="nav-button">
+            &laquo;
+          </button>
+          <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
+          <button onClick={handleNextMonth} className="nav-button">
+            &raquo;
+          </button>
+        </div>
       </div>
 
-      {loading && <div className="loading-spinner">Caricamento attività...</div>}
+      {loading && <div className="loading-spinner">Caricamento in corso...</div>}
       {error && <div className="error-message">{error}</div>}
 
-      <div className="calendar-grid">
-        {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'].map(dayName => (
-          <div key={dayName} className="day-name">{dayName}</div>
-        ))}
-        {Array.from({ length: startingDay }).map((_, i) => (
-          <div key={`empty-${i}`} className="empty-day"></div>
-        ))}
-        {days.map(day => (
-          <div key={day.toISOString()} className="calendar-day" onClick={() => handleDayClick(day)}>
-            <div className="day-number">{day.getDate()}</div>
-            <div className="day-tasks">
-              {getTasksForDay(day).map(task => (
-                <div 
-                  key={task.id} 
-                  className={`task-item ${task.nomeCliente === userClientName ? 'my-task' : ''} status-${task.status || 'proposta'}`}
-                  onClick={(e) => { e.stopPropagation(); handleEditTask(task); }}
-                >
-                  <div className="task-status-indicator">
-                    {/* Icona semaforo in base allo stato */}
-                    {task.status === 'accettata' && <span className="status-icon status-green">✓</span>}
-                    {task.status === 'rifiutata' && <span className="status-icon status-red">✗</span>}
-                    {(!task.status || task.status === 'proposta') && <span className="status-icon status-yellow">?</span>}
-                  </div>
-                  <div className="task-content">
-                    <strong>{task.nomeCliente} - {task.sid}</strong>
-                    <p>{task.oraInizio}-{task.orarioFine}</p>
-                  </div>
-                  {isAdminRole && (
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }} className="delete-task-btn">X</button>
-                  )}
+      <div className="calendar">
+        <div className="weekdays">
+          {daysOfWeek.map(day => (
+            <div key={day} className="weekday">{day}</div>
+          ))}
+        </div>
+        
+        <div className="days">
+          {getDaysInMonth(currentDate).map(day => {
+            const dayTasks = getTasksForDay(day);
+            const isToday = new Date().toDateString() === day.toDateString();
+            
+            return (
+              <div 
+                key={day.toISOString()} 
+                className={`day ${isToday ? 'today' : ''}`}
+                onClick={() => handleDayClick(day)}
+              >
+                <div className="day-number">{day.getDate()}</div>
+                <div className="day-tasks">
+                  {dayTasks.map(task => (
+                    <div 
+                      key={task.id} 
+                      className={`task-item status-${task.status || 'proposta'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditTask(task);
+                      }}
+                    >
+                      <div className="task-time">
+                        {task.oraInizio} - {task.orarioFine}
+                      </div>
+                      <div className="task-name">
+                        {task.nomeCliente} {task.sid && `- ${task.sid}`}
+                      </div>
+                      {isAdminRole && task.motivazioneRifiuto && (
+                        <div className="task-rejection-reason" title={task.motivazioneRifiuto}>
+                          Motivazione: {task.motivazioneRifiuto.substring(0, 20)}
+                          {task.motivazioneRifiuto.length > 20 ? '...' : ''}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {showTaskForm && (
-        <TaskForm
+        <TaskForm 
           task={editingTask}
           onSave={handleSaveTask}
-          onCancel={() => setShowTaskForm(false)}
+          onCancel={() => {
+            setShowTaskForm(false);
+            setEditingTask(null);
+          }}
           userRole={userRole}
           userClientName={userClientName}
+          onReject={handleRejectTask}
         />
       )}
+      
+      {showRejectionModal && <RejectionModal />}
     </div>
   );
 };
 
 AgendaView.propTypes = {
-  userRole: PropTypes.string,
+  userRole: PropTypes.string.isRequired,
   userClientName: PropTypes.string,
-  user: PropTypes.object.isRequired,
+  user: PropTypes.object
 };
 
 export default AgendaView;

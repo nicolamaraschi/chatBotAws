@@ -20,6 +20,8 @@
     "@cloudscape-design/components": "^3.0.839",
     "@cloudscape-design/design-tokens": "^3.0.56",
     "@cloudscape-design/global-styles": "^1.0.32",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/react-fontawesome": "^3.0.0",
     "@vitejs/plugin-react": "^4.4.1",
     "aws-amplify": "^6.7.0",
     "axios": "^1.12.2",

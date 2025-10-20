@@ -98,6 +98,34 @@ app.post('/api/sap/sids', async (req, res) => {
   }
 });
 
+// Endpoint per ottenere i SID per un cliente specifico (GET)
+app.get('/api/sap/sids', async (req, res) => {
+  console.log('🔍 GET /api/sap/sids');
+  try {
+    const { clientName } = req.query;
+    
+    if (!clientName) {
+      return res.status(400).json({ error: 'Parametro clientName è richiesto.' });
+    }
+    
+    // Query diretta per evitare problemi con la funzione getAvailableSIDsQuery
+    const query = `
+      SELECT DISTINCT sid
+      FROM "sap_reports_db"."reportparquet"
+      WHERE nomecliente = '${clientName}'
+      ORDER BY sid
+    `;
+    
+    const results = await runSAPQuery(query);
+    res.json(results);
+  } catch (error) {
+    console.error('❌ Errore recupero SID:', error);
+    res.status(500).json({ error: 'Errore durante il recupero dei SID.', details: error.message });
+  }
+});
+
+
+
 app.post('/api/sap/dashboard', async (req, res) => {
   console.log('🔍 POST /api/sap/dashboard');
   try {

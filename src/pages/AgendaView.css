@@ -1,193 +1,129 @@
-/* Stili di base per il calendario con supporto dark mode */
-.agenda-view {
+.agenda-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
-  max-width: 100%;
-  overflow-x: auto;
-  background-color: #f8f9fa;
-  transition: background-color 0.3s, color 0.3s;
+  font-family: 'Arial', sans-serif;
 }
 
-body[data-theme="dark"] .agenda-view {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-}
-
-.agenda-header {
+.calendar-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.agenda-header h2 {
-  color: #333;
-  margin: 0;
-  font-size: 1.75rem;
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-body[data-theme="dark"] .agenda-header h2 {
-  color: #e0e0e0;
-}
-
-.agenda-header button {
-  background: #007bff;
-  color: white;
-  border: none;
+.nav-button {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 5px 10px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-.agenda-header button:hover {
-  background: #0056b3;
+.nav-button:hover {
+  background: #e0e0e0;
 }
 
-body[data-theme="dark"] .agenda-header button {
-  background: #0056b3;
+.calendar {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
 }
 
-body[data-theme="dark"] .agenda-header button:hover {
-  background: #003d82;
-}
-
-.calendar-grid {
+.weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  border-radius: 5px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  min-width: 800px; /* Add this to force a minimum width */
-}
-
-body[data-theme="dark"] .calendar-grid {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.day-name {
   background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.weekday {
   padding: 10px;
   text-align: center;
   font-weight: bold;
-  border-bottom: 1px solid #e0e0e0;
-  color: #333;
 }
 
-body[data-theme="dark"] .day-name {
-  background: #333333;
-  border-bottom: 1px solid #444444;
-  color: #e0e0e0;
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
 }
 
-.calendar-day {
+.day {
   min-height: 100px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #eee;
   padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
   position: relative;
-  overflow-y: auto;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
-body[data-theme="dark"] .calendar-day {
-  background: #2a2a2a;
-  border: 1px solid #444444;
-  color: #e0e0e0;
+.day:hover {
+  background-color: #f9f9f9;
 }
 
-.empty-day {
-  background: #f9f9f9;
-  min-height: 100px;
-  border: 1px solid #e0e0e0;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-body[data-theme="dark"] .empty-day {
-  background: #222222;
-  border: 1px solid #444444;
+.today {
+  background-color: #f0f8ff;
 }
 
 .day-number {
-  position: sticky;
-  top: 0;
-  right: 5px;
-  background: white;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: right;
+  font-weight: bold;
   margin-bottom: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  color: #333;
-  font-weight: 600;
-  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
 }
 
-body[data-theme="dark"] .day-number {
-  background: #333333;
-  color: #e0e0e0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-/* Stili per le attività */
-.task-item {
+.day-tasks {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.task-item {
   padding: 5px;
-  margin-bottom: 3px;
   border-radius: 4px;
-  background-color: white;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-body[data-theme="dark"] .task-item {
-  background-color: #333333;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  color: #e0e0e0;
-}
-
-.task-item.my-task {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-body[data-theme="dark"] .task-item.my-task {
-  background-color: rgba(0, 123, 255, 0.2);
-}
-
-.delete-task-btn {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: none;
-  border: none;
-  color: #dc3545;
   font-size: 12px;
   cursor: pointer;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  transition: transform 0.2s;
 }
 
-.delete-task-btn:hover {
-  opacity: 1;
+.task-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-body[data-theme="dark"] .delete-task-btn {
-  color: #ff6b6b;
+.task-time {
+  font-weight: bold;
 }
 
-/* Stili per il form */
+.status-proposta {
+  background-color: #fff9c4;
+  border-left: 3px solid #ffd600;
+}
+
+.status-accettata {
+  background-color: #c8e6c9;
+  border-left: 3px solid #4caf50;
+}
+
+.status-rifiutata {
+  background-color: #ffcdd2;
+  border-left: 3px solid #f44336;
+}
+
 .task-form-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -196,21 +132,13 @@ body[data-theme="dark"] .delete-task-btn {
 }
 
 .task-form-content {
-  background-color: white;
-  border-radius: 8px;
+  background: white;
   padding: 20px;
-  width: 90%;
+  border-radius: 8px;
   max-width: 500px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  transition: background-color 0.3s;
-}
-
-body[data-theme="dark"] .task-form-content {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
 .form-group {
@@ -221,12 +149,6 @@ body[data-theme="dark"] .task-form-content {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #333;
-  transition: color 0.3s;
-}
-
-body[data-theme="dark"] .form-group label {
-  color: #e0e0e0;
 }
 
 .form-group input,
@@ -236,37 +158,11 @@ body[data-theme="dark"] .form-group label {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  background-color: #fff;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-}
-
-body[data-theme="dark"] .form-group input,
-body[data-theme="dark"] .form-group select,
-body[data-theme="dark"] .form-group textarea {
-  background-color: #333333;
-  color: #e0e0e0;
-  border-color: #555555;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-body[data-theme="dark"] .form-group input:focus,
-body[data-theme="dark"] .form-group select:focus,
-body[data-theme="dark"] .form-group textarea:focus {
-  border-color: #0056b3;
-  box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.25);
+  font-size: 14px;
 }
 
 .form-group textarea {
-  height: 80px;
-  resize: vertical;
+  min-height: 100px;
 }
 
 .checkbox-group {
@@ -276,7 +172,7 @@ body[data-theme="dark"] .form-group textarea:focus {
 
 .checkbox-group input {
   width: auto;
-  margin-right: 8px;
+  margin-right: 10px;
 }
 
 .form-actions {
@@ -286,323 +182,136 @@ body[data-theme="dark"] .form-group textarea:focus {
   margin-top: 20px;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
+button {
+  padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s;
 }
 
-.btn-primary:hover {
-  background-color: #0069d9;
-}
-
-body[data-theme="dark"] .btn-primary {
-  background-color: #0056b3;
-}
-
-body[data-theme="dark"] .btn-primary:hover {
-  background-color: #003d82;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
+button[type="submit"] {
+  background-color: #4caf50;
   color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268;
+button[type="submit"]:hover {
+  background-color: #45a049;
 }
 
-body[data-theme="dark"] .btn-secondary {
-  background-color: #555555;
+button[type="button"] {
+  background-color: #f0f0f0;
+  color: #333;
 }
 
-body[data-theme="dark"] .btn-secondary:hover {
-  background-color: #444444;
+button[type="button"]:hover {
+  background-color: #e0e0e0;
 }
 
 .loading-spinner {
-  display: flex;
-  justify-content: center;
+  text-align: center;
   padding: 20px;
-}
-
-.loading-spinner .spinner {
-  border: 4px solid rgba(0, 123, 255, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #007bff;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-}
-
-body[data-theme="dark"] .loading-spinner .spinner {
-  border: 4px solid rgba(0, 86, 179, 0.1);
-  border-top: 4px solid #0056b3;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  font-style: italic;
 }
 
 .error-message {
-  color: #dc3545;
+  background-color: #ffebee;
+  color: #c62828;
   padding: 10px;
-  background-color: rgba(220, 53, 69, 0.1);
   border-radius: 4px;
   margin-bottom: 15px;
 }
 
-body[data-theme="dark"] .error-message {
-  color: #ff6b6b;
-  background-color: rgba(255, 107, 107, 0.1);
-}
-
-/* Stili per le icone semaforiche */
-.task-status-indicator {
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.status-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 16px;
-  font-size: 12px;
-  color: white;
-  font-weight: bold;
-}
-
-.status-green {
-  background-color: #4CAF50; /* Verde */
-}
-
-.status-red {
-  background-color: #F44336; /* Rosso */
-}
-
-.status-yellow {
-  background-color: #FFC107; /* Giallo */
-}
-
-.task-content {
-  flex-grow: 1;
-  overflow: hidden;
-}
-
-/* Stili aggiuntivi per evidenziare lo stato nel bordo dell'attività */
-.task-item.status-proposta {
-  border-left: 3px solid #FFC107;
-}
-
-.task-item.status-accettata {
-  border-left: 3px solid #4CAF50;
-}
-
-.task-item.status-rifiutata {
-  border-left: 3px solid #F44336;
-}
-
-/* Stili per pulsanti di accettazione/rifiuto */
-.btn-accept {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
+.form-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
   border-radius: 4px;
-  padding: 8px 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  margin-bottom: 15px;
+  font-size: 14px;
 }
 
-.btn-accept:hover {
-  background-color: #3e8e41;
-}
-
-body[data-theme="dark"] .btn-accept {
-  background-color: #3e8e41;
-}
-
-body[data-theme="dark"] .btn-accept:hover {
-  background-color: #2e6930;
-}
-
-.btn-reject {
-  background-color: #F44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-reject:hover {
-  background-color: #d32f2f;
-}
-
-body[data-theme="dark"] .btn-reject {
-  background-color: #d32f2f;
-}
-
-body[data-theme="dark"] .btn-reject:hover {
-  background-color: #b71c1c;
-}
-
-/* Stili per la navigazione mese */
-.month-navigator {
+.edit-permission-container {
   display: flex;
   align-items: center;
-  gap: 15px;
 }
 
-.month-navigator button {
-  background-color: transparent;
-  border: none;
-  color: #007bff;
-  font-size: 1.2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+.selector-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-.month-navigator button:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-body[data-theme="dark"] .month-navigator button {
-  color: #3f90f7;
-}
-
-body[data-theme="dark"] .month-navigator button:hover {
-  background-color: rgba(63, 144, 247, 0.1);
-}
-
-.current-month {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-}
-
-body[data-theme="dark"] .current-month {
-  color: #e0e0e0;
-}
-
-/* Stile per oggi */
-.calendar-day.today {
-  background-color: rgba(0, 123, 255, 0.05);
-  border: 2px solid #007bff;
-}
-
-body[data-theme="dark"] .calendar-day.today {
-  background-color: rgba(0, 123, 255, 0.1);
-  border: 2px solid #0056b3;
-}
-
-/* Stile per il popup di dettaglio task */
-.task-detail-popup {
-  position: fixed;
+.loading-indicator {
+  position: absolute;
+  right: 30px;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
+  transform: translateY(-50%);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Stile per il modal di rifiuto */
+.rejection-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.rejection-modal-content {
+  background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  z-index: 1001;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  width: 400px;
+  max-width: 90%;
 }
 
-body[data-theme="dark"] .task-detail-popup {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-}
-
-.task-detail-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-body[data-theme="dark"] .task-detail-title {
-  color: #e0e0e0;
-}
-
-.task-detail-description {
+.rejection-modal-content textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 10px;
   margin-bottom: 15px;
-  line-height: 1.5;
-  color: #555;
+  resize: vertical;
+  min-height: 80px;
 }
 
-body[data-theme="dark"] .task-detail-description {
-  color: #bbb;
-}
-
-.task-detail-info {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.task-detail-info-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.task-detail-info-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-body[data-theme="dark"] .task-detail-info-label {
-  color: #aaa;
-}
-
-.task-detail-info-value {
-  color: #333;
-}
-
-body[data-theme="dark"] .task-detail-info-value {
-  color: #e0e0e0;
-}
-
-.task-detail-actions {
+.rejection-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
 }
 
-body[data-theme="dark"] .task-detail-actions {
-  border-top: 1px solid #444;
+button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.task-rejection-reason {
+  font-size: 10px;
+  font-style: italic;
+  color: #d32f2f;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rejection-reason {
+  background-color: #fff8e1;
+  padding: 10px;
+  border-radius: 4px;
+  font-style: italic;
+  border-left: 3px solid #ffc107;
 }
