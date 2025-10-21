@@ -1,60 +1,79 @@
+// File: src/pages/AgendaView.jsx
+// Calendario responsivo corretto con debug dei problemi di rendering
+
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { API_URL } from '../config';
 import './AgendaView.css';
+import { API_URL } from '../config';
 
 const AgendaView = ({ userRole, userClientName, user }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [taskToReject, setTaskToReject] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [viewMode, setViewMode] = useState('month'); // 'month', 'week', 'day'
 
-  const isClientRole = userRole === 'cliente';
   const isAdminRole = userRole === 'admin';
+  const isClientRole = userRole === 'cliente';
 
   useEffect(() => {
     fetchTasks();
-  }, [currentDate, userRole, userClientName]);
+  }, [currentDate, userClientName]);
 
   const fetchTasks = async () => {
     setLoading(true);
     setError(null);
+    
     try {
-      const yearMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const yearMonth = `${year}-${month}`;
+      
       let url = `${API_URL}/agenda/tasks?yearMonth=${yearMonth}`;
-
+      
       if (isClientRole && userClientName) {
-        url += `&nomeCliente=${userClientName}`;
+        url += `&nomeCliente=${encodeURIComponent(userClientName)}`;
       }
-
+      
       const response = await axios.get(url);
       setTasks(response.data);
     } catch (err) {
-      console.error('Errore nel recupero delle attività:', err);
+      console.error('Errore nel recupero attività:', err);
       setError('Impossibile caricare le attività. Riprova più tardi.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrevMonth = () => {
+  const handlePrevPeriod = () => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() - 1);
+      if (viewMode === 'month') {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else if (viewMode === 'week') {
+        newDate.setDate(newDate.getDate() - 7);
+      } else if (viewMode === 'day') {
+        newDate.setDate(newDate.getDate() - 1);
+      }
       return newDate;
     });
   };
 
-  const handleNextMonth = () => {
+  const handleNextPeriod = () => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() + 1);
+      if (viewMode === 'month') {
+        newDate.setMonth(newDate.getMonth() + 1);
+      } else if (viewMode === 'week') {
+        newDate.setDate(newDate.getDate() + 7);
+      } else if (viewMode === 'day') {
+        newDate.setDate(newDate.getDate() + 1);
+      }
       return newDate;
     });
   };
@@ -62,14 +81,19 @@ const AgendaView = ({ userRole, userClientName, user }) => {
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
-    const lastDay = new Date(year, month + 1, 0);
-    const numDays = lastDay.getDate();
-
-    const days = [];
-    for (let i = 1; i <= numDays; i++) {
-      days.push(new Date(year, month, i));
+    const daysInMonth = [];
+    
+    // Ottieni il primo giorno del mese
+    const firstDayOfMonth = new Date(year, month, 1);
+    // Ottieni l'ultimo giorno del mese
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    
+    // Riempi l'array con i giorni del mese
+    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+      daysInMonth.push(new Date(year, month, i));
     }
-    return days;
+    
+    return daysInMonth;
   };
 
   const getTasksForDay = (day) => {
@@ -77,32 +101,29 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     return tasks.filter(task => task.data === dayString);
   };
 
-// Modifica alla funzione handleDayClick in AgendaView.jsx
-
-const handleDayClick = (day) => {
-  if (isAdminRole) {
-    // Fix del problema timezone - usiamo un metodo che evita il problema dello spostamento di data
-    // Costruiamo manualmente una stringa in formato YYYY-MM-DD che rispetti la data locale
-    const year = day.getFullYear();
-    const month = String(day.getMonth() + 1).padStart(2, '0'); // +1 perché getMonth() restituisce 0-11
-    const dayOfMonth = String(day.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${dayOfMonth}`;
-    
-    // Admin può aggiungere nuova attività per questo giorno
-    setEditingTask({ 
-      data: formattedDate, 
-      nomeCliente: '', 
-      sid: '', 
-      oraInizio: '', 
-      orarioFine: '', 
-      emailCliente: '', 
-      descrizione: '', 
-      canClientEdit: false,
-      status: 'proposta' // Stato predefinito
-    });
-    setShowTaskForm(true);
-  }
-};
+  const handleDayClick = (day) => {
+    if (isAdminRole) {
+      // Fix del problema timezone - usiamo un metodo che evita il problema dello spostamento di data
+      const year = day.getFullYear();
+      const month = String(day.getMonth() + 1).padStart(2, '0');
+      const dayOfMonth = String(day.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${dayOfMonth}`;
+      
+      // Admin può aggiungere nuova attività per questo giorno
+      setEditingTask({ 
+        data: formattedDate, 
+        nomeCliente: '', 
+        sid: '', 
+        oraInizio: '', 
+        orarioFine: '', 
+        emailCliente: '', 
+        descrizione: '', 
+        canClientEdit: false,
+        status: 'proposta' // Stato predefinito
+      });
+      setShowTaskForm(true);
+    }
+  };
 
   const handleEditTask = (task) => {
     // L'admin può sempre modificare
@@ -115,19 +136,90 @@ const handleDayClick = (day) => {
     // Il cliente può sempre vedere il form per accettare/rifiutare,
     // indipendentemente dal valore di canClientEdit
     if (isClientRole && task.nomeCliente === userClientName) {
-      // Creiamo una copia dell'attività ma con meno campi modificabili
-      // per il cliente quando canClientEdit è false
       setEditingTask({
         ...task,
-        // Se il cliente non può modificare, diamo solo accesso al campo status
         readOnly: !task.canClientEdit
       });
       setShowTaskForm(true);
     }
   };
 
+  const handleSaveTask = async () => {
+    if (!editingTask) return;
+    
+    setLoading(true);
+    try {
+      let response;
+      
+      if (editingTask.id) {
+        // Aggiornamento
+        response = await axios.put(`${API_URL}/agenda/tasks/${editingTask.id}`, editingTask);
+      } else {
+        // Nuova attività
+        response = await axios.post(`${API_URL}/agenda/tasks`, editingTask);
+      }
+      
+      fetchTasks();
+      setShowTaskForm(false);
+    } catch (err) {
+      console.error('Errore nel salvataggio attività:', err);
+      setError('Impossibile salvare l\'attività.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectTask = () => {
+    setShowRejectionModal(true);
+  };
+
+  const submitRejection = async () => {
+    if (!editingTask) return;
+    
+    setLoading(true);
+    try {
+      const updatedTask = {
+        ...editingTask,
+        status: 'rifiutata',
+        motivazioneRifiuto: rejectionReason
+      };
+      
+      await axios.put(`${API_URL}/agenda/tasks/${editingTask.id}`, updatedTask);
+      fetchTasks();
+      setShowRejectionModal(false);
+      setShowTaskForm(false);
+    } catch (err) {
+      console.error('Errore nel rifiuto attività:', err);
+      setError('Impossibile aggiornare lo stato dell\'attività.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAcceptTask = async () => {
+    if (!editingTask) return;
+    
+    setLoading(true);
+    try {
+      const updatedTask = {
+        ...editingTask,
+        status: 'accettata'
+      };
+      
+      await axios.put(`${API_URL}/agenda/tasks/${editingTask.id}`, updatedTask);
+      fetchTasks();
+      setShowTaskForm(false);
+    } catch (err) {
+      console.error('Errore nell\'accettazione attività:', err);
+      setError('Impossibile aggiornare lo stato dell\'attività.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm('Sei sicuro di voler eliminare questa attività?')) return;
+    
     setLoading(true);
     try {
       await axios.delete(`${API_URL}/agenda/tasks/${taskId}`);
@@ -140,390 +232,180 @@ const handleDayClick = (day) => {
     }
   };
 
-  const handleSaveTask = async (taskData) => {
-    setLoading(true);
-    try {
-      if (taskData.id) {
-        // Aggiorna attività esistente
-        await axios.put(`${API_URL}/agenda/tasks/${taskData.id}`, taskData);
-      } else {
-        // Crea nuova attività
-        await axios.post(`${API_URL}/agenda/tasks`, taskData);
-      }
-      setShowTaskForm(false);
-      setEditingTask(null);
-      fetchTasks();
-    } catch (err) {
-      console.error('Errore nel salvataggio attività:', err);
-      setError('Impossibile salvare l\'attività.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRejectTask = (task) => {
-    setTaskToReject(task);
-    setRejectionReason("");
-    setShowRejectionModal(true);
-  };
-
-  const submitRejection = async () => {
-    if (!taskToReject) return;
+  // Renderizza il form per modificare/creare un'attività
+  const renderTaskForm = () => {
+    if (!showTaskForm || !editingTask) return null;
     
-    setLoading(true);
-    try {
-      const updatedTask = {
-        id: taskToReject.id,
-        status: 'rifiutata',
-        motivazioneRifiuto: rejectionReason
-      };
-      
-      await axios.put(`${API_URL}/agenda/tasks/${taskToReject.id}`, updatedTask);
-      setShowRejectionModal(false);
-      setTaskToReject(null);
-      setRejectionReason("");
-      setShowTaskForm(false);
-      fetchTasks();
-    } catch (err) {
-      console.error('Errore nel rifiuto dell\'attività:', err);
-      setError('Impossibile registrare il rifiuto dell\'attività.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }) => {
-    const [formData, setFormData] = useState({
-      status: 'proposta',
-      ...task
-    });
-    const [clients, setClients] = useState([]);
-    const [sids, setSids] = useState([]);
-    const [loadingClients, setLoadingClients] = useState(false);
-    const [loadingSids, setLoadingSids] = useState(false);
-    const [loadingError, setLoadingError] = useState(null);
-    
-    const isReadOnly = formData.readOnly === true;
-    const isClientRole = userRole === 'cliente';
-    const isAdminRole = userRole === 'admin';
-
-    // Carica la lista dei clienti all'inizializzazione
-    useEffect(() => {
-      if (isAdminRole) {
-        fetchClients();
-      }
-    }, [isAdminRole]);
-
-    // Carica i SID quando viene selezionato un cliente
-    useEffect(() => {
-      if (isAdminRole && formData.nomeCliente) {
-        fetchSids(formData.nomeCliente);
-      }
-    }, [isAdminRole, formData.nomeCliente]);
-
-    const fetchClients = async () => {
-      setLoadingClients(true);
-      setLoadingError(null);
-      try {
-        // Utilizziamo l'endpoint API esistente per ottenere i clienti
-        const response = await axios.get(`${API_URL}/sap/clients`);
-        setClients(response.data);
-      } catch (err) {
-        console.error('Errore nel recupero dei clienti:', err);
-        setLoadingError('Impossibile caricare la lista dei clienti. Riprova più tardi.');
-      } finally {
-        setLoadingClients(false);
-      }
-    };
-
-    const fetchSids = async (clientName) => {
-      if (!clientName) return;
-      
-      setLoadingSids(true);
-      setLoadingError(null);
-      try {
-        // Utilizziamo l'endpoint API esistente per ottenere i SID
-        const response = await axios.get(`${API_URL}/sap/sids?clientName=${encodeURIComponent(clientName)}`);
-        setSids(response.data);
-        
-        // Se non c'è un SID selezionato o non è nella lista, seleziona il primo
-        if (!formData.sid || !response.data.some(s => s.sid === formData.sid)) {
-          if (response.data.length > 0) {
-            setFormData(prev => ({
-              ...prev,
-              sid: response.data[0].sid
-            }));
-          }
-        }
-      } catch (err) {
-        console.error('Errore nel recupero dei SID:', err);
-        setLoadingError('Impossibile caricare la lista dei SID per il cliente selezionato.');
-      } finally {
-        setLoadingSids(false);
-      }
-    };
-    
-    const handleChange = (e) => {
-      const { name, value, type, checked } = e.target;
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
-    };
-    
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      
-      // Se è in modalità readOnly (cliente che può solo accettare/rifiutare),
-      // invia solo l'aggiornamento dello stato, non tutti i campi
-      if (isReadOnly && isClientRole) {
-        onSave({
-          id: formData.id,
-          status: formData.status
-        });
-      } else {
-        onSave(formData);
-      }
-    };
-    
-    // Se il cliente sceglie "rifiutata", mostriamo il modal
-    const handleStatusChange = (e) => {
-      const newStatus = e.target.value;
-      
-      if (isClientRole && newStatus === 'rifiutata') {
-        // Se è previsto un handler per il rifiuto con motivazione
-        if (onReject && formData.id) {
-          e.preventDefault(); // Previene il cambiamento diretto dello stato
-          onReject(formData);
-          return;
-        }
-      }
-      
-      // Altrimenti procedi normalmente
-      handleChange(e);
-    };
+    const isNew = !editingTask.id;
+    const isReadOnly = editingTask.readOnly;
     
     return (
       <div className="task-form-overlay">
-        <div className="task-form-content">
-          <h3>{formData.id ? 'Gestione Attività' : 'Nuova Attività'}</h3>
-          {loadingError && <div className="form-error">{loadingError}</div>}
+        <div className="task-form-container">
+          <h3>{isNew ? 'Nuova attività' : 'Dettagli attività'}</h3>
           
-          <form onSubmit={handleSubmit}>
-            {/* Per admin, usiamo il selettore di clienti e SID */}
-            {isAdminRole ? (
-              <>
-                <div className="form-group">
-                  <label htmlFor="clientSelector">Cliente:</label>
-                  <div className="selector-wrapper">
-                    <select 
-                      id="clientSelector"
-                      name="nomeCliente"
-                      value={formData.nomeCliente} 
-                      onChange={handleChange}
-                      disabled={loadingClients}
-                      required
-                    >
-                      <option value="">-- Seleziona cliente --</option>
-                      {clients.map((client) => (
-                        <option key={client.nomecliente} value={client.nomecliente}>
-                          {client.nomecliente}
-                        </option>
-                      ))}
-                    </select>
-                    {loadingClients && <span className="loading-indicator">⟳</span>}
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="sidSelector">SID:</label>
-                  <div className="selector-wrapper">
-                    <select 
-                      id="sidSelector"
-                      name="sid"
-                      value={formData.sid} 
-                      onChange={handleChange}
-                      disabled={loadingSids || !formData.nomeCliente}
-                      required
-                    >
-                      <option value="">-- Seleziona SID --</option>
-                      {sids.map((sidObj) => (
-                        <option key={sidObj.sid} value={sidObj.sid}>
-                          {sidObj.sid}
-                        </option>
-                      ))}
-                    </select>
-                    {loadingSids && <span className="loading-indicator">⟳</span>}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="form-group">
-                  <label>Cliente:</label>
-                  <input 
-                    type="text" 
-                    name="nomeCliente" 
-                    value={formData.nomeCliente} 
-                    onChange={handleChange} 
-                    required 
-                    disabled={isReadOnly || (userRole === 'cliente')} 
-                  />
-                </div>
-                <div className="form-group">
-                  <label>SID:</label>
-                  <input 
-                    type="text" 
-                    name="sid" 
-                    value={formData.sid} 
-                    onChange={handleChange} 
-                    required 
-                    disabled={isReadOnly || (userRole === 'cliente')} 
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="form-group">
-              <label>Data:</label>
-              <input 
-                type="date" 
-                name="data" 
-                value={formData.data} 
-                onChange={handleChange} 
-                required 
-                disabled={isReadOnly || (userRole === 'cliente')} 
-              />
-            </div>
-            <div className="form-group">
-              <label>Ora Inizio:</label>
+          <div className="form-group">
+            <label>Data</label>
+            <input 
+              type="date" 
+              value={editingTask.data || ''} 
+              onChange={(e) => setEditingTask({...editingTask, data: e.target.value})}
+              disabled={!isAdminRole || !isNew}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Cliente</label>
+            <input 
+              type="text" 
+              value={editingTask.nomeCliente || ''} 
+              onChange={(e) => setEditingTask({...editingTask, nomeCliente: e.target.value})}
+              disabled={!isAdminRole || !isNew}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>SID</label>
+            <input 
+              type="text" 
+              value={editingTask.sid || ''} 
+              onChange={(e) => setEditingTask({...editingTask, sid: e.target.value})}
+              disabled={!isAdminRole && isReadOnly}
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group half">
+              <label>Ora inizio</label>
               <input 
                 type="time" 
-                name="oraInizio" 
-                value={formData.oraInizio} 
-                onChange={handleChange} 
-                required 
-                disabled={isReadOnly || (userRole === 'cliente')} 
+                value={editingTask.oraInizio || ''} 
+                onChange={(e) => setEditingTask({...editingTask, oraInizio: e.target.value})}
+                disabled={!isAdminRole && isReadOnly}
               />
             </div>
-            <div className="form-group">
-              <label>Ora Fine:</label>
+            <div className="form-group half">
+              <label>Ora fine</label>
               <input 
                 type="time" 
-                name="orarioFine" 
-                value={formData.orarioFine} 
-                onChange={handleChange} 
-                required 
-                disabled={isReadOnly || (userRole === 'cliente')} 
+                value={editingTask.orarioFine || ''} 
+                onChange={(e) => setEditingTask({...editingTask, orarioFine: e.target.value})}
+                disabled={!isAdminRole && isReadOnly}
               />
             </div>
+          </div>
+          
+          <div className="form-group">
+            <label>Email cliente</label>
+            <input 
+              type="email" 
+              value={editingTask.emailCliente || ''} 
+              onChange={(e) => setEditingTask({...editingTask, emailCliente: e.target.value})}
+              disabled={!isAdminRole}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label>Descrizione</label>
+            <textarea 
+              value={editingTask.descrizione || ''} 
+              onChange={(e) => setEditingTask({...editingTask, descrizione: e.target.value})}
+              disabled={!isAdminRole && isReadOnly}
+              rows="3"
+            />
+          </div>
+          
+          {isAdminRole && (
             <div className="form-group">
-              <label>Email Cliente:</label>
-              <input 
-                type="email" 
-                name="emailCliente" 
-                value={formData.emailCliente} 
-                onChange={handleChange} 
-                disabled={isReadOnly || (userRole === 'cliente')} 
-              />
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={editingTask.canClientEdit || false} 
+                  onChange={(e) => setEditingTask({...editingTask, canClientEdit: e.target.checked})}
+                />
+                Cliente può modificare
+              </label>
             </div>
+          )}
+          
+          {!isNew && editingTask.status && (
             <div className="form-group">
-              <label>Descrizione:</label>
-              <textarea 
-                name="descrizione" 
-                value={formData.descrizione} 
-                onChange={handleChange}
-                disabled={isReadOnly || (userRole === 'cliente')}
-              ></textarea>
-            </div>
-
-            {/* Sezione per lo stato dell'attività */}
-            {/* Admin può impostare qualsiasi stato */}
-            {isAdminRole && (
-              <div className="form-group">
-                <label>Stato:</label>
-                <select name="status" value={formData.status || 'proposta'} onChange={handleChange}>
-                  <option value="proposta">Proposta</option>
-                  <option value="accettata">Accettata</option>
-                  <option value="rifiutata">Rifiutata</option>
-                </select>
+              <label>Stato</label>
+              <div className={`status-badge status-${editingTask.status}`}>
+                {editingTask.status === 'proposta' ? 'Proposta' : 
+                 editingTask.status === 'accettata' ? 'Accettata' : 'Rifiutata'}
               </div>
-            )}
-            
-            {/* Cliente può accettare o rifiutare indipendentemente da canClientEdit */}
-            {isClientRole && formData.id && (!formData.status || formData.status === 'proposta') && (
-              <div className="form-group">
-                <label>Risposta alla proposta:</label>
-                <select name="status" value={formData.status || 'proposta'} onChange={handleStatusChange}>
-                  <option value="proposta">In attesa</option>
-                  <option value="accettata">Accettare</option>
-                  <option value="rifiutata">Rifiutare</option>
-                </select>
-              </div>
-            )}
-
-            {/* Checkbox canClientEdit - solo per admin */}
-            {isAdminRole && (
-              <div className="form-group checkbox-group">
-                <div className="edit-permission-container">
-                  <input 
-                    type="checkbox" 
-                    name="canClientEdit" 
-                    checked={formData.canClientEdit} 
-                    onChange={handleChange} 
-                    id="canClientEdit" 
-                  />
-                  <label htmlFor="canClientEdit">
-                    {formData.canClientEdit ? '🔓' : '🔒'} 
-                    Il cliente può modificare i dettagli dell'attività
-                  </label>
-                </div>
-              </div>
-            )}
-            
-            {/* Motivazione di rifiuto (solo admin può visualizzare) */}
-            {isAdminRole && formData.motivazioneRifiuto && (
-              <div className="form-group">
-                <label>Motivazione del rifiuto:</label>
+              {editingTask.status === 'rifiutata' && editingTask.motivazioneRifiuto && (
                 <div className="rejection-reason">
-                  {formData.motivazioneRifiuto}
+                  Motivazione: {editingTask.motivazioneRifiuto}
                 </div>
-              </div>
+              )}
+            </div>
+          )}
+          
+          <div className="form-actions">
+            {isAdminRole && (
+              <button onClick={handleSaveTask} className="btn-save">
+                {isNew ? 'Crea' : 'Salva'}
+              </button>
             )}
             
-            <div className="form-actions">
-              <button type="submit">Salva</button>
-              <button type="button" onClick={onCancel}>Annulla</button>
-            </div>
-          </form>
+            {isClientRole && !isNew && editingTask.status === 'proposta' && (
+              <>
+                <button onClick={handleAcceptTask} className="btn-accept">
+                  Accetta
+                </button>
+                <button onClick={handleRejectTask} className="btn-reject">
+                  Rifiuta
+                </button>
+              </>
+            )}
+            
+            {isAdminRole && !isNew && (
+              <button 
+                onClick={() => handleDeleteTask(editingTask.id)} 
+                className="btn-delete"
+              >
+                Elimina
+              </button>
+            )}
+            
+            <button onClick={() => setShowTaskForm(false)} className="btn-cancel">
+              Annulla
+            </button>
+          </div>
         </div>
       </div>
     );
   };
 
-  const RejectionModal = () => {
+  // Renderizza il modal per il motivo del rifiuto
+  const renderRejectionModal = () => {
+    if (!showRejectionModal) return null;
+    
     return (
       <div className="rejection-modal-overlay">
         <div className="rejection-modal-content">
-          <h3>Motivazione del rifiuto</h3>
-          <p>Per favore, fornisci una motivazione per il rifiuto dell'attività:</p>
-          <textarea
+          <h3>Motivo del rifiuto</h3>
+          <p>Per favore, specifica il motivo per cui stai rifiutando questa attività:</p>
+          
+          <textarea 
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Scrivi qui la motivazione del rifiuto..."
-            rows={4}
-            autoFocus={true}
-            className="rejection-reason-input"
+            placeholder="Inserisci il motivo del rifiuto..."
           />
+          
           <div className="rejection-modal-actions">
             <button 
-              onClick={submitRejection} 
-              disabled={!rejectionReason.trim()}
-              className={!rejectionReason.trim() ? "disabled" : ""}
+              onClick={submitRejection}
+              className={!rejectionReason ? "disabled" : ""}
+              disabled={!rejectionReason}
             >
               Conferma rifiuto
             </button>
-            <button onClick={() => setShowRejectionModal(false)}>Annulla</button>
+            <button onClick={() => setShowRejectionModal(false)}>
+              Annulla
+            </button>
           </div>
         </div>
       </div>
@@ -537,23 +419,11 @@ const handleDayClick = (day) => {
 
   const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 
-  return (
-    <div className="agenda-container">
-      <div className="calendar-header">
-        <div className="month-navigation">
-          <button onClick={handlePrevMonth} className="nav-button">
-            &laquo;
-          </button>
-          <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
-          <button onClick={handleNextMonth} className="nav-button">
-            &raquo;
-          </button>
-        </div>
-      </div>
-
-      {loading && <div className="loading-spinner">Caricamento in corso...</div>}
-      {error && <div className="error-message">{error}</div>}
-
+  // Versione semplificata e robusta
+  const renderMonthView = () => {
+    const days = getDaysInMonth(currentDate);
+    
+    return (
       <div className="calendar">
         <div className="weekdays">
           {daysOfWeek.map(day => (
@@ -562,7 +432,7 @@ const handleDayClick = (day) => {
         </div>
         
         <div className="days">
-          {getDaysInMonth(currentDate).map(day => {
+          {days.map(day => {
             const dayTasks = getTasksForDay(day);
             const isToday = new Date().toDateString() === day.toDateString();
             
@@ -589,12 +459,6 @@ const handleDayClick = (day) => {
                       <div className="task-name">
                         {task.nomeCliente} {task.sid && `- ${task.sid}`}
                       </div>
-                      {isAdminRole && task.motivazioneRifiuto && (
-                        <div className="task-rejection-reason" title={task.motivazioneRifiuto}>
-                          Motivazione: {task.motivazioneRifiuto.substring(0, 20)}
-                          {task.motivazioneRifiuto.length > 20 ? '...' : ''}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -603,22 +467,52 @@ const handleDayClick = (day) => {
           })}
         </div>
       </div>
+    );
+  };
 
-      {showTaskForm && (
-        <TaskForm 
-          task={editingTask}
-          onSave={handleSaveTask}
-          onCancel={() => {
-            setShowTaskForm(false);
-            setEditingTask(null);
-          }}
-          userRole={userRole}
-          userClientName={userClientName}
-          onReject={handleRejectTask}
-        />
-      )}
-      
-      {showRejectionModal && <RejectionModal />}
+  return (
+    <div className="agenda-container">
+      <div className="calendar-header">
+        <div className="month-navigation">
+          <button onClick={handlePrevPeriod} className="nav-button">
+            &laquo;
+          </button>
+          <h2>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
+          <button onClick={handleNextPeriod} className="nav-button">
+            &raquo;
+          </button>
+        </div>
+        
+        {/* Disattivato temporaneamente per stabilità
+        <div className="view-mode-buttons">
+          <button 
+            onClick={() => setViewMode('month')} 
+            className={viewMode === 'month' ? 'active' : ''}
+          >
+            Mese
+          </button>
+          <button 
+            onClick={() => setViewMode('week')} 
+            className={viewMode === 'week' ? 'active' : ''}
+          >
+            Settimana
+          </button>
+          <button 
+            onClick={() => setViewMode('day')} 
+            className={viewMode === 'day' ? 'active' : ''}
+          >
+            Giorno
+          </button>
+        </div>
+        */}
+      </div>
+
+      {loading && <div className="loading-spinner">Caricamento in corso...</div>}
+      {error && <div className="error-message">{error}</div>}
+
+      {renderMonthView()}
+      {renderTaskForm()}
+      {renderRejectionModal()}
     </div>
   );
 };
