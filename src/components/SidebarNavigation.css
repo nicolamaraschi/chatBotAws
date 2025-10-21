@@ -209,7 +209,6 @@
 .main-content-area {
   flex-grow: 1;
   overflow: auto;
-  padding: 20px;
   background-color: transparent; /* Make it transparent */
   transition: margin-left 0.3s ease;
 

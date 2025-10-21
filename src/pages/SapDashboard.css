@@ -732,36 +732,3 @@ body[data-theme="dark"] .chart-container text,
 body[data-theme="dark"] .chart-card text {
   fill: #e0e0e0 !important;
 }
-
-/* Rimuove lo scrollbar principale sul lato destro */
-html {
-  overflow: hidden;
-}
-
-/* Contenitore principale senza scrollbar visibile, ma con funzionalità di scroll */
-.dashboard-with-chat-layout {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Mantieni l'overflow per il contenuto principale, ma nascondi la scrollbar */
-.dashboard-main-container {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Nascondi la scrollbar in Chrome, Safari, Edge */
-.dashboard-main-container::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
-}
-
-/* Nascondi la scrollbar in Firefox */
-.dashboard-main-container {
-  scrollbar-width: none;
-}
-
-/* Nascondi la scrollbar in IE e Edge vecchi */
-.dashboard-main-container {
-  -ms-overflow-style: none;
-}

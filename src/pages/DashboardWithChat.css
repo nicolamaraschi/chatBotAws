@@ -360,3 +360,7 @@ body[data-theme="dark"] .chat-container .chat-input-area {
   border-top: 1px solid #444444;
   background-color: #333333;
 }
+
+.dashboard-main-container.with-chat .charts-grid {
+  grid-template-columns: 1fr;
+}
