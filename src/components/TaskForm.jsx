@@ -3,15 +3,33 @@ import PropTypes from 'prop-types';
 import ClientSidSelector from './ClientSidSelector';
 import './TaskForm.css';
 
-const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }) => {
+const TaskForm = ({ task, onSave, onCancel, onDelete, userRole, userClientName, onReject }) => {
   const [formData, setFormData] = useState({
     status: 'proposta',
     ...task
   });
+  const [formErrors, setFormErrors] = useState({});
   
   const isReadOnly = formData.readOnly === true;
   const isClientRole = userRole === 'cliente';
   const isAdminRole = userRole === 'admin';
+  
+  const validateForm = () => {
+    const errors = {};
+
+    // Validazione orari: l'orario di fine non può essere precedente all'orario di inizio
+    if (formData.oraInizio && formData.orarioFine) {
+      const startTime = new Date(`2000-01-01T${formData.oraInizio}`);
+      const endTime = new Date(`2000-01-01T${formData.orarioFine}`);
+      
+      if (endTime <= startTime) {
+        errors.orarioFine = "L'orario di fine deve essere successivo all'orario di inizio";
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -19,6 +37,11 @@ const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Cancella l'errore quando l'utente modifica il campo
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
   
   const handleSubmit = (e) => {
@@ -31,9 +54,16 @@ const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }
         id: formData.id,
         status: formData.status
       });
-    } else {
-      onSave(formData);
+      return;
     }
+    
+    // Validazione del form prima del salvataggio
+    if (!validateForm()) {
+      return; // Interrompe l'invio se la validazione fallisce
+    }
+    
+    // Se passa la validazione, procedi con il salvataggio
+    onSave(formData);
   };
 
   const handleClientSelected = (clientName) => {
@@ -129,7 +159,11 @@ const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }
               onChange={handleChange} 
               required 
               disabled={isReadOnly || (userRole === 'cliente')} 
+              className={formErrors.oraInizio ? 'error' : ''}
             />
+            {formErrors.oraInizio && (
+              <div className="error-message">{formErrors.oraInizio}</div>
+            )}
           </div>
           <div className="form-group">
             <label>Ora Fine:</label>
@@ -140,7 +174,11 @@ const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }
               onChange={handleChange} 
               required 
               disabled={isReadOnly || (userRole === 'cliente')} 
+              className={formErrors.orarioFine ? 'error' : ''}
             />
+            {formErrors.orarioFine && (
+              <div className="error-message">{formErrors.orarioFine}</div>
+            )}
           </div>
           <div className="form-group">
             <label>Email Cliente:</label>
@@ -219,6 +257,17 @@ const TaskForm = ({ task, onSave, onCancel, userRole, userClientName, onReject }
           <div className="form-actions">
             <button type="submit">Salva</button>
             <button type="button" onClick={onCancel}>Annulla</button>
+            
+            {/* Aggiungi il pulsante Elimina solo per admin e solo se l'attività ha già un ID */}
+            {isAdminRole && formData.id && (
+              <button 
+                type="button" 
+                className="delete-button"
+                onClick={() => onDelete && onDelete(formData.id)}
+              >
+                Elimina
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -230,6 +279,7 @@ TaskForm.propTypes = {
   task: PropTypes.object.isRequired,
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   userRole: PropTypes.string.isRequired,
   userClientName: PropTypes.string,
   onReject: PropTypes.func

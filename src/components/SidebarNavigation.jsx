@@ -1,13 +1,14 @@
 // SidebarNavigation.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import DashboardWithChat from '../pages/DashboardWithChat';
 import Dashboard from '../pages/Dashboard';
+import DashboardWithChat from '../pages/DashboardWithChat';
 import ChatComponent from '../ChatComponent';
 import AgendaView from '../pages/AgendaView';
 import ErrorBoundary from './ErrorBoundary';
-import './SidebarNavigation.css';
 import { useTheme } from '../context/ThemeContext';
+import * as AWSAuth from '@aws-amplify/auth';
+import './SidebarNavigation.css';
 
 const SidebarNavigation = ({
   activeView,
@@ -24,16 +25,52 @@ const SidebarNavigation = ({
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [userEmail, setUserEmail] = useState('');
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  // Recupera l'email dell'utente da Cognito
+  useEffect(() => {
+    if (userRole === 'admin' && user) {
+      const fetchUserEmail = async () => {
+        try {
+          const attributes = await AWSAuth.fetchUserAttributes();
+          if (attributes && attributes.email) {
+            setUserEmail(attributes.email);
+          }
+        } catch (error) {
+          console.error('Errore nel recupero dell\'email:', error);
+        }
+      };
+      fetchUserEmail();
+    }
+  }, [userRole, user]);
 
-  // Icone per i menu
+  // Icons for menu buttons (using Font Awesome)
   const menuIcons = {
     dashboard: <i className="menu-icon fas fa-chart-line"></i>,
-    chatbot: <i className="menu-icon fas fa-comments"></i>,
+    chatbot: <i className="menu-icon fas fa-robot"></i>,
     agenda: <i className="menu-icon fas fa-calendar-alt"></i>,
+  };
+
+  // Determina quale informazione visualizzare nella barra laterale
+  const getUserDisplayName = () => {
+    if (userRole === 'admin') {
+      // Per gli admin, mostra l'email se disponibile
+      return userEmail || user?.username || 'Admin';
+    } else {
+      // Per i clienti, mostra il nome del cliente
+      return userClientName || user?.username || 'User';
+    }
+  };
+
+  // Determina quale iniziale utilizzare per l'avatar
+  const getAvatarInitial = () => {
+    if (userRole === 'admin') {
+      // Per gli admin, usa l'iniziale dell'email
+      return userEmail ? userEmail.charAt(0).toUpperCase() : (user?.username?.charAt(0) || 'A');
+    } else {
+      // Per i clienti, usa l'iniziale del nome cliente
+      return userClientName ? userClientName.charAt(0).toUpperCase() : (user?.username?.charAt(0) || 'U');
+    }
   };
 
   return (
@@ -41,17 +78,11 @@ const SidebarNavigation = ({
       <div className={`sidebar-nav ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container">
-            {!sidebarCollapsed && <span className="app-logo">APP</span>}
+            <div className="app-logo">APP</div>
           </div>
-          {!isMobile && (
-            <button
-              className="toggle-sidebar"
-              onClick={toggleSidebar}
-              aria-label={sidebarCollapsed ? "Espandi sidebar" : "Comprimi sidebar"}
-            >
-              <i className={`fas ${sidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
-            </button>
-          )}
+          <button className="toggle-sidebar" onClick={() => setSidebarCollapsed(prev => !prev)} title="Toggle sidebar">
+            <i className={`fas ${sidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
+          </button>
         </div>
 
         <div className="nav-buttons">
@@ -70,7 +101,6 @@ const SidebarNavigation = ({
           >
             {menuIcons.chatbot}
             {!sidebarCollapsed && <span className="btn-text">Agent AI</span>}
-            {/* Numero rimosso */}
           </button>
           <button
             className={activeView === 'agenda' ? 'active' : ''}
@@ -104,10 +134,10 @@ const SidebarNavigation = ({
 
         {!sidebarCollapsed && (
           <div className="user-profile">
-            <div className="avatar">{user?.username?.charAt(0) || 'U'}</div>
+            <div className="avatar">{getAvatarInitial()}</div>
             <div className="user-info">
-              <div className="username">{user?.username || 'User'}</div>
-              <div className="role">{userRole || 'Guest'}</div>
+              <div className="username">{getUserDisplayName()}</div>
+              <div className="role">{userRole === 'admin' ? 'Amministratore' : 'Cliente'}</div>
             </div>
           </div>
         )}

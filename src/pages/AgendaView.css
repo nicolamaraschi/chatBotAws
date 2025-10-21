@@ -315,3 +315,135 @@ button.disabled {
   font-style: italic;
   border-left: 3px solid #ffc107;
 }
+
+
+
+/* Dark Mode per AgendaView */
+body[data-theme="dark"] .agenda-container {
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] .calendar-header h2 {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .nav-button {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] .nav-button:hover {
+  background: #444;
+}
+
+body[data-theme="dark"] .calendar {
+  background: #222;
+  border-color: #444;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .weekdays {
+  background: #333;
+  border-color: #444;
+}
+
+body[data-theme="dark"] .weekday {
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] .day {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+body[data-theme="dark"] .day:hover {
+  background: #252525;
+}
+
+body[data-theme="dark"] .today {
+  background: #1c3a5e;
+}
+
+body[data-theme="dark"] .today:hover {
+  background: #264773 !important;
+}
+
+body[data-theme="dark"] .day-number {
+  color: #ccc;
+}
+
+body[data-theme="dark"] .today .day-number {
+  background-color: #0056b3;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+body[data-theme="dark"] .status-proposta {
+  background-color: rgba(255, 214, 0, 0.2);
+  border-left: 3px solid #ffd600;
+  color: #f0f0f0;
+}
+
+body[data-theme="dark"] .status-accettata {
+  background-color: rgba(76, 175, 80, 0.2);
+  border-left: 3px solid #4caf50;
+  color: #f0f0f0;
+}
+
+body[data-theme="dark"] .status-rifiutata {
+  background-color: rgba(244, 67, 54, 0.2);
+  border-left: 3px solid #f44336;
+  color: #f0f0f0;
+}
+
+body[data-theme="dark"] .task-form-content,
+body[data-theme="dark"] .rejection-modal-content {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .form-group label {
+  color: #ccc;
+}
+
+body[data-theme="dark"] .form-group input,
+body[data-theme="dark"] .form-group select,
+body[data-theme="dark"] .form-group textarea,
+body[data-theme="dark"] .rejection-modal-content textarea {
+  background-color: #333;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body[data-theme="dark"] button[type="button"] {
+  background-color: #333;
+  color: #e0e0e0;
+}
+
+body[data-theme="dark"] button[type="button"]:hover {
+  background-color: #444;
+}
+
+body[data-theme="dark"] .loading-spinner {
+  color: #aaa;
+}
+
+body[data-theme="dark"] .error-message,
+body[data-theme="dark"] .form-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #ff8a80;
+}
+
+body[data-theme="dark"] .rejection-reason {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #e0e0e0;
+  border-left-color: #ffc107;
+}
+
+body[data-theme="dark"] .task-rejection-reason {
+  color: #ff8a80;
+}

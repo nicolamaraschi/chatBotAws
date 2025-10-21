@@ -77,23 +77,32 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     return tasks.filter(task => task.data === dayString);
   };
 
-  const handleDayClick = (day) => {
-    if (isAdminRole) {
-      // Admin può aggiungere nuova attività per questo giorno
-      setEditingTask({ 
-        data: day.toISOString().split('T')[0], 
-        nomeCliente: '', 
-        sid: '', 
-        oraInizio: '', 
-        orarioFine: '', 
-        emailCliente: '', 
-        descrizione: '', 
-        canClientEdit: false,
-        status: 'proposta' // Stato predefinito
-      });
-      setShowTaskForm(true);
-    }
-  };
+// Modifica alla funzione handleDayClick in AgendaView.jsx
+
+const handleDayClick = (day) => {
+  if (isAdminRole) {
+    // Fix del problema timezone - usiamo un metodo che evita il problema dello spostamento di data
+    // Costruiamo manualmente una stringa in formato YYYY-MM-DD che rispetti la data locale
+    const year = day.getFullYear();
+    const month = String(day.getMonth() + 1).padStart(2, '0'); // +1 perché getMonth() restituisce 0-11
+    const dayOfMonth = String(day.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${dayOfMonth}`;
+    
+    // Admin può aggiungere nuova attività per questo giorno
+    setEditingTask({ 
+      data: formattedDate, 
+      nomeCliente: '', 
+      sid: '', 
+      oraInizio: '', 
+      orarioFine: '', 
+      emailCliente: '', 
+      descrizione: '', 
+      canClientEdit: false,
+      status: 'proposta' // Stato predefinito
+    });
+    setShowTaskForm(true);
+  }
+};
 
   const handleEditTask = (task) => {
     // L'admin può sempre modificare
@@ -504,6 +513,7 @@ const AgendaView = ({ userRole, userClientName, user }) => {
             placeholder="Scrivi qui la motivazione del rifiuto..."
             rows={4}
             autoFocus={true}
+            className="rejection-reason-input"
           />
           <div className="rejection-modal-actions">
             <button 
