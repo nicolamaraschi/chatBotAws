@@ -26,6 +26,7 @@ import { BedrockAgentRuntimeClient, InvokeAgentCommand } from "@aws-sdk/client-b
 import { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } from "@aws-sdk/client-bedrock-agentcore";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import { useTheme } from '/src/context/ThemeContext'; // Import useTheme hook
+import useAuthSessionMonitor, { isTokenExpiredError } from '/src/hooks/useAuthSessionMonitor';
 import '/src/ChatComponent.css';
 
 const ChatComponent = ({ user, onLogout, isChatCollapsed, toggleChatCollapse }) => {
@@ -79,6 +80,22 @@ if (!user || !user?.username) {
   
   // Get theme context
   const { theme, toggleTheme } = useTheme();
+
+  // Gestione automatica logout su token scaduto
+  const handleSessionExpired = useCallback(async () => {
+    console.warn('Session expired, logging out user automatically');
+    try {
+      await AWSAuth.signOut();
+      onLogout();
+    } catch (error) {
+      console.error('Error during automatic logout:', error);
+      // Forza il logout anche in caso di errore
+      onLogout();
+    }
+  }, [onLogout]);
+
+  // Monitora la validità della sessione ogni 5 minuti
+  useAuthSessionMonitor(handleSessionExpired, 5 * 60 * 1000);
 
   const filteredSavedChats = savedChats.filter(chat => {
     if (!savedChatsSearchQuery) {
@@ -362,12 +379,17 @@ useEffect(() => {
     } catch (error) {
       console.error('❌ Error in fetchCredentials:', error);
       console.error('Stack trace:', error.stack);
+
+      // Verifica se l'errore è dovuto a token scaduto
+      if (isTokenExpiredError(error)) {
+        handleSessionExpired();
+      }
     }
   };
 
   fetchCredentials();
   loadSavedChatsList(); // Carica la lista delle chat salvate all'avvio
-}, [loadSavedChatsList]);
+}, [loadSavedChatsList, handleSessionExpired]);
 
   useEffect(() => {
     if ((bedrockClient || lambdaClient || agentCoreClient) && !sessionId) {
@@ -530,6 +552,13 @@ useEffect(() => {
 
       } catch (err) {
         console.error('Error invoking agent:', err);
+
+        // Verifica se l'errore è dovuto a token scaduto
+        if (isTokenExpiredError(err)) {
+          console.warn('Request failed due to expired token, logging out user');
+          handleSessionExpired();
+          return; // Non mostrare messaggio di errore, l'utente verrà reindirizzato al login
+        }
 
         let errReason = "**"+String(err).toString()+"**";
 
