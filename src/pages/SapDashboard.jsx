@@ -291,15 +291,20 @@ useEffect(() => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [theme, dashboardData]);
 
-  const loadAvailableClients = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/sap/clients`);
-      setAvailableClients(response.data);
-    } catch (err) {
-      console.error('Errore nel caricamento dei clienti:', err);
-    }
-  };
-
+const loadAvailableClients = async () => {
+  // Aggiungi questa riga all'inizio della funzione
+  setLoading(true);  // Utilizza lo stesso stato di loading già esistente
+  
+  try {
+    const response = await axios.get(`${API_URL}/sap/clients`);
+    setAvailableClients(response.data);
+  } catch (err) {
+    console.error('Errore nel caricamento dei clienti:', err);
+  } finally {
+    // Aggiungi questa riga alla fine della funzione
+    setLoading(false);  // Ripristina lo stato di loading quando finisce
+  }
+};
   const loadAvailableSIDs = async (clients) => {
     try {
       const response = await axios.post(`${API_URL}/sap/sids`, { clients });
