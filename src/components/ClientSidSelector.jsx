@@ -1,3 +1,4 @@
+// File: src/components/ClientSidSelector.jsx
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
@@ -35,6 +36,16 @@ const ClientSidSelector = ({ onClientSelected, onSidSelected, initialClient, ini
     try {
       const response = await axios.get(`${API_URL}/sap/clients`);
       setClients(response.data);
+      
+      // Se c'è un cliente iniziale e fa parte dei clienti disponibili, usalo
+      if (initialClient && response.data.some(c => c.nomecliente === initialClient)) {
+        setSelectedClient(initialClient);
+        if (onClientSelected) onClientSelected(initialClient);
+      } else if (response.data.length > 0) {
+        // Altrimenti seleziona il primo cliente disponibile
+        setSelectedClient(response.data[0].nomecliente);
+        if (onClientSelected) onClientSelected(response.data[0].nomecliente);
+      }
     } catch (err) {
       console.error('Errore nel recupero dei clienti:', err);
       setError('Impossibile caricare la lista dei clienti. Riprova più tardi.');
@@ -65,9 +76,6 @@ const ClientSidSelector = ({ onClientSelected, onSidSelected, initialClient, ini
     } catch (err) {
       console.error('Errore nel recupero dei SID:', err);
       setError('Impossibile caricare la lista dei SID. Riprova più tardi.');
-      setSids([]);
-      setSelectedSid('');
-      if (onSidSelected) onSidSelected('');
     } finally {
       setLoadingSids(false);
     }
@@ -87,54 +95,48 @@ const ClientSidSelector = ({ onClientSelected, onSidSelected, initialClient, ini
 
   return (
     <div className="client-sid-selector">
-      {error && <div className="selector-error">{error}</div>}
+      {error && <div className="error-message">{error}</div>}
       
-      <div className="selector-group">
-        <label htmlFor="clientSelector">Cliente:</label>
-        <div className="selector-wrapper">
-          <select 
-            id="clientSelector" 
-            value={selectedClient} 
-            onChange={handleClientChange}
-            disabled={loadingClients}
-          >
-            <option value="">-- Seleziona cliente --</option>
-            {clients.map((client) => (
-              <option key={client.nomeCliente} value={client.nomeCliente}>
-                {client.nomeCliente}
-              </option>
-            ))}
-          </select>
-          {loadingClients && <span className="selector-spinner">⟳</span>}
-        </div>
+      <div className="form-group">
+        <label>Cliente</label>
+        <select 
+          value={selectedClient} 
+          onChange={handleClientChange}
+          disabled={loadingClients}
+        >
+          <option value="">Seleziona un cliente</option>
+          {clients.map(client => (
+            <option key={client.nomecliente} value={client.nomecliente}>
+              {client.nomecliente}
+            </option>
+          ))}
+        </select>
+        {loadingClients && <span className="loading-indicator">Caricamento...</span>}
       </div>
       
-      <div className="selector-group">
-        <label htmlFor="sidSelector">SID:</label>
-        <div className="selector-wrapper">
-          <select 
-            id="sidSelector" 
-            value={selectedSid} 
-            onChange={handleSidChange}
-            disabled={loadingSids || !selectedClient}
-          >
-            <option value="">-- Seleziona SID --</option>
-            {sids.map((sidObj) => (
-              <option key={sidObj.sid} value={sidObj.sid}>
-                {sidObj.sid}
-              </option>
-            ))}
-          </select>
-          {loadingSids && <span className="selector-spinner">⟳</span>}
-        </div>
+      <div className="form-group">
+        <label>SID</label>
+        <select 
+          value={selectedSid} 
+          onChange={handleSidChange}
+          disabled={loadingSids || !selectedClient}
+        >
+          <option value="">Seleziona un SID</option>
+          {sids.map(sid => (
+            <option key={`${sid.sid}-${sid.nomecliente || 'default'}`} value={sid.sid}>
+              {sid.sid}
+            </option>
+          ))}
+        </select>
+        {loadingSids && <span className="loading-indicator">Caricamento...</span>}
       </div>
     </div>
   );
 };
 
 ClientSidSelector.propTypes = {
-  onClientSelected: PropTypes.func,
-  onSidSelected: PropTypes.func,
+  onClientSelected: PropTypes.func.isRequired,
+  onSidSelected: PropTypes.func.isRequired,
   initialClient: PropTypes.string,
   initialSid: PropTypes.string
 };

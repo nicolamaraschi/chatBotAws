@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import './AgendaView.css';
 import { API_URL } from '../config';
+import ClientSidSelector from '../components/ClientSidSelector';
 
 const AgendaView = ({ userRole, userClientName, user }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -232,6 +233,14 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     }
   };
 
+  const handleClientSelected = (clientName) => {
+    setEditingTask(prev => ({ ...prev, nomeCliente: clientName }));
+  };
+
+  const handleSidSelected = (sid) => {
+    setEditingTask(prev => ({ ...prev, sid: sid }));
+  };
+
   // Renderizza il form per modificare/creare un'attività
   const renderTaskForm = () => {
     if (!showTaskForm || !editingTask) return null;
@@ -254,54 +263,64 @@ const AgendaView = ({ userRole, userClientName, user }) => {
             />
           </div>
           
-          <div className="form-group">
-            <label>Cliente</label>
-            <input 
-              type="text" 
-              value={editingTask.nomeCliente || ''} 
-              onChange={(e) => setEditingTask({...editingTask, nomeCliente: e.target.value})}
-              disabled={!isAdminRole || !isNew}
+          {isAdminRole && isNew ? (
+            <ClientSidSelector
+              onClientSelected={handleClientSelected}
+              onSidSelected={handleSidSelected}
+              initialClient={editingTask.nomeCliente}
+              initialSid={editingTask.sid}
             />
-          </div>
+          ) : (
+            <>
+              <div className="form-group">
+                <label>Cliente</label>
+                <input 
+                  type="text" 
+                  value={editingTask.nomeCliente || ''} 
+                  onChange={(e) => setEditingTask({...editingTask, nomeCliente: e.target.value})}
+                  disabled={!isAdminRole || !isNew}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>SID</label>
+                <input 
+                  type="text" 
+                  value={editingTask.sid || ''} 
+                  onChange={(e) => setEditingTask({...editingTask, sid: e.target.value})}
+                  disabled={!isAdminRole && isReadOnly}
+                />
+              </div>
+            </>
+          )}
           
           <div className="form-group">
-            <label>SID</label>
+            <label>Ora Inizio</label>
             <input 
-              type="text" 
-              value={editingTask.sid || ''} 
-              onChange={(e) => setEditingTask({...editingTask, sid: e.target.value})}
+              type="time" 
+              value={editingTask.oraInizio || ''} 
+              onChange={(e) => setEditingTask({...editingTask, oraInizio: e.target.value})}
               disabled={!isAdminRole && isReadOnly}
             />
           </div>
           
-          <div className="form-row">
-            <div className="form-group half">
-              <label>Ora inizio</label>
-              <input 
-                type="time" 
-                value={editingTask.oraInizio || ''} 
-                onChange={(e) => setEditingTask({...editingTask, oraInizio: e.target.value})}
-                disabled={!isAdminRole && isReadOnly}
-              />
-            </div>
-            <div className="form-group half">
-              <label>Ora fine</label>
-              <input 
-                type="time" 
-                value={editingTask.orarioFine || ''} 
-                onChange={(e) => setEditingTask({...editingTask, orarioFine: e.target.value})}
-                disabled={!isAdminRole && isReadOnly}
-              />
-            </div>
+          <div className="form-group">
+            <label>Ora Fine</label>
+            <input 
+              type="time" 
+              value={editingTask.orarioFine || ''} 
+              onChange={(e) => setEditingTask({...editingTask, orarioFine: e.target.value})}
+              disabled={!isAdminRole && isReadOnly}
+            />
           </div>
           
           <div className="form-group">
-            <label>Email cliente</label>
+            <label>Email Cliente</label>
             <input 
               type="email" 
               value={editingTask.emailCliente || ''} 
               onChange={(e) => setEditingTask({...editingTask, emailCliente: e.target.value})}
-              disabled={!isAdminRole}
+              disabled={!isAdminRole && isReadOnly}
             />
           </div>
           
@@ -311,67 +330,48 @@ const AgendaView = ({ userRole, userClientName, user }) => {
               value={editingTask.descrizione || ''} 
               onChange={(e) => setEditingTask({...editingTask, descrizione: e.target.value})}
               disabled={!isAdminRole && isReadOnly}
-              rows="3"
+              rows="4"
             />
           </div>
           
           {isAdminRole && (
             <div className="form-group">
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={editingTask.canClientEdit || false} 
-                  onChange={(e) => setEditingTask({...editingTask, canClientEdit: e.target.checked})}
-                />
-                Cliente può modificare
-              </label>
+              <label>Permetti modifica al cliente</label>
+              <input 
+                type="checkbox" 
+                checked={editingTask.canClientEdit || false} 
+                onChange={(e) => setEditingTask({...editingTask, canClientEdit: e.target.checked})}
+                disabled={!isAdminRole}
+              />
             </div>
           )}
           
-          {!isNew && editingTask.status && (
-            <div className="form-group">
-              <label>Stato</label>
-              <div className={`status-badge status-${editingTask.status}`}>
-                {editingTask.status === 'proposta' ? 'Proposta' : 
-                 editingTask.status === 'accettata' ? 'Accettata' : 'Rifiutata'}
-              </div>
-              {editingTask.status === 'rifiutata' && editingTask.motivazioneRifiuto && (
-                <div className="rejection-reason">
-                  Motivazione: {editingTask.motivazioneRifiuto}
-                </div>
-              )}
-            </div>
-          )}
-          
-          <div className="form-actions">
-            {isAdminRole && (
-              <button onClick={handleSaveTask} className="btn-save">
-                {isNew ? 'Crea' : 'Salva'}
-              </button>
-            )}
-            
-            {isClientRole && !isNew && editingTask.status === 'proposta' && (
+          <div className="task-form-buttons">
+            {isClientRole && !isReadOnly && (
               <>
-                <button onClick={handleAcceptTask} className="btn-accept">
+                <button onClick={handleAcceptTask} className="button-accept">
                   Accetta
                 </button>
-                <button onClick={handleRejectTask} className="btn-reject">
+                <button onClick={handleRejectTask} className="button-reject">
                   Rifiuta
                 </button>
               </>
             )}
             
-            {isAdminRole && !isNew && (
-              <button 
-                onClick={() => handleDeleteTask(editingTask.id)} 
-                className="btn-delete"
-              >
+            {(isAdminRole || !isReadOnly) && (
+              <button onClick={handleSaveTask} className="button-save">
+                Salva
+              </button>
+            )}
+            
+            {isAdminRole && editingTask.id && (
+              <button onClick={() => handleDeleteTask(editingTask.id)} className="button-delete">
                 Elimina
               </button>
             )}
             
-            <button onClick={() => setShowTaskForm(false)} className="btn-cancel">
-              Annulla
+            <button onClick={() => setShowTaskForm(false)}>
+              Chiudi
             </button>
           </div>
         </div>
@@ -379,26 +379,29 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     );
   };
 
-  // Renderizza il modal per il motivo del rifiuto
+  // Renderizza il modal per il rifiuto dell'attività
   const renderRejectionModal = () => {
     if (!showRejectionModal) return null;
     
     return (
-      <div className="rejection-modal-overlay">
-        <div className="rejection-modal-content">
-          <h3>Motivo del rifiuto</h3>
-          <p>Per favore, specifica il motivo per cui stai rifiutando questa attività:</p>
+      <div className="task-form-overlay">
+        <div className="task-form-container">
+          <h3>Rifiuta attività</h3>
           
-          <textarea 
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Inserisci il motivo del rifiuto..."
-          />
+          <div className="form-group">
+            <label>Motivo del rifiuto:</label>
+            <textarea 
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows="4"
+              required
+            />
+          </div>
           
-          <div className="rejection-modal-actions">
+          <div className="task-form-buttons">
             <button 
-              onClick={submitRejection}
-              className={!rejectionReason ? "disabled" : ""}
+              onClick={submitRejection} 
+              className={rejectionReason.length > 0 ? "" : "disabled"} 
               disabled={!rejectionReason}
             >
               Conferma rifiuto
@@ -506,11 +509,18 @@ const AgendaView = ({ userRole, userClientName, user }) => {
         </div>
         */}
       </div>
-
-      {loading && <div className="loading-spinner">Caricamento in corso...</div>}
+      
       {error && <div className="error-message">{error}</div>}
-
-      {renderMonthView()}
+      
+      {loading && <div className="loading">Caricamento...</div>}
+      
+      {!loading && (
+        <>
+          {viewMode === 'month' && renderMonthView()}
+          {/* Implementare altre visualizzazioni (settimana, giorno) in futuro */}
+        </>
+      )}
+      
       {renderTaskForm()}
       {renderRejectionModal()}
     </div>
