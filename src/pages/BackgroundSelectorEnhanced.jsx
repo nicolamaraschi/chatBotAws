@@ -1,3 +1,4 @@
+// BackgroundSelectorEnhanced.jsx
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './BackgroundSelectorEnhanced.css';
@@ -59,7 +60,9 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     if (!color || typeof color !== 'string') return;
     
     // Standardizza il formato per tutti i colori
-    const standardizedColor = color.startsWith('color:') ? color : `color:${color}`;
+    const standardizedColor = color.startsWith('color:') 
+      ? color 
+      : `color:${color}`;
     
     // Crea una nuova lista di colori recenti
     const updatedColors = [
@@ -79,8 +82,6 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     }
   };
   
-  
-
   const handleSetBackground = () => {
     if (newBg) {
       onBackgroundChange(newBg);
@@ -95,7 +96,6 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     // Supporta input di colore in vari formati
     if (validColor && !validColor.startsWith('#') && !validColor.startsWith('rgb') && !validColor.startsWith('hsl')) {
       // Presumibilmente è un nome di colore, lo accettiamo così com'è
-      // ma potremmo anche convertirlo in un hex se volessimo standardizzare
     }
     
     if (validColor) {
@@ -131,7 +131,6 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     onClose();
   };
   
-
   const handleRemoveBackground = () => {
     onBackgroundChange('');
     setNewBg('');
@@ -139,11 +138,10 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
     onClose();
   };
 
-  // Determina se il colore è scuro per scegliere il testo in contrasto
-  const isColorDark = (color) => {
-    // Logica semplificata: considera i colori scuri per default
-    // In una implementazione più robusta, convertiremmo il colore in RGB e calcoleremo la luminosità
-    return true;
+  // Funzione per estrarre il colore reale da un formato "color:..."
+  const extractActualColor = (colorString) => {
+    if (typeof colorString !== 'string') return '';
+    return colorString.startsWith('color:') ? colorString.substring(6) : colorString;
   };
 
   return (
@@ -228,20 +226,25 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
               <div className="recent-items">
                 <h4>Colori Recenti</h4>
                 <div className="item-list color-list">
-                  {recentColors.map((color, index) => (
-                    <div key={index} className="item-thumbnail color-item">
-                      <div 
-                        className="thumbnail color-thumbnail" 
-                        style={{ backgroundColor: color }}
-                        onClick={() => handleSelectRecentColor(color)}
-                        title={color}
-                      >
-                        <div className="thumbnail-overlay">
-                          <i className="fas fa-check"></i>
+                  {recentColors.map((color, index) => {
+                    // Estrai il colore reale per visualizzarlo correttamente
+                    const actualColor = extractActualColor(color);
+                    
+                    return (
+                      <div key={index} className="item-thumbnail color-item">
+                        <div 
+                          className="thumbnail color-thumbnail" 
+                          style={{ backgroundColor: actualColor }}
+                          onClick={() => handleSelectRecentColor(color)}
+                          title={actualColor}
+                        >
+                          <div className="thumbnail-overlay">
+                            <i className="fas fa-check"></i>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

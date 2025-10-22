@@ -363,3 +363,52 @@ body[data-theme="dark"] .main-content-area {
     padding-left: 200px;
   }
 }
+
+
+/* Pulsante flottante per riaprire la sidebar quando è collassata */
+.sidebar-toggle-float {
+  position: fixed;
+  top: 20px;
+  left: 10px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar-toggle-float:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.sidebar-toggle-float.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+body[data-theme="dark"] .sidebar-toggle-float {
+  background-color: #3f90f7;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .sidebar-toggle-float:hover {
+  background-color: #0056b3;
+}
+
+/* Adatta per mobile */
+@media (max-width: 1024px) {
+  .sidebar-toggle-float {
+    top: 60px;
+  }
+}

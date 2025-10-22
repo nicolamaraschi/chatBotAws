@@ -43,6 +43,11 @@ const SidebarNavigation = ({
       fetchUserEmail();
     }
   }, [userRole, user]);
+  
+  // Funzione per alternare lo stato della sidebar
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => !prev);
+  };
 
   // Icons for menu buttons (using Font Awesome)
   const menuIcons = {
@@ -78,9 +83,9 @@ const SidebarNavigation = ({
       <div className={`sidebar-nav ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container">
-            <div className="app-logo">APP</div>
+           
           </div>
-          <button className="toggle-sidebar" onClick={() => setSidebarCollapsed(prev => !prev)} title="Toggle sidebar">
+          <button className="toggle-sidebar" onClick={toggleSidebar} title="Toggle sidebar">
             <i className={`fas ${sidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
           </button>
         </div>
@@ -142,6 +147,16 @@ const SidebarNavigation = ({
           </div>
         )}
       </div>
+      
+      {/* Pulsante flottante per riaprire la sidebar quando è collassata */}
+      <button 
+        className={`sidebar-toggle-float ${sidebarCollapsed ? 'visible' : ''}`} 
+        onClick={toggleSidebar} 
+        title="Espandi menu"
+        aria-label="Espandi menu"
+      >
+        <i className="fas fa-angle-right"></i>
+      </button>
 
       <div className="main-content-area">
         {activeView === 'dashboard' && (
