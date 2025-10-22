@@ -182,6 +182,17 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  margin-top: 400px; /* Margine per desktop */
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+}
+
+/* Media query per dispositivi mobili */
+@media (max-width: 768px) {
+  .task-form-container {
+    margin-top: 0px; /* Nessun margine superiore su mobile */
+  }
 }
 
 .task-form-container h3 {
@@ -765,3 +776,88 @@ body[data-theme="dark"] .task-item {
     background-color: rgba(244, 67, 54, 0.4);
   }
 }
+
+
+/* Stili specifici per ogni tipo di bottone */
+.button-save {
+  background-color: #007bff; /* Blu */
+  color: white;
+}
+
+.button-accept {
+  background-color: #28a745; /* Verde */
+  color: white;
+}
+
+.button-reject {
+  background-color: #dc3545; /* Rosso */
+  color: white;
+}
+
+.button-delete {
+  background-color: #dc3545; /* Rosso */
+  color: white;
+}
+
+/* Bottone di chiusura generico */
+.task-form-buttons button:not(.button-save):not(.button-accept):not(.button-reject):not(.button-delete) {
+  background-color: #f8f9fa;
+  color: #212529;
+  border: 1px solid #ddd;
+}
+
+/* Effetti hover per tutti i bottoni */
+.task-form-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button-save:hover, .button-accept:hover {
+  background-color: #0069d9;
+}
+
+.button-reject:hover, .button-delete:hover {
+  background-color: #c82333;
+}
+
+/* Bottone disabilitato */
+.task-form-buttons button.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Stili per Dark Mode */
+body[data-theme="dark"] .task-form-container {
+  background: #333;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body[data-theme="dark"] .task-form-buttons {
+  border-top-color: #444;
+}
+
+body[data-theme="dark"] .task-form-buttons button:not(.button-save):not(.button-accept):not(.button-reject):not(.button-delete) {
+  background-color: #444;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+/* Migliorare la visibilità in dispositivi mobili */
+@media (max-width: 768px) {
+  .task-form-container {
+    padding: 15px;
+    max-height: 90vh;
+  }
+  
+  .task-form-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .task-form-buttons button {
+    width: 100%;
+  }
+}
+
+

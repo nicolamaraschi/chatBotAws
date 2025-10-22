@@ -506,9 +506,29 @@ useEffect(() => {
   };
 
   const KPICard = ({ title, value, trend, trendLabel, status }) => {
-    const getTrendIcon = () => { if (trend > 0) return '↑'; if (trend < 0) return '↓'; return '→'; };
-    const getTrendColor = () => { if (title.includes('Dumps') || title.includes('Backup') || title.includes('Job')) { if (trend > 0) return '#dc3545'; if (trend < 0) return '#28a745'; } return '#666'; };
-    return ( <div className="kpi-card"> <h3>{title}</h3> <div className="kpi-value">{value}</div> {trend !== 0 && ( <div className="kpi-trend" style={{ color: getTrendColor() }}> <span className="trend-icon">{getTrendIcon()}</span> <span className="trend-label">{trendLabel}</span> <span className="trend-period"> dal periodo precedente</span> </div> )} {status && <div className="kpi-status">{status}</div>} </div> );
+    // Mantengo i metodi per calcolare le icone e colori del trend, anche se non li userò
+    // per non introdurre errori nel codice
+    const getTrendIcon = () => { 
+      if (trend > 0) return '↑'; 
+      if (trend < 0) return '↓'; 
+      return '→'; 
+    };
+    
+    const getTrendColor = () => { 
+      if (title.includes('Dumps') || title.includes('Backup') || title.includes('Job')) { 
+        if (trend > 0) return '#dc3545'; 
+        if (trend < 0) return '#28a745'; 
+      } 
+      return '#666'; 
+    };
+    
+    // Rimuovo la visualizzazione del trend e dello status
+    return (
+      <div className="kpi-card">
+        <h3>{title}</h3>
+        <div className="kpi-value">{value}</div>
+      </div>
+    );
   };
 
   const handleExport = async (exportType) => {

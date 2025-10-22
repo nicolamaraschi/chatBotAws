@@ -225,6 +225,8 @@ const AgendaView = ({ userRole, userClientName, user }) => {
     try {
       await axios.delete(`${API_URL}/agenda/tasks/${taskId}`);
       fetchTasks();
+      setShowTaskForm(false);  // Chiudi il form dopo l'eliminazione
+      setEditingTask(null);    // Reset dei dati del task in editing
     } catch (err) {
       console.error('Errore nell\'eliminazione attività:', err);
       setError('Impossibile eliminare l\'attività.');
