@@ -1,0 +1,559 @@
+/* src/components/LoginComponent.css - SPECIFICITÀ AUMENTATA + SFUMATURA */
+
+/* --- Variabili CSS --- */
+/* ... (variabili come prima) ... */
+:root {
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-primary: #6D28D9;
+  --color-primary-light: #8B5CF6;
+  --color-primary-dark: #5B21B6;
+  --color-secondary: #EC4899;
+  --color-text-dark: #111827;
+  --color-text-medium: #4B5563;
+  --color-text-light: #9CA3AF;
+  --color-bg-light: #FFFFFF;
+  --color-bg-form: #F9FAFB;
+  --color-border: #D1D5DB;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --border-radius-lg: 1.5rem;
+  --border-radius-md: 0.75rem;
+  --spacing-unit: 0.25rem;
+}
+
+
+/* --- Stili Base --- */
+#custom-login-container body { /* Aumenta specificità se necessario */
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  color: var(--color-text-medium);
+}
+
+/* --- Layout Background & Centering --- */
+/* Applica a #custom-login-container invece di .app-background se preferisci */
+#custom-login-container.app-background {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #E0E7FF 0%, #CFFAFE 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: calc(var(--spacing-unit) * 4);
+  box-sizing: border-box;
+  overflow: auto;
+  z-index: 100; /* Assicurati sia visibile */
+}
+
+#custom-login-container .centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100%;
+  padding: 0;
+}
+
+#custom-login-container .login-page-container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+/* --- Login Card --- */
+#custom-login-container .login-card {
+  display: flex;
+  background: var(--color-bg-light);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  width: 100%;
+  min-height: 600px;
+  max-height: 90vh;
+  transition: box-shadow 0.3s ease;
+}
+
+#custom-login-container .login-card:hover {
+   box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Sezione Form (Sinistra) --- */
+#custom-login-container .login-form-section {
+  flex: 1 1 55%;
+  padding: calc(var(--spacing-unit) * 12); /* Ripristinato padding completo */
+  /* *** MODIFICA: Sfondo bianco per riempire lo spazio *** */
+  background-color: var(--color-bg-light); 
+  display: flex;
+  flex-direction: column;
+  /* *** MODIFICA: Allinea in alto invece che al centro *** */
+  justify-content: flex-start; 
+  position: relative;
+  min-width: 320px;
+  overflow-y: auto;
+}
+
+/* --- Header Login/Conferma --- */
+#custom-login-container .login-header,
+#custom-login-container .confirm-header {
+  margin-bottom: calc(var(--spacing-unit) * 8);
+  text-align: left;
+}
+
+#custom-login-container .login-header h2,
+#custom-login-container .confirm-header h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  /* *** MODIFICA: Colore sempre nero per Bentornato! *** */
+  color: #111827 !important; /* Forza il colore nero */
+  margin: 0 0 calc(var(--spacing-unit) * 2);
+  line-height: 1.2;
+}
+
+#custom-login-container .login-header p,
+#custom-login-container .confirm-header p {
+  font-size: 1rem;
+  /* *** MODIFICA: Colore sempre nero per Accedi al tuo account *** */
+  color: #111827 !important; /* Forza il colore nero */
+  margin: 0;
+}
+
+/* --- Form e Campi --- */
+#custom-login-container .custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 6);
+}
+
+#custom-login-container .custom-field {
+  display: flex;
+  flex-direction: column;
+}
+
+#custom-login-container .field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+#custom-login-container .required { color: var(--color-error); }
+
+#custom-login-container .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#custom-login-container .input-wrapper svg {
+  position: absolute;
+  left: calc(var(--spacing-unit) * 4);
+  z-index: 1;
+  pointer-events: none;
+  color: var(--color-text-light);
+  transition: color 0.2s ease;
+}
+
+#custom-login-container .input-wrapper:focus-within svg {
+    color: var(--color-primary);
+}
+
+#custom-login-container .input-wrapper.no-icon svg { display: none; }
+
+/* Stile input specifico per sovrascrivere Amplify */
+#custom-login-container .input-field {
+  width: 100%;
+  padding: calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 11) !important; /* Usa !important se necessario */
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--border-radius-md) !important;
+  font-size: 1rem !important;
+  background: var(--color-bg-form) !important;
+  color: var(--color-text-dark) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-sizing: border-box;
+  appearance: none !important;
+  /* Rimuovi stili Amplify se possibile */
+  box-shadow: none !important;
+}
+/* Stili per placeholder */
+#custom-login-container .input-field::placeholder {
+    color: var(--color-text-light);
+    opacity: 1;
+}
+
+
+#custom-login-container .input-wrapper.no-icon .input-field {
+  padding-left: calc(var(--spacing-unit) * 4) !important;
+}
+
+#custom-login-container .input-field:focus {
+  outline: none !important;
+  border-color: var(--color-primary) !important;
+  background: var(--color-bg-light) !important;
+  box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1) !important;
+}
+
+#custom-login-container .input-field.error {
+  border-color: var(--color-error) !important;
+  background: #FEF2F2 !important;
+}
+
+#custom-login-container .input-field.error:focus {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+#custom-login-container .error-message {
+  font-size: 0.875rem;
+  color: var(--color-error) !important;
+  margin-top: calc(var(--spacing-unit) * 1);
+  font-weight: 500;
+}
+
+/* --- Bottoni --- */
+/* Stile bottone specifico per sovrascrivere Amplify */
+#custom-login-container .sign-in-button,
+#custom-login-container .confirm-button {
+  width: 100% !important;
+  padding: calc(var(--spacing-unit) * 4) 0 !important;
+  background: linear-gradient(100deg, var(--color-primary-dark) 0%, var(--color-primary) 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--border-radius-md) !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-top: calc(var(--spacing-unit) * 2) !important;
+  box-shadow: var(--shadow-md) !important;
+  /* Reset stile Amplify se necessario */
+  height: auto !important;
+  line-height: normal !important;
+}
+
+#custom-login-container .confirm-button {
+  background: linear-gradient(100deg, #047857 0%, #059669 100%) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+#custom-login-container .sign-in-button:hover:not(:disabled),
+#custom-login-container .confirm-button:hover:not(:disabled) {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 15px 25px -5px rgba(109, 40, 217, 0.2) !important;
+}
+#custom-login-container .confirm-button:hover:not(:disabled) {
+    box-shadow: 0 15px 25px -5px rgba(5, 150, 105, 0.2) !important;
+}
+
+#custom-login-container .sign-in-button:disabled,
+#custom-login-container .confirm-button:disabled {
+    background: #E5E7EB !important;
+    color: #9CA3AF !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* --- Footer Links --- */
+#custom-login-container .login-footer-links,
+#custom-login-container .confirm-footer-links {
+  margin-top: calc(var(--spacing-unit) * 6);
+  padding-top: calc(var(--spacing-unit) * 6);
+  border-top: 1px solid #E5E7EB;
+}
+
+#custom-login-container .login-footer-links {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#custom-login-container .create-account-link,
+#custom-login-container .forgot-password-link,
+#custom-login-container .back-link {
+  font-size: 0.875rem !important;
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+  /* Reset stile Amplify link */
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer;
+}
+#custom-login-container .back-link { color: var(--color-text-medium) !important; }
+
+#custom-login-container .create-account-link:hover,
+#custom-login-container .forgot-password-link:hover,
+#custom-login-container .back-link:hover {
+  color: var(--color-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+#custom-login-container .confirm-footer-links { text-align: center; }
+
+/* === Sezione Grafica (Destra) - CON SFONDO IMMAGINE E OVERLAY SFUMATO === */
+#custom-login-container .login-graphic-section {
+  flex: 1 1 45%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: calc(var(--spacing-unit) * 12);
+  min-width: 0;
+  background-image: url('/login.png'); /* <<< Assicurati sia in /public */
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  color: white;
+}
+
+/* Overlay Sfumato sopra l'immagine (CORRETTO e VISIBILE) */
+#custom-login-container .login-graphic-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Gradiente da TRASPARENTE (sopra) a NERO SEMI-TRASPARENTE (sotto) */
+  /* Regola 40% (inizio sfumatura) e 0.7 (intensità scuro) se necessario */
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 1; /* Sta tra lo sfondo e il testo */
+}
+
+/* Contenuto testuale (sopra overlay) */
+#custom-login-container .welcome-back {
+  position: relative;
+  z-index: 2; /* Sta sopra ::before */
+  text-align: center;
+  max-width: 420px;
+}
+
+#custom-login-container .welcome-back h3 {
+  font-size: 2.35rem;
+  font-weight: 700;
+  margin: 0 0 calc(var(--spacing-unit) * 6);
+  line-height: 1.25;
+  text-shadow: 0 3px 10px rgba(0,0,0,0.6);
+}
+
+#custom-login-container .welcome-back p {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  opacity: 1;
+  margin: 0;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* Nasconde il logo separato */
+#custom-login-container .graphic-logo { display: none; }
+
+/* === Fine Sezione Grafica Modificata === */
+
+
+/* --- Stato Loading --- */
+#custom-login-container .loading-state {
+  text-align: center;
+  padding: calc(var(--spacing-unit) * 8);
+  color: var(--color-text-medium);
+  font-size: 1rem;
+}
+#custom-login-container .loading-state::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+
+/* --- Responsive Design --- */
+@media (max-width: 900px) {
+  #custom-login-container .login-graphic-section { display: none; }
+  #custom-login-container .login-form-section { 
+    flex-basis: 100%; 
+    padding: calc(var(--spacing-unit) * 8); 
+    /* Allineamento in alto anche su mobile */
+    justify-content: flex-start;
+    overflow-y: auto; 
+  }
+  #custom-login-container .login-card { min-height: auto; max-height: none; border-radius: var(--border-radius-md); }
+  #custom-login-container .login-header h2, #custom-login-container .confirm-header h2 { font-size: 1.75rem; }
+  #custom-login-container .input-field { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+   #custom-login-container .login-form-section { padding: calc(var(--spacing-unit) * 6); }
+   #custom-login-container .custom-form { gap: calc(var(--spacing-unit) * 5); }
+}
+
+/* --- Dark Mode (Base) --- */
+/* *** CORREZIONE APPLICATA ***
+  Aggiunto 'body' a *TUTTI* i selettori [data-theme="dark"] 
+  per aumentare la specificità e garantire la sovrascrittura.
+*/
+
+body[data-theme="dark"] #custom-login-container.app-background { background: linear-gradient(135deg, #111827 0%, #1F2937 100%); }
+
+/* *** MODIFICA: Aggiunto !important per forzare lo sfondo dark *** */
+/* Lo sfondo della card ora è scuro */
+body[data-theme="dark"] #custom-login-container .login-card { background: #1F2937 !important; box-shadow: var(--shadow-lg); }
+/* Ma la .login-form-section rimane bianca (grazie alla regola a riga 91), creando l'effetto bicolore */
+
+/* *** RIMOSSO: Le regole per h2 e p nel dark mode, ora sono sempre neri sopra *** */
+/* body[data-theme="dark"] #custom-login-container .login-header h2, */
+/* body[data-theme="dark"] #custom-login-container .confirm-header h2, */
+body[data-theme="dark"] #custom-login-container .field-label,
+body[data-theme="dark"] #custom-login-container .input-field { color: #F9FAFB; } /* Questo è per le label "Username/Password" */
+
+/* body[data-theme="dark"] #custom-login-container .login-header p, */
+/* body[data-theme="dark"] #custom-login-container .confirm-header p { color: #D1D5DB; } */
+
+body[data-theme="dark"] #custom-login-container .input-wrapper svg { color: #6B7280; }
+body[data-theme="dark"] #custom-login-container .input-wrapper:focus-within svg { color: #A78BFA; }
+
+body[data-theme="dark"] #custom-login-container .input-field { background: #374151 !important; border-color: #4B5563 !important; color: #F9FAFB !important;}
+body[data-theme="dark"] #custom-login-container .input-field:focus { background: #1F2937 !important; border-color: #A78BFA !important; box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15) !important; }
+body[data-theme="dark"] #custom-login-container .input-field.error { border-color: #F87171 !important; background: rgba(248, 113, 113, 0.1) !important; }
+body[data-theme="dark"] #custom-login-container .input-field.error:focus { box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15) !important; }
+
+body[data-theme="dark"] #custom-login-container .error-message { color: #F87171 !important; }
+
+body[data-theme="dark"] #custom-login-container .login-footer-links,
+body[data-theme="dark"] #custom-login-container .confirm-footer-links { border-top-color: #4B5563; }
+
+body[data-theme="dark"] #custom-login-container .forgot-password-link { color: #C4B5FD !important; }
+body[data-theme="dark"] #custom-login-container .back-link { color: #D1D5DB !important; }
+body[data-theme="dark"] #custom-login-container .forgot-password-link:hover { color: #A78BFA !important; }
+body[data-theme="dark"] #custom-login-container .back-link:hover { color: #C4B5FD !important; }
+
+body[data-theme="dark"] #custom-login-container .login-graphic-section::before { background: linear-gradient( to bottom, rgba(10, 5, 20, 0.1) 40%, rgba(10, 5, 20, 0.8) 100% ); }
+body[data-theme="dark"] #custom-login-container .welcome-back h3,
+body[data-theme="dark"] #custom-login-container .welcome-back p { color: #F3F4F6; text-shadow: 0 2px 6px rgba(0,0,0,0.7); }
+
+body[data-theme="dark"] #custom-login-container .input-field::placeholder { color: #6B7280; opacity: 0.8; }
+
+
+/* Aggiunta importante per sovrascrivere specifici stili Amplify UI */
+#custom-login-container .amplify-button--primary {
+    /* Applica gli stili del tuo .sign-in-button */
+    padding: calc(var(--spacing-unit) * 4) 0 !important;
+    background: linear-gradient(100deg, var(--color-primary-dark) 0%, var(--color-primary) 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--border-radius-md) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-top: calc(var(--spacing-unit) * 2) !important;
+    box-shadow: var(--shadow-md) !important;
+    height: auto !important; /* Override altezza fissa */
+    line-height: normal !important; /* Override line-height */
+}
+#custom-login-container .amplify-button--primary:hover:not(:disabled) {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 15px 25px -5px rgba(109, 40, 217, 0.2) !important;
+}
+#custom-login-container .amplify-button--primary:disabled {
+     background: #E5E7EB !important;
+     color: #9CA3AF !important;
+     cursor: not-allowed !important;
+     box-shadow: none !important;
+     transform: none !important;
+}
+
+/* Sovrascrivi stili input Amplify */
+#custom-login-container .amplify-input {
+    /* Applica stili .input-field */
+    padding: calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 3.5) calc(var(--spacing-unit) * 11) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--border-radius-md) !important;
+    font-size: 1rem !important;
+    background: var(--color-bg-form) !important;
+    color: var(--color-text-dark) !important;
+    box-shadow: none !important; /* Rimuovi shadow interna amplify */
+}
+#custom-login-container .amplify-input:focus {
+     border-color: var(--color-primary) !important;
+     background: var(--color-bg-light) !important;
+     box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1) !important;
+}
+/* Aggiusta padding se l'icona è gestita da Amplify */
+#custom-login-container .amplify-field-group__field-wrapper .amplify-input {
+    padding-left: calc(var(--spacing-unit) * 11) !important; /* Mantiene padding per icona */
+}
+
+
+/* Sovrascrivi stili link Amplify */
+#custom-login-container .amplify-button--link {
+    /* Applica stili .forgot-password-link */
+    font-size: 0.875rem !important;
+    color: var(--color-primary) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    padding: 0 !important; /* Reset padding Amplify */
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: auto !important;
+    line-height: normal !important;
+}
+#custom-login-container .amplify-button--link:hover {
+    color: var(--color-primary-dark) !important;
+    text-decoration: underline !important;
+    background: none !important; /* Assicura nessun background su hover */
+}
+
+/* *** AGGIUNTA: Override Dark Mode per componenti Amplify *** */
+/* Risolve il problema degli input/bottoni disabilitati che restano chiari */
+
+body[data-theme="dark"] #custom-login-container .amplify-button--primary:disabled {
+     background: #374151 !important; /* Sfondo scuro per bottone disabilitato */
+     color: #6B7280 !important; /* Testo grigio scuro */
+}
+
+/* Gli input ora sono scuri in dark mode, anche se lo sfondo della sezione è bianco */
+body[data-theme="dark"] #custom-login-container .amplify-input {
+    /* Applica stili .input-field dark */
+    border-color: #4B5563 !important;
+    background: #374151 !important;
+    color: #F9FAFB !important;
+}
+body[data-theme="dark"] #custom-login-container .amplify-input:focus {
+     border-color: #A78BFA !important;
+     background: #1F2937 !important;
+     box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15) !important;
+}
+/* Le label "Username/Password" ora sono scure in dark mode */
+body[data-theme="dark"] #custom-login-container .field-label {
+    color: #F9FAFB;
+}
+
+body[data-theme="dark"] #custom-login-container .amplify-button--link {
+    color: #C4B5FD !important;
+}
+body[data-theme="dark"] #custom-login-container .amplify-button--link:hover {
+    color: #A78BFA !important;
+}
+

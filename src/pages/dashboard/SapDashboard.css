@@ -1,0 +1,21 @@
+/* src/pages/dashboard/SapDashboard.css */
+
+.sap-dashboard {
+  /* Rimuoviamo padding e max-width da qui, li gestiamo in app.css/.dashboard-section */
+  /* padding: 2rem; */
+  /* max-width: 1600px; */
+  /* margin: 0 auto; */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Se vuoi uno sfondo specifico SOLO per questa pagina DIVERSO da quello
+   impostato in app.css per .dashboard-section, puoi aggiungerlo qui.
+   Altrimenti, erediterà lo sfondo da .dashboard-section. */
+
+/* Esempio: Sfondo specifico per SapDashboard in dark mode */
+/* body[data-theme="dark"] .sap-dashboard { */
+  /* background-color: #1f1f1f; */ /* Un grigio leggermente diverso? */
+/* } */
+
+/* Eventuali altri stili specifici solo per il layout generale di SapDashboard */

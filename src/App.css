@@ -1,147 +1,176 @@
+/* src/app.css */
+
+/* --- Variabili CSS --- */
+body { /* Tema Chiaro */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-input: #ffffff;
+  --bg-hover: #e9ecef;
+  --bg-button: #007bff;
+  --bg-button-hover: #0056b3;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-button: #ffffff;
+  --border-color: #dee2e6;
+  --dashboard-bg: #f1f3f5;
+  /* Rimuovi o commenta il gradiente viola */
+  /* background: linear-gradient(135deg, rgb(71, 17, 118) 3%, rgb(131, 57, 157) 44%, rgb(149, 85, 182) 69%, rgb(145, 134, 215) 94%); */
+  /* Aggiungi il grigio semi-trasparente */
+  background-color: rgba(230, 230, 230, 0.1); /* Esempio: Grigio chiaro al 10% */
+  color: var(--text-primary);
+}
+body[data-theme="dark"] { /* Tema Scuro */
+  --bg-primary: #212529;
+  --bg-secondary: #343a40;
+  --bg-input: #495057;
+  --bg-hover: #495057;
+  --bg-button: #007bff;
+  --bg-button-hover: #0056b3;
+  --text-primary: #f8f9fa;
+  --text-secondary: #adb5bd;
+  --text-button: #ffffff;
+  --border-color: #495057;
+  --dashboard-bg: #1a1d21;
+  /* Rimuovi o commenta il gradiente viola scuro */
+  /* background: linear-gradient(135deg, rgb(27, 6, 45) 3%, rgb(67, 29, 80) 44%, rgb(77, 44, 94) 69%, rgb(74, 69, 110) 94%); */
+  /* Aggiungi il grigio semi-trasparente per il tema scuro */
+  background-color: rgba(50, 50, 50, 0.2); /* Esempio: Grigio scuro al 20% */
+  color: var(--text-primary);
+}
+
+/* --- Stili Globali --- */
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  /* overflow: hidden; */ /* This was causing scrolling issues */
-  width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
 }
-
 body {
-  background: linear-gradient(135deg, rgb(71, 17, 118) 3%, rgb(131, 57, 157) 44%, rgb(149, 85, 182) 69%, rgb(145, 134, 215) 94%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
 }
 
-body[data-theme="dark"] {
-  background: linear-gradient(135deg, rgb(27, 6, 45) 3%, rgb(67, 29, 80) 44%, rgb(77, 44, 94) 69%, rgb(74, 69, 110) 94%);
-}
-
+/* --- Contenitore Principale App (SOLO SFONDO) --- */
 .app-background {
   min-height: 100vh;
   width: 100%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  position: relative;
 }
 
-/* In modalità dark, aggiungiamo un overlay semi-trasparente per evitare problemi di trasparenza */
-body[data-theme="dark"] .app-background::before {
+/* Overlay Dark Mode */
+/* Questa regola potrebbe non essere più necessaria se usi background-color trasparente sopra */
+/* body[data-theme="dark"] .app-background:not([style*="background-image"])::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(18, 18, 18, 0.85); /* Colore scuro semi-trasparente */
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(18, 18, 18, 0.85);
   z-index: -1;
   pointer-events: none;
-}
+} */
 
-/* Se è stato impostato uno sfondo personalizzato, lo applichiamo sopra l'overlay */
-body[data-theme="dark"] .app-background[style*="background-image"] {
-  position: relative;
-  z-index: 0;
-}
-
+/* --- Layout Autenticato (Sidebar + Contenuto) --- */
 .main-layout {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100%;
-}
-
-.dashboard-section {
-  flex: 1; /* Takes up remaining space */
   height: 100vh;
-  overflow-y: auto;
-  min-width: 0; /* Prevents flexbox overflow */
+  position: relative;
+  overflow: hidden;
 }
 
+/* Sezione Dashboard/Contenuto */
+.dashboard-section {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  min-width: 0;
+  background-color: var(--dashboard-bg); /* Usa variabile per sfondo dashboard */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Sezione Chat Resizable */
 .chat-section-resizable {
   position: relative;
   flex-shrink: 0;
-  /* The ugly debug border is gone! */
-}
-
-.chat-section-resizable .react-resizable-handle-w {
-  position: absolute;
-  width: 8px;
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
   height: 100%;
-  left: -4px;
-  top: 0;
-  cursor: col-resize;
-  
-  /* --- FIX for the "oblique" bug --- */
-  transform: none !important;
-  
-  /* Final production style for the handle */
-  background-color: #007bff;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="30"><path d="M3 0 v30 M5 0 v30" stroke="rgba(255,255,255,0.4)" stroke-width="1"/></svg>');
-  background-repeat: no-repeat;
-  background-position: center;
-  
-  opacity: 0.4;
-  
-  z-index: 999;
 }
-
-.chat-section-resizable .react-resizable-handle-w:hover {
-  opacity: 1;
-}
-
+.chat-section-resizable .react-resizable-handle-w { /* ... stile handle ... */ }
+.chat-section-resizable .react-resizable-handle-w:hover { /* ... stile handle hover ... */ }
 .chat-section {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
+/* Contenitore Centraggio */
 .centered-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
-/* Styles for mobile and tablet devices */
-@media (max-width: 1024px), (orientation: portrait) {
+/* Spinner */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 123, 255, 0.3); /* Blu chiaro trasparente */
+  border-radius: 50%;
+  border-top-color: #007bff; /* Blu primario */
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* --- Media Query Mobile --- */
+@media (max-width: 1024px) {
   .main-layout {
     flex-direction: column;
-    flex-grow: 1; /* Allow main-layout to take remaining space */
-    height: auto; /* Let flexbox manage height */
+    height: auto;
+    overflow: visible;
   }
-
-  .dashboard-section, .chat-section-resizable, .chat-section {
-    width: 100% !important; /* Override inline styles from resizable */
-    height: 100%; /* Occupy full height in mobile/tablet view */
+  .dashboard-section, .chat-section-resizable {
+    width: 100% !important;
+    height: auto;
+    min-height: auto;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
   }
+   .dashboard-section {
+      overflow-y: visible;
+      border-top: none;
+      order: 1;
+  }
+   .chat-section-resizable {
+       order: 2;
+   }
+   .chat-section {
+       height: auto;
+       min-height: 50vh;
+   }
 }
 
-/* Regole per disattivare i gradienti e gli overlay predefiniti quando si usa un colore personalizzato */
-.custom-background-color {
-  background: none !important;
-}
 
-.custom-background-color .app-background {
-  position: relative;
-  z-index: 1;
-}
-
-.custom-background-color .app-background::before {
-  content: none !important; 
-  display: none !important;
-}
-
-body[data-theme="dark"].custom-background-color .app-background::before {
-  content: none !important;
-  display: none !important;
-}
-
-/* Assicuriamo che i gradienti predefiniti siano completamente disabilitati */
+/* Regole Sfondi Custom */
+/* Rende trasparente lo sfondo del body se c'è uno sfondo custom in app-background */
 body.custom-background-color {
-  background: none !important;
+    background: transparent !important; /* Forza trasparenza */
+}
+/* Lo stile per .app-background viene applicato inline da App.jsx */
+/* Nasconde l'overlay scuro se c'è uno sfondo custom a colore */
+body[data-theme="dark"].custom-background-color .app-background::before {
+    display: none !important;
 }
 
-body[data-theme="dark"].custom-background-color {
-  background: none !important;
-}

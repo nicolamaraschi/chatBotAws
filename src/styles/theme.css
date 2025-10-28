@@ -1,7 +1,10 @@
+/* theme.css - VERSIONE MODIFICATA */
+
 /* Theme Variables */
 :root {
-  --bg-gradient-light: linear-gradient(135deg, rgb(71, 17, 118) 3%, rgb(131, 57, 157) 44%, rgb(149, 85, 182) 69%, rgb(145, 134, 215) 94%);
-  --bg-gradient-dark: linear-gradient(135deg, rgb(27, 6, 45) 3%, rgb(67, 29, 80) 44%, rgb(77, 44, 94) 69%, rgb(74, 69, 110) 94%);
+  /* MODIFICATO: cambiati i gradienti originali con colori sfumati trasparenti */
+  --bg-gradient-light: rgba(240, 230, 220, 0.7);
+  --bg-gradient-dark: rgba(70, 70, 70, 0.7);
   
   --text-color-light: #000;
   --text-color-dark: #fff;
@@ -46,7 +49,8 @@ body[data-theme="dark"] {
 
 /* Global Theme Styles */
 body {
-  background: var(--bg-gradient);
+  /* MODIFICATO: cambiato per usare background-color invece che background */
+  background-color: var(--bg-gradient);
   color: var(--text-color);
 }
 
@@ -85,9 +89,11 @@ body[data-theme="dark"] .chat-container {
 
 /* Override Cloudscape component colors in dark mode */
 html.awsui-dark-mode {
-  background: var(--bg-gradient-dark);
+  /* MODIFICATO: cambiato per usare background-color invece di background */
+  background-color: var(--bg-gradient-dark);
 }
 
 html.awsui-light-mode {
-  background: var(--bg-gradient-light);
+  /* MODIFICATO: cambiato per usare background-color invece di background */
+  background-color: var(--bg-gradient-light);
 }

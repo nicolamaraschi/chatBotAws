@@ -1,0 +1,345 @@
+/* src/pages/dashboard/DashboardContent.css */
+
+/* Stili KPI Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Minimo più piccolo per più card */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .kpi-card {
+    background-color: var(--bg-primary); /* Usa sfondo primario solido */
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Ombra leggermente più pronunciata */
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--border-color); /* Bordo sottile */
+  }
+  
+  /* Rimosso :hover per semplicità, può essere aggiunto se desiderato */
+  /* .kpi-card:hover { ... } */
+  
+  .kpi-card h3 {
+    margin: 0 0 0.75rem 0; /* Ridotto spazio sotto */
+    font-size: 0.9rem; /* Leggermente più piccolo */
+    color: var(--text-secondary); /* Usa colore secondario */
+    font-weight: 600; /* Leggermente più grassetto */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .kpi-value {
+    font-size: 2.2rem; /* Ridotto leggermente */
+    font-weight: 700; /* Grassetto */
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  
+  /* Colori specifici per valori con stato */
+  .kpi-value.error {
+    color: #dc3545; /* Rosso per errori */
+  }
+  body[data-theme="dark"] .kpi-value.error {
+    color: #f14668; /* Rosso più chiaro per dark mode */
+  }
+  .kpi-value.warning {
+    color: #ffc107; /* Giallo/Arancio per warning */
+  }
+  body[data-theme="dark"] .kpi-value.warning {
+    color: #ffdd57; /* Giallo più chiaro per dark mode */
+  }
+  
+  
+  .kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem; /* Leggermente più piccolo */
+    margin-top: 0.5rem;
+  }
+  
+  .trend-label {
+    font-weight: 600;
+  }
+  
+  /* Colori per trend positivo/negativo */
+  .kpi-trend.positive .trend-label {
+      color: #28a745; /* Verde */
+  }
+  body[data-theme="dark"] .kpi-trend.positive .trend-label {
+      color: #48c774; /* Verde più chiaro */
+  }
+  .kpi-trend.negative .trend-label {
+      color: #dc3545; /* Rosso */
+  }
+  body[data-theme="dark"] .kpi-trend.negative .trend-label {
+      color: #f14668; /* Rosso più chiaro */
+  }
+  
+  
+  /* Stili Charts Grid */
+  .charts-grid {
+    display: grid;
+    /* Prova con 2 colonne di default */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  /* Regola per elementi full-width */
+  .charts-grid .chart-card.full-width {
+    grid-column: 1 / -1; /* Occupa tutte le colonne disponibili */
+  }
+  
+  .chart-card {
+    background-color: var(--bg-primary); /* Usa sfondo primario solido */
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    display: flex; /* Utile per layout interno */
+    flex-direction: column; /* Contenuto in colonna */
+  }
+  
+  .chart-card h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem; /* Leggermente più piccolo */
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .chart-subtitle {
+    margin: 0 0 1.5rem 0;
+    font-size: 0.85rem; /* Più piccolo */
+    color: var(--text-secondary);
+  }
+  
+  .chart-container {
+    /* Imposta un'altezza base, ma permetti crescita */
+    min-height: 300px;
+    height: 350px; /* Altezza fissa precedente, mantenuta */
+    position: relative;
+    flex-grow: 1; /* Permette al contenitore di crescere se chart-card cresce */
+    width: 100%; /* Assicura larghezza piena */
+  }
+  
+  /* Contenitore specifico per timeline se serve altezza diversa */
+  .chart-container-timeline {
+    height: 350px;
+  }
+  /* Contenitore per barre orizzontali (usa stile inline in JSX per altezza dinamica) */
+  .horizontal-bar-chart {
+     min-height: 350px; /* Altezza minima */
+  }
+  
+  
+  /* Stili Details Table */
+  .details-table {
+    background-color: var(--bg-primary); /* Usa sfondo primario solido */
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow-x: auto; /* Scroll orizzontale se necessario */
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem; /* Spazio sotto la tabella */
+  }
+  
+  .details-table h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .details-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Larghezza minima per evitare compressione eccessiva */
+  }
+  
+  .details-table th,
+  .details-table td {
+    padding: 0.8rem 1rem; /* Padding leggermente ridotto */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap; /* Evita che il testo vada a capo facilmente */
+  }
+  
+  .details-table th {
+    background-color: var(--bg-secondary); /* Sfondo leggermente diverso per header */
+    font-weight: 600;
+    color: var(--text-secondary); /* Usa colore secondario */
+    text-transform: uppercase;
+    font-size: 0.75rem; /* Più piccolo */
+    letter-spacing: 0.5px;
+  }
+  
+  .details-table td {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
+  
+  /* Colori specifici per celle warning/error */
+  .details-table td.warning { color: #ff9800; }
+  body[data-theme="dark"] .details-table td.warning { color: #ffdd57; }
+  .details-table td.error { color: #dc3545; }
+  body[data-theme="dark"] .details-table td.error { color: #f14668; }
+  
+  
+  /* Raggruppamento visivo tabella */
+  .details-table tbody tr.first-of-client td {
+     /* Aggiunge più spazio sopra la prima riga di un nuovo cliente */
+     padding-top: 1.5rem;
+  }
+  .details-table tbody tr.first-of-client {
+     /* Bordo più evidente sopra il nuovo cliente */
+     border-top: 2px solid var(--border-color);
+  }
+  
+  /* Nasconde il nome cliente duplicato */
+  .details-table tbody tr:not(.first-of-client) td:first-child {
+    /* Rende il testo invisibile invece di usare color: transparent */
+    visibility: hidden;
+  }
+  
+  
+  /* Stili Loading / Error / No Data */
+  .loading-container { /* Usato in SapDashboard per lo spinner principale */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    min-height: 200px; /* Altezza minima */
+    color: var(--text-secondary);
+  }
+  
+  .loading-spinner {
+    border: 4px solid var(--bg-secondary); /* Colore base spinner */
+    border-top: 4px solid var(--bg-button); /* Colore animazione */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    font-size: 1rem;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0; /* Aggiunto margine */
+    border: 1px solid #f5c6cb;
+    text-align: center;
+  }
+  body[data-theme="dark"] .error-message {
+    background-color: #3b2426;
+    color: #f14668;
+    border-color: #642c30;
+  }
+  /* Stile specifico per errori nel form */
+  .error-message.form-error {
+      margin-top: 1rem; /* Spazio sopra nel form */
+      margin-bottom: 0;
+      font-size: 0.9rem;
+  }
+  
+  
+  .no-data-message { /* Usato sia per grafici che tabella */
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    min-height: 100px; /* Altezza minima per visibilità */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  
+  /* Responsive Design Specifico per Content */
+  @media (max-width: 1200px) {
+    /* Su schermi più piccoli, passa a 1 colonna per i grafici prima */
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .kpi-grid {
+      /* Su mobile, 2 colonne potrebbero starci */
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem; /* Riduci gap */
+    }
+    .kpi-card {
+        padding: 1rem; /* Riduci padding interno */
+    }
+    .kpi-value {
+        font-size: 1.8rem; /* Riduci dimensione font valore */
+    }
+    .kpi-card h3 {
+        font-size: 0.8rem;
+    }
+  
+    .charts-grid {
+      gap: 1rem; /* Riduci gap */
+    }
+    .chart-card {
+      padding: 1rem; /* Riduci padding */
+    }
+    .chart-card h2 {
+        font-size: 1rem;
+    }
+    .chart-subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .chart-container {
+      min-height: 250px; /* Riduci altezza minima grafici */
+      height: 300px; /* Riduci altezza fissa */
+    }
+     .horizontal-bar-chart {
+         min-height: 300px; /* Riduci minima anche per barre oriz */
+     }
+  
+    .details-table {
+      padding: 0.5rem; /* Riduci padding tabella */
+    }
+    .details-table th,
+    .details-table td {
+      padding: 0.6rem 0.4rem; /* Riduci padding celle */
+      font-size: 0.8rem; /* Riduci font tabella */
+    }
+  }
+  
+  /* ======================================================== */
+  /* REGOLE MODIFICATE PER LEGENDA DOUGHNUT */
+  /* ======================================================== */
+  /* Applica stile normale (non sbarrato) a tutti gli span di default */
+  .chartjs-legend li span {
+    text-decoration: none !important;
+    opacity: 1 !important; /* Forza opacità piena */
+    cursor: pointer;
+  }
+  /* Applica stile sbarrato SOLO quando Chart.js aggiunge la classe .hidden al LI */
+  .chartjs-legend li.hidden span {
+    text-decoration: line-through !important;
+    opacity: 0.6 !important; /* Riduci opacità per chiarezza */
+  }
+  /* ======================================================== */
+  /* FINE REGOLE MODIFICATE */
+  /* ======================================================== */
+  
+  

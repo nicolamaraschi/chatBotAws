@@ -102,7 +102,7 @@ RUN echo '[supervisord]' > /etc/supervisord.conf && \
     echo 'user=root' >> /etc/supervisord.conf && \
     echo '' >> /etc/supervisord.conf && \
     echo '[program:nginx]' >> /etc/supervisord.conf && \
-    echo 'command=nginx -g "daemon off; pid /tmp/nginx.pid;"' >> /etc/supervisord.conf && \
+    echo 'command=nginx -g "daemon off;"' >> /etc/supervisord.conf && \
     echo 'autostart=true' >> /etc/supervisord.conf && \
     echo 'autorestart=true' >> /etc/supervisord.conf && \
     echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
@@ -111,7 +111,9 @@ RUN echo '[supervisord]' > /etc/supervisord.conf && \
     echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
     echo '' >> /etc/supervisord.conf && \
     echo '[program:backend]' >> /etc/supervisord.conf && \
-    echo 'command=node index.js' >> /etc/supervisord.conf && \
+    # ----- MODIFICA QUI -----
+    echo 'command=node server.js' >> /etc/supervisord.conf && \
+    # ----- FINE MODIFICA -----
     echo 'directory=/app' >> /etc/supervisord.conf && \
     echo 'autostart=true' >> /etc/supervisord.conf && \
     echo 'autorestart=true' >> /etc/supervisord.conf && \

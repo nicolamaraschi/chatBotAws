@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SapDashboard from './SapDashboard';
+import SapDashboard from './dashboard/SapDashboard';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const Dashboard = ({

@@ -15,10 +15,10 @@ AWS_ACCOUNT_ID="593740920040"
 # IL TUO REPOSITORY ECR UNICO
 ECR_REPO_NAME="hrun/sap-dashboard"
 ECR_URI="593740920040.dkr.ecr.eu-west-1.amazonaws.com/$ECR_REPO_NAME"
-DOCKERFILE_NAME="Dockerfile.unified"
+DOCKERFILE_NAME="Dockerfile.unified" # Assicurati che questo sia il Dockerfile corretto e aggiornato
 
 echo -e "${BLUE}════════════════════════════════════════${NC}"
-echo -e "${BLUE}  Build e Push Immagine Unificata (Bomba) ${NC}"
+echo -e "${BLUE}  Build e Push Immagine Unificata (ARM64) ${NC}"
 echo -e "${BLUE}  Repository: ${CYAN}$ECR_URI${NC}"
 echo -e "${BLUE}════════════════════════════════════════${NC}"
 
@@ -28,13 +28,13 @@ aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS 
 echo -e "${GREEN}Login ECR riuscito!${NC}"
 
 # 2. Build e Push
-echo -e "${YELLOW}2. Avvio Build & Push (per linux/amd64)...${NC}"
+echo -e "${YELLOW}2. Avvio Build & Push (per linux/arm64)...${NC}"
 echo "Dockerfile: $DOCKERFILE_NAME"
 echo "Questo richiederà diversi minuti..."
 
-# Usiamo buildx per assicurarci che sia l'architettura giusta per ECS (linux/amd64)
+# Usiamo buildx per specificare l'architettura ARM64
 docker buildx build \
-    --platform linux/amd64 \
+    --platform linux/arm64 \
     -f $DOCKERFILE_NAME \
     -t "$ECR_URI:latest" \
     --build-arg VITE_COGNITO_USER_POOL_ID="eu-west-1_7WLST1Mlg" \
@@ -53,5 +53,5 @@ echo -e "${GREEN}✅ Build e Push completati!${NC}"
 # 3. Riepilogo
 echo -e "${BLUE}════════════════════════════════════════${NC}"
 echo -e "${CYAN}🎉 DEPLOY SU ECR COMPLETATO 🎉${NC}"
-echo -e "Immagine pubblicata su: ${GREEN}$ECR_URI:latest${NC}"
+echo -e "Immagine ARM64 pubblicata su: ${GREEN}$ECR_URI:latest${NC}"
 echo -e "${BLUE}════════════════════════════════════════${NC}"

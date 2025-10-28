@@ -1,863 +1,447 @@
 /* File: src/pages/AgendaView.css */
-/* CSS ottimizzato per AgendaView con miglior supporto mobile e dark mode */
+/* CSS ottimizzato per AgendaView con fix per modal scroll */
 
-.agenda-container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 15px;
-  font-family: 'Arial', sans-serif;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Header del calendario */
-.calendar-header {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding-bottom: 15px;
-}
-
-.month-navigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.month-navigation h2 {
-  font-size: 1.4rem;
-  margin: 0;
-  text-align: center;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.nav-button {
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px 15px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-}
-
-.nav-button:hover {
-  background: #e0e0e0;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-button:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-/* Stile del calendario */
-.calendar {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  background: #f8f9fa;
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
-}
-
-.weekday {
-  padding: 8px 4px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #495057;
-}
-
-.days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-
-.day {
-  min-height: 70px;
-  border: 1px solid #eee;
-  padding: 6px;
-  cursor: pointer;
-  position: relative;
-  transition: background-color 0.2s ease;
-}
-
-.day:hover {
-  background-color: #f5f9ff;
-}
-
-.today {
-  background-color: #e6f3ff;
-}
-
-.day-number {
-  text-align: right;
-  font-weight: 600;
-  margin-bottom: 6px;
-  font-size: 0.85rem;
-  color: #555;
-  line-height: 1;
-}
-
-.today .day-number {
-  color: #007bff;
-  background-color: rgba(0, 123, 255, 0.1);
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
-  border-radius: 50%;
-}
-
-.day-tasks {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.task-item {
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  line-height: 1.3;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.task-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.task-time {
-  font-weight: bold;
-  font-size: 0.7rem;
-}
-
-/* Form di modifica/creazione task */
-.task-form-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 15px;
-}
-
-.task-form-container {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  margin-top: 400px; /* Margine per desktop */
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 20px;
-}
-
-/* Media query per dispositivi mobili */
-@media (max-width: 768px) {
-  .task-form-container {
-    margin-top: 0px; /* Nessun margine superiore su mobile */
+/* Stile da aggiungere al tuo CSS GLOBALE (es. App.css o index.css)
+   per nascondere lo scroll del body quando un modal è aperto */
+   body.modal-open {
+    overflow: hidden;
+    /* padding-right gestito (o non gestito) da JS */
   }
-}
-
-.task-form-container h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 1.3rem;
-  color: #333;
-}
-
-.form-group {
-  margin-bottom: 18px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 18px;
-}
-
-.form-group.half {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-.form-group input[type="checkbox"] {
-  width: auto;
-  margin-right: 8px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 25px;
-  flex-wrap: wrap;
-}
-
-.btn-save, .btn-accept, .btn-reject, .btn-delete, .btn-cancel {
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.btn-save {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-accept {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-reject {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-delete {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-cancel {
-  background-color: #f8f9fa;
-  color: #212529;
-  border: 1px solid #ddd;
-}
-
-.btn-save:hover, .btn-accept:hover, .btn-reject:hover, .btn-delete:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-cancel:hover {
-  background-color: #e9ecef;
-}
-
-.btn-save:active, .btn-accept:active, .btn-reject:active, .btn-delete:active, .btn-cancel:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-/* Modal di rifiuto */
-.rejection-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1100;
-  padding: 15px;
-}
-
-.rejection-modal-content {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 450px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.rejection-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #dc3545;
-}
-
-.rejection-modal-content textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  margin: 15px 0;
-  resize: vertical;
-  min-height: 100px;
-  font-size: 0.95rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.rejection-modal-content textarea:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-.rejection-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.rejection-reason {
-  background-color: #fff8e1;
-  padding: 12px;
-  border-radius: 6px;
-  font-style: italic;
-  border-left: 4px solid #ffc107;
-  margin-top: 8px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-/* Stati e colori */
-.status-proposta {
-  background-color: rgba(255, 214, 0, 0.3);
-  border-left: 4px solid #ffd600;
-  color: #333;
-}
-
-.status-accettata {
-  background-color: rgba(76, 175, 80, 0.3);
-  border-left: 4px solid #4caf50;
-  color: #333;
-}
-
-.status-rifiutata {
-  background-color: rgba(244, 67, 54, 0.3);
-  border-left: 4px solid #f44336;
-  color: #333;
-}
-
-.task-rejection-reason {
-  font-size: 11px;
-  font-style: italic;
-  color: #d32f2f;
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Caricamento e errori */
-.loading-spinner {
-  text-align: center;
-  padding: 30px;
-  font-style: italic;
-  color: #666;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.loading-spinner::before {
-  content: "";
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.error-message::before {
-  content: "⚠️";
-  margin-right: 10px;
-  font-size: 1.2rem;
-}
-
-/* Status badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  margin-top: 8px;
-  font-weight: 500;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.status-badge.status-proposta {
-  background-color: #fff9c4;
-  color: #856404;
-}
-
-.status-badge.status-accettata {
-  background-color: #c8e6c9;
-  color: #155724;
-}
-
-.status-badge.status-rifiutata {
-  background-color: #ffcdd2;
-  color: #721c24;
-}
-
-/* ====== Dark Mode ====== */
-body[data-theme="dark"] .agenda-container {
-  background-color: rgba(30, 30, 30, 0.8);
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .calendar-header h2 {
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-body[data-theme="dark"] .nav-button {
-  background: #333;
-  border-color: #555;
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .nav-button:hover {
-  background: #444;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-body[data-theme="dark"] .calendar {
-  background: #222;
-  border-color: #444;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-}
-
-body[data-theme="dark"] .weekdays {
-  background: #333;
-  border-color: #444;
-}
-
-body[data-theme="dark"] .weekday {
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .day {
-  background: #1a1a1a;
-  border-color: #333;
-}
-
-body[data-theme="dark"] .day:hover {
-  background: #2a2a2a;
-}
-
-body[data-theme="dark"] .day.today {
-  background: #1a3b5c;
-}
-
-body[data-theme="dark"] .today .day-number {
-  color: #4da3ff;
-  background-color: rgba(77, 163, 255, 0.2);
-}
-
-body[data-theme="dark"] .day-number {
-  color: #ccc;
-}
-
-body[data-theme="dark"] .task-form-container,
-body[data-theme="dark"] .rejection-modal-content {
-  background: #333;
-  color: #e0e0e0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-body[data-theme="dark"] .task-form-container h3,
-body[data-theme="dark"] .rejection-modal-content h3 {
-  border-color: #444;
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .form-group label {
-  color: #ccc;
-}
-
-body[data-theme="dark"] .form-group input,
-body[data-theme="dark"] .form-group select,
-body[data-theme="dark"] .form-group textarea,
-body[data-theme="dark"] .rejection-modal-content textarea {
-  background: #222;
-  border-color: #444;
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .form-group input:focus,
-body[data-theme="dark"] .form-group select:focus,
-body[data-theme="dark"] .form-group textarea:focus,
-body[data-theme="dark"] .rejection-modal-content textarea:focus {
-  border-color: #3f90f7;
-  box-shadow: 0 0 0 3px rgba(63, 144, 247, 0.25);
-}
-
-body[data-theme="dark"] .btn-cancel {
-  background-color: #444;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-body[data-theme="dark"] .btn-cancel:hover {
-  background-color: #505050;
-}
-
-body[data-theme="dark"] .btn-save {
-  background-color: #0d6efd;
-}
-
-body[data-theme="dark"] .btn-accept {
-  background-color: #198754;
-}
-
-body[data-theme="dark"] .rejection-reason {
-  background-color: #3a3400;
-  border-color: #ffc107;
-  color: #e0e0e0;
-}
-
-body[data-theme="dark"] .loading-spinner {
-  color: #aaa;
-}
-
-body[data-theme="dark"] .loading-spinner::before {
-  border: 3px solid #333;
-  border-top: 3px solid #3f90f7;
-}
-
-body[data-theme="dark"] .error-message {
-  background-color: #4a1414;
-  color: #ff8a80;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* Colori degli eventi in dark mode ottimizzati */
-body[data-theme="dark"] .status-proposta {
-  background-color: rgba(255, 214, 0, 0.9);
-  border-left: 4px solid #ffd600;
-  color: #000000;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-body[data-theme="dark"] .status-accettata {
-  background-color: rgba(76, 175, 80, 0.9);
-  border-left: 4px solid #4caf50;
-  color: #000000;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-body[data-theme="dark"] .status-rifiutata {
-  background-color: rgba(244, 67, 54, 0.9);
-  border-left: 4px solid #f44336;
-  color: #000000;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-body[data-theme="dark"] .task-time,
-body[data-theme="dark"] .task-name,
-body[data-theme="dark"] .task-item {
-  color: #000000;
-  font-weight: 600;
-}
-
-/* Mobile Optimizations */
-@media (max-width: 768px) {
+  
   .agenda-container {
-    padding: 10px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 15px;
+    font-family: 'Arial', sans-serif;
+    border-radius: 10px;
+    /* Rimosso sfondo semi-trasparente per vedere meglio il calendario */
+    background-color: var(--bg-secondary); /* Usa uno sfondo secondario solido */
+    /* backdrop-filter: blur(5px); */ /* Rimosso blur */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary); /* Usa variabile per colore testo */
+  }
+  
+  /* Header del calendario */
+  .calendar-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color); /* Usa variabile */
+    padding-bottom: 15px;
   }
   
   .month-navigation {
-    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
   
   .month-navigation h2 {
-    font-size: 1.1rem;
-    flex-basis: 100%;
-    margin-bottom: 10px;
+    font-size: 1.4rem;
+    margin: 0;
     text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-primary); /* Usa variabile */
   }
   
   .nav-button {
-    padding: 8px 12px;
-    font-size: 14px;
-    flex: 1;
+    background: var(--bg-input); /* Usa variabile */
+    border: 1px solid var(--border-color); /* Usa variabile */
+    color: var(--text-primary); /* Usa variabile */
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+  }
+  
+  .nav-button:hover {
+    background: var(--bg-hover); /* Usa variabile */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .nav-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+  }
+  .nav-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+  
+  /* Stile del calendario */
+  .calendar {
+    border: 1px solid var(--border-color); /* Usa variabile */
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-primary); /* Usa variabile */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--bg-secondary); /* Usa variabile */
+    border-bottom: 1px solid var(--border-color); /* Usa variabile */
+    padding: 10px 0;
   }
   
   .weekday {
-    padding: 5px 2px;
-    font-size: 0.7rem;
+    padding: 8px 4px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary); /* Usa variabile */
+  }
+  
+  .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
   }
   
   .day {
-    min-height: 60px;
-    padding: 4px;
+    min-height: 90px; /* Aumentato leggermente per più spazio task */
+    border-right: 1px solid var(--border-color); /* Usa variabile */
+    border-bottom: 1px solid var(--border-color); /* Usa variabile */
+    padding: 6px;
+    position: relative;
+    transition: background-color 0.2s ease;
+    background-color: var(--bg-primary); /* Sfondo di base */
+  }
+  /* Rimuovi bordi esterni superflui */
+  .day:nth-child(7n) { border-right: none; }
+  /* Considera di rimuovere anche il bordo inferiore dell'ultima riga */
+  
+  .day.clickable:hover { /* Applica hover solo se admin */
+    background-color: var(--bg-hover); /* Usa variabile */
+    cursor: pointer;
   }
   
+  .day.empty { /* Stile per celle vuote inizio/fine mese */
+      background-color: var(--bg-secondary); /* Sfondo leggermente diverso */
+      cursor: default;
+      opacity: 0.6;
+  }
+  
+  .today {
+    background-color: #e6f3ff; /* Mantenuto colore specifico per 'oggi' */
+  }
+  body[data-theme="dark"] .today {
+    background-color: #1a3b5c; /* Colore specifico dark per 'oggi' */
+  }
+  
+  
   .day-number {
-    font-size: 0.7rem;
-    margin-bottom: 2px;
-    text-align: center;
-    background: rgba(0,0,0,0.05);
-    padding: 2px 0;
-    border-radius: 10px;
-    width: 100%;
+    text-align: right;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary); /* Usa variabile */
+    line-height: 1;
   }
   
   .today .day-number {
-    width: 100%;
-    border-radius: 10px;
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+    display: inline-block; /* O block se vuoi tutta larghezza */
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    float: right; /* Sposta a destra */
   }
-
+  body[data-theme="dark"] .today .day-number {
+     color: #4da3ff;
+     background-color: rgba(77, 163, 255, 0.2);
+  }
+  
+  
+  .day-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Aumentato leggermente gap */
+    padding-top: 28px; /* Spazio per numero giorno */
+  }
+  
   .task-item {
-    padding: 3px 4px;
-    font-size: 0.65rem;
-    margin-bottom: 2px;
+    padding: 5px 8px; /* Aumentato padding */
+    border-radius: 4px;
+    font-size: 0.78rem; /* Leggermente più grande */
+    line-height: 1.3;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* Impedisce al testo di andare a capo */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid transparent; /* Base per colore stato */
+  }
+  
+  .task-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
   
   .task-time {
-    font-size: 0.6rem;
-    display: block;
+    font-weight: bold;
+    font-size: 0.7rem;
+    display: block; /* Metti orario sopra */
+    margin-bottom: 2px;
+    opacity: 0.8;
+  }
+  .task-details {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+  }
+  .task-client { font-weight: 500; }
+  .task-sid { font-size: 0.9em; opacity: 0.7; }
+  
+  
+  /* Form di modifica/creazione task */
+  .task-form-overlay {
+    position: fixed;
+    inset: 0; /* Equivalente a top/left/right/bottom: 0 */
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Aumentato blur */
+    display: flex;
+    justify-content: center; /* Centra orizzontalmente */
+    align-items: center; /* Centra verticalmente */
+    z-index: 1050; /* Z-index alto per stare sopra tutto */
+    padding: 20px; /* Padding per non far toccare bordi schermo */
+    box-sizing: border-box;
   }
   
-  .task-form-container,
-  .rejection-modal-content {
-    padding: 15px;
-    border-radius: 8px;
-  }
-  
-  .form-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .form-actions button {
-    width: 100%;
-  }
-  
-  /* Improve readability on small screens */
-  body[data-theme="dark"] .day {
-    background: #252525; /* Slightly lighter for better contrast */
-  }
-
-  body[data-theme="dark"] .day-number {
-    background: rgba(255,255,255,0.1);
-  }
-
-  body[data-theme="dark"] .status-proposta,
-  body[data-theme="dark"] .status-accettata,
-  body[data-theme="dark"] .status-rifiutata {
-    border-left-width: 6px; /* Make indicator more visible */
-  }
-}
-
-/* Smaller mobile screens */
-@media (max-width: 480px) {
-  .weekday {
-    font-size: 0.6rem;
-    padding: 4px 0;
-  }
-  
-  .day {
-    min-height: 50px;
-    padding: 2px;
-  }
-  
-  .task-item {
-    font-size: 0.6rem;
-    line-height: 1.2;
-    padding: 2px 3px;
-  }
-
-  /* Show just the first task and indicate there are more */
-  .day-tasks:not(:empty):not(:first-child):after {
-    content: "...";
-    display: block;
-    text-align: center;
-    font-size: 0.6rem;
-    color: #666;
-  }
-
-  body[data-theme="dark"] .day-tasks:not(:empty):not(:first-child):after {
-    color: #aaa;
-  }
-  
-  /* Improve visual clarity with bolder colors */
-  .status-proposta {
-    background-color: rgba(255, 214, 0, 0.4);
-  }
-  
-  .status-accettata {
-    background-color: rgba(76, 175, 80, 0.4);
-  }
-  
-  .status-rifiutata {
-    background-color: rgba(244, 67, 54, 0.4);
-  }
-}
-
-
-/* Stili specifici per ogni tipo di bottone */
-.button-save {
-  background-color: #007bff; /* Blu */
-  color: white;
-}
-
-.button-accept {
-  background-color: #28a745; /* Verde */
-  color: white;
-}
-
-.button-reject {
-  background-color: #dc3545; /* Rosso */
-  color: white;
-}
-
-.button-delete {
-  background-color: #dc3545; /* Rosso */
-  color: white;
-}
-
-/* Bottone di chiusura generico */
-.task-form-buttons button:not(.button-save):not(.button-accept):not(.button-reject):not(.button-delete) {
-  background-color: #f8f9fa;
-  color: #212529;
-  border: 1px solid #ddd;
-}
-
-/* Effetti hover per tutti i bottoni */
-.task-form-buttons button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.button-save:hover, .button-accept:hover {
-  background-color: #0069d9;
-}
-
-.button-reject:hover, .button-delete:hover {
-  background-color: #c82333;
-}
-
-/* Bottone disabilitato */
-.task-form-buttons button.disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-/* Stili per Dark Mode */
-body[data-theme="dark"] .task-form-container {
-  background: #333;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-body[data-theme="dark"] .task-form-buttons {
-  border-top-color: #444;
-}
-
-body[data-theme="dark"] .task-form-buttons button:not(.button-save):not(.button-accept):not(.button-reject):not(.button-delete) {
-  background-color: #444;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-/* Migliorare la visibilità in dispositivi mobili */
-@media (max-width: 768px) {
   .task-form-container {
-    padding: 15px;
-    max-height: 90vh;
-  }
-  
-  .task-form-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .task-form-buttons button {
+    background: var(--bg-primary); /* Usa variabile */
+    padding: 30px; /* Aumentato padding */
+    border-radius: 12px;
+    max-width: 550px; /* Aumentato leggermente max-width */
     width: 100%;
+    max-height: calc(100vh - 40px); /* Altezza massima meno padding overlay */
+    overflow-y: auto; /* Scroll verticale SE necessario */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Ombra più marcata */
+    color: var(--text-primary); /* Colore testo default */
+    box-sizing: border-box;
+    /* ============================================ */
+    /* RIMOSSI MARGINI - Centrato da overlay flexbox */
+    /* margin-top: 400px; */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    /* margin-bottom: 20px; */
+    /* ============================================ */
   }
+  
+  .task-form-container h3 {
+    margin-top: 0;
+    margin-bottom: 25px; /* Aumentato spazio sotto titolo */
+    padding-bottom: 15px; /* Aumentato spazio sotto linea */
+    border-bottom: 1px solid var(--border-color); /* Usa variabile */
+    font-size: 1.4rem; /* Aumentato font */
+    color: var(--text-primary); /* Usa variabile */
+  }
+  
+  .form-group {
+    margin-bottom: 20px; /* Aumentato spazio tra gruppi */
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px; /* Aumentato spazio sotto label */
+    font-weight: 600; /* Label più grassetto */
+    font-size: 0.9rem;
+    color: var(--text-secondary); /* Usa variabile */
+  }
+  /* Stile per checkbox label */
+  .form-group label input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      vertical-align: middle; /* Allinea checkbox al testo */
+  }
+  .form-group label span { /* Se usi span intorno al testo checkbox */
+      vertical-align: middle;
+  }
+  
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 14px; /* Aumentato padding interno */
+    border: 1px solid var(--border-color); /* Usa variabile */
+    border-radius: 6px;
+    font-size: 1rem; /* Dimensione font input standard */
+    background-color: var(--bg-input); /* Usa variabile */
+    color: var(--text-primary); /* Usa variabile */
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box; /* Include padding nel width */
+  }
+  /* Stile specifico per select per coerenza */
+  .form-group select {
+      appearance: none; /* Rimuovi stile default */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E"); /* Freccia custom */
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      background-size: 1em;
+      padding-right: 2.5rem; /* Spazio per freccia */
+  }
+  body[data-theme="dark"] .form-group select {
+       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E"); /* Freccia custom scura */
+  }
+  
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+  .form-group input:disabled,
+  .form-group select:disabled,
+  .form-group textarea:disabled {
+      background-color: var(--bg-secondary); /* Sfondo diverso per disabled */
+      opacity: 0.7;
+      cursor: not-allowed;
+  }
+  
+  
+  .task-form-buttons { /* Usa .task-form-buttons invece di .form-actions */
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px; /* Aumentato spazio sopra i bottoni */
+    padding-top: 20px; /* Aggiunto spazio con linea sopra */
+    border-top: 1px solid var(--border-color); /* Linea sopra bottoni */
+    flex-wrap: wrap; /* Permetti ai bottoni di andare a capo se necessario */
+  }
+  
+  /* Stili bottoni (usa classi specifiche definite nel JSX) */
+  .task-form-buttons button {
+    padding: 10px 20px; /* Aumentato padding bottoni */
+    border-radius: 6px;
+    font-weight: 600; /* Bottoni più grassetto */
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    line-height: 1.5; /* Migliora allineamento testo */
+  }
+  
+  /* Colori specifici */
+  .button-save { background-color: #007bff; color: white; }
+  .button-accept { background-color: #28a745; color: white; }
+  .button-reject, .button-delete { background-color: #dc3545; color: white; }
+  /* Bottone Chiudi/Annulla */
+  .task-form-buttons button:last-child:not([class*="button-"]) {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  body[data-theme="dark"] .task-form-buttons button:last-child:not([class*="button-"]) {
+      background-color: var(--bg-input); /* Usa bg-input in dark mode */
+  }
+  
+  
+  /* Effetti Hover */
+  .task-form-buttons button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+  }
+  .task-form-buttons button:last-child:not([class*="button-"]):not(:disabled):hover {
+      background-color: var(--bg-hover);
+  }
+  
+  /* Stile Disabilitato */
+  .task-form-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  
+  /* Modal di rifiuto (stili simili al form principale) */
+  .rejection-modal-overlay { /* Riusa overlay stile */ }
+  .rejection-modal-content { /* Riusa container stile */ }
+  .rejection-modal-content h3 { color: #dc3545; }
+  body[data-theme="dark"] .rejection-modal-content h3 { color: #f14668; }
+  .rejection-modal-content textarea { /* Stile textarea già definito sopra */ }
+  .rejection-modal-actions { /* Riusa stile task-form-buttons */ }
+  
+  
+  /* Stati e colori task nel calendario */
+  .status-proposta { background-color: rgba(255, 214, 0, 0.2); border-left-color: #ffd600; }
+  .status-accettata { background-color: rgba(76, 175, 80, 0.2); border-left-color: #4caf50; }
+  .status-rifiutata { background-color: rgba(244, 67, 54, 0.2); border-left-color: #f44336; }
+  
+  body[data-theme="dark"] .status-proposta { background-color: rgba(255, 214, 0, 0.3); border-left-color: #ffd600; }
+  body[data-theme="dark"] .status-accettata { background-color: rgba(76, 175, 80, 0.3); border-left-color: #4caf50; }
+  body[data-theme="dark"] .status-rifiutata { background-color: rgba(244, 67, 54, 0.3); border-left-color: #f44336; }
+  
+  
+  /* Caricamento e errori */
+  .loading-spinner { /* ... (stile spinner invariato) ... */ }
+  .error-message { /* ... (stile errore invariato) ... */ }
+  
+  
+  /* ====== Mobile Optimizations ====== */
+  @media (max-width: 768px) {
+    .agenda-container { padding: 10px; }
+    .month-navigation h2 { font-size: 1.2rem; margin-bottom: 10px; }
+    .nav-button { padding: 8px 12px; }
+    .weekday { font-size: 0.75rem; }
+    .day { min-height: 70px; padding: 4px; }
+    .day-number { font-size: 0.75rem; }
+    .today .day-number { width: 22px; height: 22px; line-height: 22px; }
+    .task-item { font-size: 0.7rem; padding: 4px 5px; }
+    .task-time { font-size: 0.65rem; }
+  
+    .task-form-overlay { padding: 10px; } /* Riduci padding overlay */
+    .task-form-container { padding: 20px; max-height: calc(100vh - 20px); } /* Riduci padding e adatta max-height */
+    .task-form-container h3 { font-size: 1.2rem; }
+    .task-form-buttons { flex-direction: column; gap: 10px; }
+    .task-form-buttons button { width: 100%; }
+  }
+  
+  @media (max-width: 480px) {
+    .weekday { font-size: 0.65rem; }
+    .day { min-height: 60px; }
+    .task-item { font-size: 0.65rem; }
+    .form-group input, .form-group select, .form-group textarea { font-size: 0.9rem; padding: 10px; }
+  }
+  
+  /* Stili per mostrare la motivazione del rifiuto */
+.form-group.rejection-reason-display label {
+  color: #b71c1c; /* Rosso scuro per il testo dell'etichetta */
+  font-weight: bold;
 }
 
+body[data-theme="dark"] .form-group.rejection-reason-display label {
+  color: #ff8a80; /* Rosso chiaro per il tema scuro */
+}
 
+.form-group.rejection-reason-display textarea {
+  background-color: #fbe9e7 !important; /* Sfondo rosa chiaro */
+  color: #b71c1c !important; /* Testo rosso scuro */
+  border: 1px solid #ff8a80 !important; /* Bordo rosso chiaro */
+  opacity: 1 !important; /* Assicura che sia leggibile anche se disabilitato */
+  cursor: text;
+}
+
+body[data-theme="dark"] .form-group.rejection-reason-display textarea {
+  background-color: #3e2723 !important; /* Sfondo rosso scuro per tema dark */
+  color: #ffcdd2 !important; /* Testo rosa chiaro */
+  border: 1px solid #b71c1c !important;
+}

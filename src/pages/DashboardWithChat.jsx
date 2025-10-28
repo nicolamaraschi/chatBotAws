@@ -1,7 +1,7 @@
 // DashboardWithChat.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import SapDashboard from './SapDashboard';
+import SapDashboard from './dashboard/SapDashboard';
 import ChatComponent from '../ChatComponent';
 import ErrorBoundary from '../components/ErrorBoundary';
 import './DashboardWithChat.css';

@@ -1,4 +1,3 @@
-// SidebarNavigation.jsx
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Dashboard from '../pages/Dashboard';
@@ -85,9 +84,11 @@ const SidebarNavigation = ({
           <div className="logo-container">
            
           </div>
-          <button className="toggle-sidebar" onClick={toggleSidebar} title="Toggle sidebar">
-            <i className={`fas ${sidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
-          </button>
+          {!sidebarCollapsed && (
+            <button className="toggle-sidebar" onClick={toggleSidebar} title="Toggle sidebar">
+              <i className={`fas ${sidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
+            </button>
+          )}
         </div>
 
         <div className="nav-buttons">

@@ -9,42 +9,57 @@ const TABLE_NAME = 'AgendaTasks';
 
 console.log('Inizializzazione servizio DynamoDB con tabella:', TABLE_NAME, 'nella regione:', config.AWS_REGION);
 
-// Crea una nuova attività
-// Crea una nuova attività
 const createTask = async (task) => {
-  console.log('DynamoDB createTask - parametri:', task);
-  
-  const now = new Date().toISOString();
-  const params = {
-    TableName: TABLE_NAME,
-    Item: {
-      id: task.id || uuidv4(),
-      nomeCliente: task.nomeCliente.toLowerCase(), // Normalizza a lowercase
-      sid: task.sid,
-      data: task.data,
-      oraInizio: task.oraInizio,
-      orarioFine: task.orarioFine,
-      emailCliente: task.emailCliente,
-      descrizione: task.descrizione,
-      createdBy: task.createdBy,
-      lastModifiedBy: task.lastModifiedBy,
-      canClientEdit: task.canClientEdit || false,
-      status: task.status || 'proposta', // Nuovo campo: 'proposta', 'accettata', 'rifiutata'
-      createdAt: task.createdAt || now,
-      updatedAt: task.updatedAt || now,
-    },
-  };
+  console.log('DynamoDB createTask - parametri:', JSON.stringify(task, null, 2));
   
   try {
+    // Validazione dei campi obbligatori
+    if (!task.nomeCliente) {
+      throw new Error('Il campo nomeCliente è obbligatorio');
+    }
+    
+    if (!task.data) {
+      throw new Error('Il campo data è obbligatorio');
+    }
+
+    const now = new Date().toISOString();
+    const params = {
+      TableName: TABLE_NAME,
+      Item: {
+        id: task.id || uuidv4(),
+        nomeCliente: task.nomeCliente.toLowerCase(), // Normalizza a lowercase
+        sid: task.sid || '',
+        data: task.data,
+        oraInizio: task.oraInizio || '',
+        orarioFine: task.orarioFine || '',
+        emailCliente: task.emailCliente || '',
+        descrizione: task.descrizione || '',
+        createdBy: task.createdBy || 'admin',
+        lastModifiedBy: task.lastModifiedBy || 'admin',
+        canClientEdit: task.canClientEdit === true,
+        status: task.status || 'proposta',
+        createdAt: task.createdAt || now,
+        updatedAt: task.updatedAt || now,
+      },
+    };
+    
+    // Log dettagliato dei parametri di inserimento
+    console.log('DynamoDB createTask - parametri di inserimento:', JSON.stringify(params, null, 2));
+    
+    // Aggiunta di un timeout più lungo
+    const putOptions = {
+      timeout: 5000 // 5 secondi di timeout
+    };
+    
     await dynamodb.put(params).promise();
     console.log('DynamoDB createTask - successo:', params.Item.id);
     return params.Item;
   } catch (error) {
-    console.error('DynamoDB createTask - errore:', error);
+    console.error('!!! ERRORE DETTAGLIATO DYNAMODB (createTask) !!!', JSON.stringify(error, null, 2));
+    console.error('DynamoDB createTask - stack trace:', error.stack);
     throw error;
   }
 };
-
 // Recupera attività per un cliente e un mese specifico
 const getTasksByClientAndMonth = async (nomeCliente, yearMonth) => {
   console.log(`DynamoDB getTasksByClientAndMonth - parametri: nomeCliente=${nomeCliente}, yearMonth=${yearMonth}`);

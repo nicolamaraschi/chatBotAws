@@ -83,11 +83,34 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
   };
   
   const handleSetBackground = () => {
-    if (newBg) {
+    if (!newBg) return;
+    
+    // Verifica validità URL
+    try {
+      new URL(newBg); // Questo lancerà un errore se l'URL non è valido
+    } catch (e) {
+      console.error("URL non valido:", e);
+      alert("Inserisci un URL valido dell'immagine");
+      return;
+    }
+    
+    // Verifica che l'URL punti effettivamente a un'immagine
+    const img = new Image();
+    img.onload = () => {
+      // L'immagine è caricata correttamente
+      console.log("Immagine caricata correttamente:", newBg);
       onBackgroundChange(newBg);
       addToRecentWallpapers(newBg);
       onClose();
-    }
+    };
+    
+    img.onerror = () => {
+      // L'immagine non si è caricata
+      console.error("Errore nel caricamento dell'immagine:", newBg);
+      alert("Impossibile caricare l'immagine. Verifica che l'URL sia corretto.");
+    };
+    
+    img.src = newBg;
   };
 
   const handleSetColor = () => {
@@ -183,20 +206,38 @@ const BackgroundSelectorEnhanced = ({ onBackgroundChange, onClose }) => {
               <div className="recent-items">
                 <h4>Sfondi Recenti</h4>
                 <div className="item-list wallpaper-list">
-                  {recentWallpapers.map((url, index) => (
-                    <div key={index} className="item-thumbnail wallpaper-item">
-                      <div 
-                        className="thumbnail" 
-                        style={{ backgroundImage: `url(${url})` }}
-                        onClick={() => handleSelectRecentWallpaper(url)}
-                        title={url}
-                      >
-                        <div className="thumbnail-overlay">
-                          <i className="fas fa-check"></i>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              
+{recentWallpapers.map((url, index) => (
+  <div key={index} className="item-thumbnail wallpaper-item">
+    <div 
+      className="thumbnail" 
+      style={{ 
+        backgroundImage: `url(${url})`, 
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+      onClick={() => handleSelectRecentWallpaper(url)}
+      title={url}
+    >
+      <div className="thumbnail-overlay">
+        <i className="fas fa-check"></i>
+      </div>
+      {/* Aggiungi un fallback in caso l'immagine non si carichi */}
+      <img 
+        src={url} 
+        alt=""
+        style={{visibility: 'hidden', width: 0, height: 0}}
+        onError={(e) => {
+          // Se l'immagine non si carica, imposta un colore di fallback
+          e.target.parentNode.style.backgroundImage = 'none';
+          e.target.parentNode.style.backgroundColor = '#cccccc';
+          e.target.parentNode.textContent = 'Immagine non disponibile';
+        }}
+      />
+    </div>
+  </div>
+))}
                 </div>
               </div>
             )}
